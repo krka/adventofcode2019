@@ -1,3 +1,7 @@
+import java.util.List;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Day4 {
@@ -10,50 +14,34 @@ public class Day4 {
 
   private static long part1(int start, int end) {
     return IntStream.rangeClosed(start, end)
-            .mapToObj(n1 -> String.format("%06d", n1))
-            .filter(Day4::validPart1)
+            .mapToObj(Day4::to6DigitString)
+            .filter(Day4::inOrder)
+            .filter(n -> hasGroup(n, i -> i >= 2))
             .count();
   }
+
 
   private static long part2(int start, int end) {
     return IntStream.rangeClosed(start, end)
-            .mapToObj(n -> String.format("%06d", n))
-            .filter(Day4::validPart2)
+            .mapToObj(Day4::to6DigitString)
+            .filter(Day4::inOrder)
+            .filter(n -> hasGroup(n, i -> i == 2))
             .count();
   }
 
-  private static boolean validPart1(String n) {
-    char prev = 0;
-    boolean hasDouble = false;
-    for (char ch : n.toCharArray()) {
-      if (prev == ch) {
-        hasDouble = true;
-      }
-      if (prev > ch) {
-        return false;
-      }
-      prev = ch;
-    }
-    return hasDouble;
+  private static boolean hasGroup(String n, Predicate<Integer> predicate) {
+    return n.chars().asLongStream().boxed()
+            .collect(Collectors.groupingBy(Function.identity()))
+            .values().stream()
+            .map(List::size)
+            .anyMatch(predicate);
   }
 
-  private static boolean validPart2(String n) {
-    char prev = 0;
-    int repeats = 1;
-    boolean hasDouble = false;
-    for (char ch : n.toCharArray()) {
-      if (prev == ch) {
-        repeats++;
-      } else {
-        hasDouble |= repeats == 2;
-        repeats = 1;
-      }
-      if (prev > ch) {
-        return false;
-      }
-      prev = ch;
-    }
-    hasDouble |= repeats == 2;
-    return hasDouble;
+  private static String to6DigitString(int n) {
+    return String.format("%06d", n);
+  }
+
+  private static boolean inOrder(String n) {
+    return n.chars().mapToObj(Character::toString).sorted().collect(Collectors.joining()).equals(n);
   }
 }
