@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 
 public class IntCode implements Runnable {
 
-  private static final Pattern DELIMITER = Pattern.compile("[,\n]+");
+  private static final Pattern DELIMITER = Pattern.compile("[,\n\r]+");
 
   private final Queue<Integer> stdout = new LinkedBlockingQueue<>();
   private final Queue<Integer> stdin = new LinkedBlockingQueue<>();

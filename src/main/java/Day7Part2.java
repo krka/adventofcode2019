@@ -30,7 +30,7 @@ public class Day7Part2 {
         Integer value = vm.getStdout().poll();
         if (value == null) {
           for (int j = 0; j < 5; j++) {
-            if (IntCode.State.HALTED != vms[i].getState()) {
+            if (IntCode.State.HALTED != vms[j].getState()) {
               throw new RuntimeException("Unexpected state: " + vm.getState());
             }
           }
