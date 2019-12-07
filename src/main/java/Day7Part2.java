@@ -29,6 +29,11 @@ public class Day7Part2 {
         vm.run();
         Integer value = vm.getStdout().poll();
         if (value == null) {
+          for (int j = 0; j < 5; j++) {
+            if (IntCode.State.HALTED != vms[i].getState()) {
+              throw new RuntimeException("Unexpected state: " + vm.getState());
+            }
+          }
           return prev;
         } else {
           prev = value;

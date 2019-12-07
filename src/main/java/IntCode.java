@@ -16,6 +16,7 @@ public class IntCode implements Runnable {
   private final int[] program;
   private int pc;
   private State state = State.WAITING_FOR_INPUT;
+  private RuntimeException exception;
 
   private IntCode(List<Integer> program) {
     this.program = new int[program.size()];
@@ -70,11 +71,13 @@ public class IntCode implements Runnable {
       return;
     }
     if (state == State.CRASHED) {
-      return;
+      throw exception;
     }
 
+    int restorePC = 0;
     try {
       while (true) {
+        restorePC = pc;
         int opcode = consume();
         int op = opcode % 100;
         ParamType firstParam = ParamType.from((opcode / 100) % 10);
@@ -95,9 +98,11 @@ public class IntCode implements Runnable {
       }
     } catch (WaitForStdin e) {
       state = State.WAITING_FOR_INPUT;
+      pc = restorePC;
     } catch (Exception e) {
       state = State.CRASHED;
-      throw new RuntimeException(e);
+      exception = new RuntimeException(e);
+      throw exception;
     }
   }
 
@@ -154,8 +159,6 @@ public class IntCode implements Runnable {
   private void opInput(ParamType firstParam, ParamType secondParam, ParamType thirdParam) throws WaitForStdin {
     Integer value = stdin.poll();
     if (value == null) {
-      // Unconsume the opcode
-      pc--;
       throw WaitForStdin.INSTANCE;
     }
 
