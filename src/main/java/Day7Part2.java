@@ -4,17 +4,13 @@ import java.util.stream.IntStream;
 
 public class Day7Part2 {
 
-  public static void main(String[] args) {
-    System.out.println(new Day7Part2("day7.in").solve());
+  private final String name;
+
+  public Day7Part2(String name) {
+    this.name = name;
   }
 
-  private final String filename;
-
-  public Day7Part2(String filename) {
-    this.filename = filename;
-  }
-
-  private int solve() {
+  int solve() {
     return Permutation.of(IntStream.range(5, 10).boxed().collect(Collectors.toList()))
             .mapToInt(this::evaluate).max().getAsInt();
   }
@@ -30,7 +26,7 @@ public class Day7Part2 {
 
     IntCode[] vms = new IntCode[5];
     for (int i = 0; i < 5; i++) {
-      vms[i] = IntCode.fromFile(filename, intcodePipes[(i + 1) % 5], intcodePipes[i]);
+      vms[i] = IntCode.fromResource(name, intcodePipes[(i + 1) % 5], intcodePipes[i]);
     }
 
     List<Thread> threads = IntStream.range(0, 5)

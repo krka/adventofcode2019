@@ -5,14 +5,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Day4 {
-  public static void main(String[] args) {
-    int start = 236491;
-    int end = 713787;
-    System.out.println("Part 1: " + part1(start, end));
-    System.out.println("Part 2: " + part2(start, end));
-  }
-
-  private static long part1(int start, int end) {
+  static long part1(int start, int end) {
     return IntStream.rangeClosed(start, end)
             .mapToObj(Day4::to6DigitString)
             .filter(Day4::inOrder)
@@ -21,7 +14,7 @@ public class Day4 {
   }
 
 
-  private static long part2(int start, int end) {
+  static long part2(int start, int end) {
     return IntStream.rangeClosed(start, end)
             .mapToObj(Day4::to6DigitString)
             .filter(Day4::inOrder)

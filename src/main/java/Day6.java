@@ -1,6 +1,4 @@
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -9,15 +7,8 @@ public class Day6 {
   private final HashMap<String, String> orbits = new HashMap<>();
   private final HashMap<String, Integer> distances = new HashMap<>();
 
-  public static void main(String[] args) throws IOException {
-    System.out.println(new Day6("day6-sample.in").part1());
-    System.out.println(new Day6("day6.in").part1());
-    System.out.println(new Day6("day6-2-sample.in").part2());
-    System.out.println(new Day6("day6.in").part2());
-  }
-
-  public Day6(String filename) throws IOException {
-    try (BufferedReader bufferedReader = new BufferedReader(new FileReader(new File(filename)))) {
+  Day6(String name) throws IOException {
+    try (BufferedReader bufferedReader = new BufferedReader(Util.fromResource(name))) {
       while (true) {
         String line = bufferedReader.readLine();
         if (line == null) {
@@ -31,11 +22,11 @@ public class Day6 {
     }
   }
 
-  private int part1() {
+  int part1() {
     return orbits.keySet().stream().mapToInt(this::count).sum();
   }
 
-  private int part2() {
+  int part2() {
     Map<String, Integer> visited = new HashMap<>();
 
     String current = "YOU";

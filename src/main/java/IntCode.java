@@ -1,8 +1,5 @@
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
+import java.io.Reader;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,24 +28,20 @@ public class IntCode implements Runnable {
     }
   }
 
-  public static IntCode fromFile(String filename, IntcodeOutput stdout, IntcodeInput stdin) {
-    return fromFile(new File(filename), stdout, stdin);
+  public static IntCode fromResource(String name, IntcodeOutput stdout, IntcodeInput stdin) {
+    return fromResource(Util.fromResource(name), stdout, stdin);
   }
 
-  private static IntCode fromFile(File file, IntcodeOutput stdout, IntcodeInput stdin) {
-    try {
-      List<Integer> program = new ArrayList<>();
-      try (Scanner scanner = new Scanner(new InputStreamReader(new FileInputStream(file), StandardCharsets.US_ASCII))) {
-        scanner.useDelimiter(DELIMITER);
-        while (scanner.hasNext()) {
-          String token = scanner.next();
-          program.add(Integer.parseInt(token));
-        }
+  private static IntCode fromResource(Reader input, IntcodeOutput stdout, IntcodeInput stdin) {
+    List<Integer> program = new ArrayList<>();
+    try (Scanner scanner = new Scanner(input)) {
+      scanner.useDelimiter(DELIMITER);
+      while (scanner.hasNext()) {
+        String token = scanner.next();
+        program.add(Integer.parseInt(token));
       }
-      return new IntCode(stdout, stdin, program);
-    } catch (FileNotFoundException e) {
-      throw new RuntimeException(e);
     }
+    return new IntCode(stdout, stdin, program);
   }
 
   @Override
