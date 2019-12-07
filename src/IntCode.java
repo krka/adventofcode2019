@@ -1,10 +1,12 @@
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Queue;
@@ -12,6 +14,8 @@ import java.util.Scanner;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class IntCode {
 
@@ -31,41 +35,49 @@ public class IntCode {
     }
   }
 
-  public static IntCode fromFile(String filename, Consumer<Integer> stdout, Callable<Integer> stdin) throws IOException {
+  public static IntCode fromFile(String filename, Consumer<Integer> stdout, Callable<Integer> stdin) {
     return fromFile(new File(filename), stdout, stdin);
   }
 
-  private static IntCode fromFile(File file, Consumer<Integer> stdout, Callable<Integer> stdin) throws IOException {
-    List<Integer> program = new ArrayList<>();
-    try (Scanner scanner = new Scanner(new InputStreamReader(new FileInputStream(file), StandardCharsets.US_ASCII))) {
-      scanner.useDelimiter(DELIMITER);
-      while (scanner.hasNext()) {
-        String token = scanner.next();
-        program.add(Integer.parseInt(token));
+  private static IntCode fromFile(File file, Consumer<Integer> stdout, Callable<Integer> stdin) {
+    try {
+      List<Integer> program = new ArrayList<>();
+      try (Scanner scanner = new Scanner(new InputStreamReader(new FileInputStream(file), StandardCharsets.US_ASCII))) {
+        scanner.useDelimiter(DELIMITER);
+        while (scanner.hasNext()) {
+          String token = scanner.next();
+          program.add(Integer.parseInt(token));
+        }
       }
+      return new IntCode(stdout, stdin, program);
+    } catch (FileNotFoundException e) {
+      throw new RuntimeException(e);
     }
-    return new IntCode(stdout, stdin, program);
   }
 
-  public void run() throws Exception {
-    while (true) {
-      int opcode = consume();
-      int op = opcode % 100;
-      ParamType firstParam = ParamType.from((opcode / 100) % 10);
-      ParamType secondParam = ParamType.from((opcode / 1000) % 10);
-      ParamType thirdParam = ParamType.from((opcode / 10000) % 10);
-      switch (op) {
-        case 1: opAdd(firstParam, secondParam, thirdParam); break;
-        case 2: opMul(firstParam, secondParam, thirdParam); break;
-        case 3: opInput(firstParam, secondParam, thirdParam); break;
-        case 4: opOutput(firstParam, secondParam, thirdParam); break;
-        case 5: jumpIfTrue(firstParam, secondParam, thirdParam); break;
-        case 6: jumpIfFalse(firstParam, secondParam, thirdParam); break;
-        case 7: lessThan(firstParam, secondParam, thirdParam); break;
-        case 8: equals(firstParam, secondParam, thirdParam); break;
-        case 99: return;
-        default: throw new RuntimeException("Unknown opcode: " + opcode + " at position " + (pc - 1));
+  public void run() {
+    try {
+      while (true) {
+        int opcode = consume();
+        int op = opcode % 100;
+        ParamType firstParam = ParamType.from((opcode / 100) % 10);
+        ParamType secondParam = ParamType.from((opcode / 1000) % 10);
+        ParamType thirdParam = ParamType.from((opcode / 10000) % 10);
+        switch (op) {
+          case 1: opAdd(firstParam, secondParam, thirdParam); break;
+          case 2: opMul(firstParam, secondParam, thirdParam); break;
+          case 3: opInput(firstParam, secondParam, thirdParam); break;
+          case 4: opOutput(firstParam, secondParam, thirdParam); break;
+          case 5: jumpIfTrue(firstParam, secondParam, thirdParam); break;
+          case 6: jumpIfFalse(firstParam, secondParam, thirdParam); break;
+          case 7: lessThan(firstParam, secondParam, thirdParam); break;
+          case 8: equals(firstParam, secondParam, thirdParam); break;
+          case 99: return;
+          default: throw new RuntimeException("Unknown opcode: " + opcode + " at position " + (pc - 1));
+        }
       }
+    } catch (Exception e) {
+      throw new RuntimeException(e);
     }
   }
 
@@ -169,6 +181,10 @@ public class IntCode {
 
     public ListStdin(Collection<Integer> data) {
       list.addAll(data);
+    }
+
+    public static ListStdin of(int... values) {
+      return new ListStdin(IntStream.of(values).boxed().collect(Collectors.toList()));
     }
 
     @Override
