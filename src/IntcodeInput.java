@@ -1,0 +1,3 @@
+interface IntcodeInput {
+  int readValue();
+}

@@ -1,32 +1,28 @@
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Queue;
 import java.util.Scanner;
-import java.util.concurrent.Callable;
-import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class IntCode {
+public class IntCode implements Runnable {
 
   private static final Pattern DELIMITER = Pattern.compile("[,\n]+");
 
-  private final Consumer<Integer> stdout;
-  private final Callable<Integer> stdin;
+  private final IntcodeOutput stdout;
+  private final IntcodeInput stdin;
   private final int[] program;
   private int pc;
 
-  private IntCode(Consumer<Integer> stdout, Callable<Integer> stdin, List<Integer> program) {
+  private IntCode(IntcodeOutput stdout, IntcodeInput stdin, List<Integer> program) {
     this.stdout = stdout;
     this.stdin = stdin;
     this.program = new int[program.size()];
@@ -35,11 +31,11 @@ public class IntCode {
     }
   }
 
-  public static IntCode fromFile(String filename, Consumer<Integer> stdout, Callable<Integer> stdin) {
+  public static IntCode fromFile(String filename, IntcodeOutput stdout, IntcodeInput stdin) {
     return fromFile(new File(filename), stdout, stdin);
   }
 
-  private static IntCode fromFile(File file, Consumer<Integer> stdout, Callable<Integer> stdin) {
+  private static IntCode fromFile(File file, IntcodeOutput stdout, IntcodeInput stdin) {
     try {
       List<Integer> program = new ArrayList<>();
       try (Scanner scanner = new Scanner(new InputStreamReader(new FileInputStream(file), StandardCharsets.US_ASCII))) {
@@ -55,6 +51,7 @@ public class IntCode {
     }
   }
 
+  @Override
   public void run() {
     try {
       while (true) {
@@ -131,11 +128,11 @@ public class IntCode {
     program[consume()] = firstArg * secondArg;
   }
 
-  private void opInput(ParamType firstParam, ParamType secondParam, ParamType thirdParam) throws Exception {
+  private void opInput(ParamType firstParam, ParamType secondParam, ParamType thirdParam) {
     assertPosition(firstParam);
     assertPosition(secondParam);
     assertPosition(thirdParam);
-    Integer value = stdin.call();
+    Integer value = stdin.readValue();
 
     program[consume()] = value;
   }
@@ -144,7 +141,7 @@ public class IntCode {
     assertPosition(secondParam);
     assertPosition(thirdParam);
 
-    stdout.accept(resolveSrc(firstParam));
+    stdout.writeValue(resolveSrc(firstParam));
   }
 
   private int resolveSrc(ParamType param) {
@@ -176,7 +173,7 @@ public class IntCode {
     }
   }
 
-  public static class ListStdin implements Callable<Integer> {
+  public static class ListStdin implements IntcodeInput {
     private final Queue<Integer> list = new ArrayDeque<>();
 
     public ListStdin(Collection<Integer> data) {
@@ -188,24 +185,25 @@ public class IntCode {
     }
 
     @Override
-    public Integer call() throws Exception {
+    public int readValue() {
       return list.remove();
     }
   }
 
-  public static class ListStdout implements Consumer<Integer> {
+  public static class ListStdout implements IntcodeOutput {
     private final List<Integer> list = new ArrayList<>();
 
     public ListStdout() {
     }
 
     @Override
-    public void accept(Integer integer) {
-      list.add(integer);
+    public void writeValue(int value) {
+      list.add(value);
     }
 
     public List<Integer> getList() {
       return list;
     }
   }
+
 }
