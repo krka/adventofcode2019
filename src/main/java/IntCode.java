@@ -13,16 +13,20 @@ public class IntCode implements Runnable {
   private final Queue<Integer> stdout = new LinkedBlockingQueue<>();
   private final Queue<Integer> stdin = new LinkedBlockingQueue<>();
 
+  private final String name;
   private final int[] program;
+  private final ProgramAnalysis analysis;
   private int pc;
   private State state = State.WAITING_FOR_INPUT;
   private RuntimeException exception;
 
-  private IntCode(List<Integer> program) {
+  private IntCode(String name, List<Integer> program) {
+    this.name = name;
     this.program = new int[program.size()];
     for (int i = 0; i < this.program.length; i++) {
       this.program[i] = program.get(i);
     }
+    this.analysis = new ProgramAnalysis(this.program);
     run();
   }
 
@@ -50,10 +54,10 @@ public class IntCode implements Runnable {
   }
 
   public static IntCode fromResource(String name) {
-    return fromResource(Util.fromResource(name));
+    return fromResource(name, Util.fromResource(name));
   }
 
-  private static IntCode fromResource(Reader input) {
+  private static IntCode fromResource(String name, Reader input) {
     List<Integer> program = new ArrayList<>();
     try (Scanner scanner = new Scanner(input)) {
       scanner.useDelimiter(DELIMITER);
@@ -62,7 +66,7 @@ public class IntCode implements Runnable {
         program.add(Integer.parseInt(token));
       }
     }
-    return new IntCode(program);
+    return new IntCode(name, program);
   }
 
   @Override
@@ -77,6 +81,7 @@ public class IntCode implements Runnable {
     int restorePC = 0;
     try {
       while (true) {
+        analysis.markOpCode(pc);
         restorePC = pc;
         int opcode = consume();
         int op = opcode % 100;
@@ -106,12 +111,21 @@ public class IntCode implements Runnable {
     }
   }
 
+  public void printAnalysis() {
+    System.out.println("Analysis of " + name);
+    for (int i = 0; i < program.length; i++) {
+      System.out.printf("%03d  %10d   %s%n", i, program[i], analysis.toString(i));
+    }
+  }
+
   private void lessThan(ParamType firstParam, ParamType secondParam, ParamType thirdParam) {
     int firstArg = resolveSrc(firstParam);
     int secondArg = resolveSrc(secondParam);
 
     assertPosition(thirdParam);
     int res = firstArg < secondArg ? 1 : 0;
+
+    analysis.markWrite(pc);
     program[consume()] = res;
   }
 
@@ -121,6 +135,8 @@ public class IntCode implements Runnable {
 
     assertPosition(thirdParam);
     int res = firstArg == secondArg ? 1 : 0;
+
+    analysis.markWrite(pc);
     program[consume()] = res;
   }
 
@@ -129,6 +145,7 @@ public class IntCode implements Runnable {
     int secondArg = resolveSrc(secondParam);
     assertPosition(thirdParam);
     if (firstArg != 0) {
+      analysis.markLabel(secondArg);
       pc = secondArg;
     }
   }
@@ -138,6 +155,7 @@ public class IntCode implements Runnable {
     int secondArg = resolveSrc(secondParam);
     assertPosition(thirdParam);
     if (firstArg == 0) {
+      analysis.markLabel(secondArg);
       pc = secondArg;
     }
   }
@@ -145,14 +163,18 @@ public class IntCode implements Runnable {
   private void opAdd(ParamType firstParam, ParamType secondParam, ParamType thirdParam) {
     int firstArg = resolveSrc(firstParam);
     int secondArg = resolveSrc(secondParam);
+
     assertPosition(thirdParam);
+    analysis.markWrite(pc);
     program[consume()] = firstArg + secondArg;
   }
 
   private void opMul(ParamType firstParam, ParamType secondParam, ParamType thirdParam) {
     int firstArg = resolveSrc(firstParam);
     int secondArg = resolveSrc(secondParam);
+
     assertPosition(thirdParam);
+    analysis.markWrite(pc);
     program[consume()] = firstArg * secondArg;
   }
 
@@ -164,8 +186,9 @@ public class IntCode implements Runnable {
 
     assertPosition(firstParam);
     assertPosition(secondParam);
-    assertPosition(thirdParam);
 
+    assertPosition(thirdParam);
+    analysis.markWrite(pc);
     program[consume()] = value;
   }
 
@@ -177,6 +200,7 @@ public class IntCode implements Runnable {
   }
 
   private int resolveSrc(ParamType param) {
+    analysis.markRead(pc);
     int value = consume();
     if (param == ParamType.POSITION) {
       return program[value];

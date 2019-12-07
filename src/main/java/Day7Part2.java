@@ -33,6 +33,7 @@ public class Day7Part2 {
             if (IntCode.State.HALTED != vms[j].getState()) {
               throw new RuntimeException("Unexpected state: " + vm.getState());
             }
+            vms[j].printAnalysis();
           }
           return prev;
         } else {

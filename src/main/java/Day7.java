@@ -21,6 +21,8 @@ public class Day7 {
       intCode.writeStdin(phase);
       intCode.writeStdin(value);
       intCode.run();
+      System.out.println("Code for phase: " + phase);
+      intCode.printAnalysis();
       List<Integer> list = intCode.drainStdout();
       if (list.size() != 1) {
         throw new RuntimeException("Unexpected list: " + list + " for phase " + phase + " of " + phases);

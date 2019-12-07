@@ -8,6 +8,7 @@ public class Day5 {
     vm.writeStdin(1);
     vm.run();
     assertEquals(IntCode.State.HALTED, vm.getState());
+    vm.printAnalysis();
     return vm.drainStdout();
   }
 
@@ -16,6 +17,7 @@ public class Day5 {
     vm.writeStdin(5);
     vm.run();
     assertEquals(IntCode.State.HALTED, vm.getState());
+    vm.printAnalysis();
     return vm.drainStdout();
   }
 }
