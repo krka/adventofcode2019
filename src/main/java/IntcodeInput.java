@@ -1,3 +1,0 @@
-interface IntcodeInput {
-  int readValue();
-}

@@ -1,5 +1,3 @@
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -11,12 +9,7 @@ public class Util {
   static Reader fromResource(String name) {
     InputStream stream = CLASS_LOADER.getResourceAsStream(name);
     if (stream == null) {
-      try {
-        return new InputStreamReader(new FileInputStream("src/test/resources/" + name), StandardCharsets.UTF_8);
-      } catch (FileNotFoundException e) {
-        throw new RuntimeException(e);
-      }
-      //throw new IllegalArgumentException("Resource not found: " + name);
+      throw new IllegalArgumentException("Resource not found: " + name);
     }
     return new InputStreamReader(stream, StandardCharsets.UTF_8);
   }

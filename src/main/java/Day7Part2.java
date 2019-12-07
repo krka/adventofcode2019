@@ -16,36 +16,24 @@ public class Day7Part2 {
   }
 
   private int evaluate(List<Integer> phases) {
-    IntcodePipe[] intcodePipes = new IntcodePipe[5];
-    for (int i = 0; i < 5; i++) {
-      intcodePipes[i] = new IntcodePipe();
-      intcodePipes[i].writeValue(phases.get(i));
-    }
-
-    intcodePipes[0].writeValue(0);
-
     IntCode[] vms = new IntCode[5];
     for (int i = 0; i < 5; i++) {
-      vms[i] = IntCode.fromResource(name, intcodePipes[(i + 1) % 5], intcodePipes[i]);
+      vms[i] = IntCode.fromResource(name);
+      vms[i].writeStdin(phases.get(i));
     }
-
-    List<Thread> threads = IntStream.range(0, 5)
-            .mapToObj(i -> {
-              Thread thread = new Thread(vms[i]);
-              thread.start();
-              return thread;
-            })
-            .collect(Collectors.toList());
-
-    threads.forEach(thread -> {
-      try {
-        thread.join();
-      } catch (InterruptedException e) {
-        throw new RuntimeException(e);
+    int prev = 0;
+    while (true) {
+      for (int i = 0; i < 5; i++) {
+        IntCode vm = vms[i];
+        vm.writeStdin(prev);
+        vm.run();
+        Integer value = vm.getStdout().poll();
+        if (value == null) {
+          return prev;
+        } else {
+          prev = value;
+        }
       }
-    });
-
-    return intcodePipes[0].readValue();
+    }
   }
-
 }

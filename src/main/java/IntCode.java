@@ -1,38 +1,58 @@
-import java.io.FileNotFoundException;
 import java.io.Reader;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Queue;
 import java.util.Scanner;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class IntCode implements Runnable {
 
   private static final Pattern DELIMITER = Pattern.compile("[,\n]+");
 
-  private final IntcodeOutput stdout;
-  private final IntcodeInput stdin;
+  private final Queue<Integer> stdout = new LinkedBlockingQueue<>();
+  private final Queue<Integer> stdin = new LinkedBlockingQueue<>();
+
   private final int[] program;
   private int pc;
+  private State state = State.WAITING_FOR_INPUT;
 
-  private IntCode(IntcodeOutput stdout, IntcodeInput stdin, List<Integer> program) {
-    this.stdout = stdout;
-    this.stdin = stdin;
+  private IntCode(List<Integer> program) {
     this.program = new int[program.size()];
     for (int i = 0; i < this.program.length; i++) {
       this.program[i] = program.get(i);
     }
+    run();
   }
 
-  public static IntCode fromResource(String name, IntcodeOutput stdout, IntcodeInput stdin) {
-    return fromResource(Util.fromResource(name), stdout, stdin);
+  public State getState() {
+    return state;
   }
 
-  private static IntCode fromResource(Reader input, IntcodeOutput stdout, IntcodeInput stdin) {
+  public void writeStdin(int value) {
+    stdin.add(value);
+  }
+
+  public Queue<Integer> getStdout() {
+    return stdout;
+  }
+
+  public List<Integer> drainStdout() {
+    ArrayList<Integer> res = new ArrayList<>();
+    while (true) {
+      Integer value = stdout.poll();
+      if (value == null) {
+        return res;
+      }
+      res.add(value);
+    }
+  }
+
+  public static IntCode fromResource(String name) {
+    return fromResource(Util.fromResource(name));
+  }
+
+  private static IntCode fromResource(Reader input) {
     List<Integer> program = new ArrayList<>();
     try (Scanner scanner = new Scanner(input)) {
       scanner.useDelimiter(DELIMITER);
@@ -41,11 +61,18 @@ public class IntCode implements Runnable {
         program.add(Integer.parseInt(token));
       }
     }
-    return new IntCode(stdout, stdin, program);
+    return new IntCode(program);
   }
 
   @Override
   public void run() {
+    if (state == State.HALTED) {
+      return;
+    }
+    if (state == State.CRASHED) {
+      return;
+    }
+
     try {
       while (true) {
         int opcode = consume();
@@ -62,11 +89,14 @@ public class IntCode implements Runnable {
           case 6: jumpIfFalse(firstParam, secondParam, thirdParam); break;
           case 7: lessThan(firstParam, secondParam, thirdParam); break;
           case 8: equals(firstParam, secondParam, thirdParam); break;
-          case 99: return;
+          case 99: state = State.HALTED; return;
           default: throw new RuntimeException("Unknown opcode: " + opcode + " at position " + (pc - 1));
         }
       }
+    } catch (WaitForStdin e) {
+      state = State.WAITING_FOR_INPUT;
     } catch (Exception e) {
+      state = State.CRASHED;
       throw new RuntimeException(e);
     }
   }
@@ -121,11 +151,17 @@ public class IntCode implements Runnable {
     program[consume()] = firstArg * secondArg;
   }
 
-  private void opInput(ParamType firstParam, ParamType secondParam, ParamType thirdParam) {
+  private void opInput(ParamType firstParam, ParamType secondParam, ParamType thirdParam) throws WaitForStdin {
+    Integer value = stdin.poll();
+    if (value == null) {
+      // Unconsume the opcode
+      pc--;
+      throw WaitForStdin.INSTANCE;
+    }
+
     assertPosition(firstParam);
     assertPosition(secondParam);
     assertPosition(thirdParam);
-    Integer value = stdin.readValue();
 
     program[consume()] = value;
   }
@@ -134,7 +170,7 @@ public class IntCode implements Runnable {
     assertPosition(secondParam);
     assertPosition(thirdParam);
 
-    stdout.writeValue(resolveSrc(firstParam));
+    stdout.add(resolveSrc(firstParam));
   }
 
   private int resolveSrc(ParamType param) {
@@ -166,37 +202,13 @@ public class IntCode implements Runnable {
     }
   }
 
-  public static class ListStdin implements IntcodeInput {
-    private final Queue<Integer> list = new ArrayDeque<>();
-
-    public ListStdin(Collection<Integer> data) {
-      list.addAll(data);
-    }
-
-    public static ListStdin of(int... values) {
-      return new ListStdin(IntStream.of(values).boxed().collect(Collectors.toList()));
-    }
-
-    @Override
-    public int readValue() {
-      return list.remove();
-    }
+  public enum State {
+    WAITING_FOR_INPUT,
+    HALTED,
+    CRASHED
   }
 
-  public static class ListStdout implements IntcodeOutput {
-    private final List<Integer> list = new ArrayList<>();
-
-    public ListStdout() {
-    }
-
-    @Override
-    public void writeValue(int value) {
-      list.add(value);
-    }
-
-    public List<Integer> getList() {
-      return list;
-    }
+  private static class WaitForStdin extends Exception {
+    private static final WaitForStdin INSTANCE = new WaitForStdin();
   }
-
 }

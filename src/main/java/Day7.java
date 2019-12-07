@@ -17,10 +17,11 @@ public class Day7 {
   private int evaluate(List<Integer> phases) {
     int value = 0;
     for (Integer phase : phases) {
-      IntCode.ListStdout stdout = new IntCode.ListStdout();
-      IntCode intCode = IntCode.fromResource(name, stdout, IntCode.ListStdin.of(phase, value));
+      IntCode intCode = IntCode.fromResource(name);
+      intCode.writeStdin(phase);
+      intCode.writeStdin(value);
       intCode.run();
-      List<Integer> list = stdout.getList();
+      List<Integer> list = intCode.drainStdout();
       if (list.size() != 1) {
         throw new RuntimeException("Unexpected list: " + list + " for phase " + phase + " of " + phases);
       }
