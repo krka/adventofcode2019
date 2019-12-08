@@ -47,7 +47,7 @@ public interface OpCode {
 
     @Override
     public String pretty() {
-      return target.pretty() + " = " + first.pretty() + " + " + second.pretty();
+      return target.pretty() + " <- " + first.pretty() + " + " + second.pretty();
     }
 
     @Override
@@ -80,7 +80,7 @@ public interface OpCode {
 
     @Override
     public String pretty() {
-      return target.pretty() + " = " + first.pretty() + " * " + second.pretty();
+      return target.pretty() + " <- " + first.pretty() + " * " + second.pretty();
     }
 
     @Override
@@ -126,7 +126,7 @@ public interface OpCode {
 
     @Override
     public String pretty() {
-      return target.pretty() + " = stdin()";
+      return target.pretty() + " <- stdin()";
     }
   }
 
@@ -157,7 +157,7 @@ public interface OpCode {
 
     @Override
     public String pretty() {
-      return input.pretty();
+      return input.pretty() + " -> stdout()";
     }
   }
 
@@ -228,7 +228,7 @@ public interface OpCode {
 
     @Override
     public String pretty() {
-      return target.pretty() + " = " + first.pretty() + " < " + second.pretty();
+      return target.pretty() + " <- " + first.pretty() + " < " + second.pretty();
     }
   }
 
@@ -262,7 +262,7 @@ public interface OpCode {
 
     @Override
     public String pretty() {
-      return target.pretty() + " = " + first.pretty() + " == " + second.pretty();
+      return target.pretty() + " <- " + first.pretty() + " == " + second.pretty();
     }
   }
 
@@ -290,7 +290,7 @@ public interface OpCode {
 
     @Override
     public String pretty() {
-      return "HALT";
+      return "";
     }
   }
 }
