@@ -194,7 +194,7 @@ public interface OpCode {
 
     @Override
     public String pretty() {
-      return "jump to " + target.pretty() + " if " + val.pretty() + " is " + (expected ? "1" : "");
+      return "jump to " + target.pretty() + " if " + val.pretty() + " is " + (expected ? "1" : "0");
     }
   }
 
