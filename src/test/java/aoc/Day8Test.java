@@ -1,3 +1,6 @@
+package aoc;
+
+import aoc.Day8;
 import org.junit.Test;
 
 import java.io.IOException;

@@ -1,3 +1,5 @@
+package intcode;
+
 import java.util.Locale;
 
 public class ProgramAnalysis {

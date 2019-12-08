@@ -1,3 +1,5 @@
+package aoc;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Collections;
@@ -44,7 +46,7 @@ public class Day8 {
   }
 
   public String part2() {
-    StringBuffer sb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
     for (String layer : layers) {
       char[] chars = layer.toCharArray();
       for (int i = 0; i < chars.length; i++) {

@@ -1,3 +1,7 @@
+package aoc;
+
+import aoc.Day7;
+import aoc.Day7Part2;
 import org.junit.Test;
 
 import static org.junit.Assert.*;

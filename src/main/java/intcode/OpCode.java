@@ -1,3 +1,5 @@
+package intcode;
+
 public interface OpCode {
   int size();
 

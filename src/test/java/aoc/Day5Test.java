@@ -1,3 +1,6 @@
+package aoc;
+
+import aoc.Day5;
 import org.junit.Test;
 
 import java.util.Arrays;
