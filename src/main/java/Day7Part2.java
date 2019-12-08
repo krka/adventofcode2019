@@ -15,6 +15,8 @@ public class Day7Part2 {
             .mapToInt(this::evaluate).max().getAsInt();
   }
 
+  static boolean firstRun = true;
+
   private int evaluate(List<Integer> phases) {
     IntCode[] vms = new IntCode[5];
     for (int i = 0; i < 5; i++) {
@@ -33,8 +35,11 @@ public class Day7Part2 {
             if (IntCode.State.HALTED != vms[j].getState()) {
               throw new RuntimeException("Unexpected state: " + vm.getState());
             }
-            vms[j].printAnalysis();
+            if (firstRun) {
+              vms[j].printAnalysis("day7-part2-vm-" + i + ".txt");
+            }
           }
+          firstRun = false;
           return prev;
         } else {
           prev = value;

@@ -1,4 +1,8 @@
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
@@ -71,6 +75,9 @@ public class IntCode implements Runnable {
 
   @Override
   public void run() {
+    if (state == State.RUNNING) {
+      return;
+    }
     if (state == State.HALTED) {
       return;
     }
@@ -81,7 +88,6 @@ public class IntCode implements Runnable {
     int restorePC = 0;
     try {
       while (true) {
-        analysis.markOpCode(pc);
         restorePC = pc;
         int opcode = consume();
         int op = opcode % 100;
@@ -97,10 +103,12 @@ public class IntCode implements Runnable {
           case 6: jumpIfFalse(firstParam, secondParam, thirdParam); break;
           case 7: lessThan(firstParam, secondParam, thirdParam); break;
           case 8: equals(firstParam, secondParam, thirdParam); break;
-          case 99: state = State.HALTED; return;
+          case 99: halt(); break;
           default: throw new RuntimeException("Unknown opcode: " + opcode + " at position " + (pc - 1));
         }
       }
+    } catch (Halt e) {
+      state = State.HALTED;
     } catch (WaitForStdin e) {
       state = State.WAITING_FOR_INPUT;
       pc = restorePC;
@@ -111,36 +119,54 @@ public class IntCode implements Runnable {
     }
   }
 
-  public void printAnalysis() {
-    System.out.println("Analysis of " + name);
-    for (int i = 0; i < program.length; i++) {
-      System.out.printf("%03d  %10d   %s%n", i, program[i], analysis.toString(i));
+  private void halt() throws Halt {
+    analysis.markOpCode(pc - 1, 0);
+    throw Halt.INSTANCE;
+  }
+
+  public void printAnalysis(String filename) {
+    try (PrintWriter writer = new PrintWriter(new File(filename), StandardCharsets.UTF_8)) {
+      writer.println("Analysis of " + name);
+      for (int i = 0; i < program.length; i++) {
+        writer.printf("%03d  %10d   %s%n", i, program[i], analysis.toString(i));
+      }
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
   }
 
   private void lessThan(ParamType firstParam, ParamType secondParam, ParamType thirdParam) {
+    analysis.markOpCode(pc - 1, 3);
+
     int firstArg = resolveSrc(firstParam);
     int secondArg = resolveSrc(secondParam);
 
     assertPosition(thirdParam);
     int res = firstArg < secondArg ? 1 : 0;
 
-    analysis.markWrite(pc);
-    program[consume()] = res;
+    writeMemory(consume(), res);
+  }
+
+  private void writeMemory(int position, int value) {
+    analysis.markWrite(position);
+    program[position] = value;
   }
 
   private void equals(ParamType firstParam, ParamType secondParam, ParamType thirdParam) {
+    analysis.markOpCode(pc - 1, 3);
+
     int firstArg = resolveSrc(firstParam);
     int secondArg = resolveSrc(secondParam);
 
     assertPosition(thirdParam);
     int res = firstArg == secondArg ? 1 : 0;
 
-    analysis.markWrite(pc);
-    program[consume()] = res;
+    writeMemory(consume(), res);
   }
 
   private void jumpIfTrue(ParamType firstParam, ParamType secondParam, ParamType thirdParam) {
+    analysis.markOpCode(pc - 1, 2);
+
     int firstArg = resolveSrc(firstParam);
     int secondArg = resolveSrc(secondParam);
     assertPosition(thirdParam);
@@ -151,6 +177,8 @@ public class IntCode implements Runnable {
   }
 
   private void jumpIfFalse(ParamType firstParam, ParamType secondParam, ParamType thirdParam) {
+    analysis.markOpCode(pc - 1, 2);
+
     int firstArg = resolveSrc(firstParam);
     int secondArg = resolveSrc(secondParam);
     assertPosition(thirdParam);
@@ -161,24 +189,28 @@ public class IntCode implements Runnable {
   }
 
   private void opAdd(ParamType firstParam, ParamType secondParam, ParamType thirdParam) {
+    analysis.markOpCode(pc - 1, 3);
+
     int firstArg = resolveSrc(firstParam);
     int secondArg = resolveSrc(secondParam);
 
     assertPosition(thirdParam);
-    analysis.markWrite(pc);
-    program[consume()] = firstArg + secondArg;
+    writeMemory(consume(), firstArg + secondArg);
   }
 
   private void opMul(ParamType firstParam, ParamType secondParam, ParamType thirdParam) {
+    analysis.markOpCode(pc - 1, 3);
+
     int firstArg = resolveSrc(firstParam);
     int secondArg = resolveSrc(secondParam);
 
     assertPosition(thirdParam);
-    analysis.markWrite(pc);
-    program[consume()] = firstArg * secondArg;
+    writeMemory(consume(), firstArg * secondArg);
   }
 
   private void opInput(ParamType firstParam, ParamType secondParam, ParamType thirdParam) throws WaitForStdin {
+    analysis.markOpCode(pc - 1, 1);
+
     Integer value = stdin.poll();
     if (value == null) {
       throw WaitForStdin.INSTANCE;
@@ -188,11 +220,12 @@ public class IntCode implements Runnable {
     assertPosition(secondParam);
 
     assertPosition(thirdParam);
-    analysis.markWrite(pc);
-    program[consume()] = value;
+    writeMemory(consume(), value);
   }
 
   private void opOutput(ParamType firstParam, ParamType secondParam, ParamType thirdParam) {
+    analysis.markOpCode(pc - 1, 1);
+
     assertPosition(secondParam);
     assertPosition(thirdParam);
 
@@ -200,9 +233,9 @@ public class IntCode implements Runnable {
   }
 
   private int resolveSrc(ParamType param) {
-    analysis.markRead(pc);
     int value = consume();
     if (param == ParamType.POSITION) {
+      analysis.markRead(value);
       return program[value];
     } else {
       // IMMEDIATE
@@ -230,6 +263,7 @@ public class IntCode implements Runnable {
   }
 
   public enum State {
+    RUNNING,
     WAITING_FOR_INPUT,
     HALTED,
     CRASHED
@@ -237,5 +271,9 @@ public class IntCode implements Runnable {
 
   private static class WaitForStdin extends Exception {
     private static final WaitForStdin INSTANCE = new WaitForStdin();
+  }
+
+  private static class Halt extends Exception {
+    private static final Halt INSTANCE = new Halt();
   }
 }
