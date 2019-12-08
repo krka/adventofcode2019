@@ -96,7 +96,7 @@ public class IntCode implements Runnable {
         OpCode opCode = OpCode.fetchOpcode(this, pc);
         //System.out.println(pc + ": " + opCode.name() + " " + opCode.pretty(this, pc));
         this.state = opCode.execute(this);
-        if (state != State.RUNNING) {
+        if (state == State.WAITING_FOR_INPUT) {
           return;
         }
         analysis.markOpCode(startPC, opCode);
@@ -104,6 +104,9 @@ public class IntCode implements Runnable {
           pc += opCode.size();
         } else {
           analysis.markLabel(pc);
+        }
+        if (state == State.HALTED) {
+          return;
         }
       }
     } catch (Exception e) {
@@ -116,8 +119,9 @@ public class IntCode implements Runnable {
   public void printAnalysis(String filename) {
     try (PrintWriter writer = new PrintWriter(new File(filename), StandardCharsets.UTF_8)) {
       writer.println("Analysis of " + name);
+      writer.println(analysis.header());
       for (int i = 0; i < program.length; i++) {
-        writer.printf("%03d  %10d   %s%n", i, program[i], analysis.toString(i));
+        writer.println(analysis.toString(i));
       }
     } catch (IOException e) {
       throw new RuntimeException(e);

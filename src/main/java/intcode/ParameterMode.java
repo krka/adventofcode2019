@@ -3,45 +3,72 @@ package intcode;
 enum ParameterMode {
   POSITION {
     @Override
-    int readParameter(IntCode vm, int pc) {
+    public ReadParameter resolveRead(IntCode vm, int pc) {
       int address = vm.getParameter(pc);
-      return vm.readValue(address);
+      int value = vm.readValue(address);
+      return new ReadParameter() {
+        @Override
+        public String pretty() {
+          return "addr[" + address + "]:" + value;
+        }
+
+        @Override
+        public int value() {
+          return value;
+        }
+      };
     }
 
     @Override
-    public void writeValue(IntCode vm, int pc, int value) {
+    public WriteParameter resolveWrite(IntCode vm, int pc) {
       int address = vm.getParameter(pc);
-      vm.put(address, value);
-    }
+      return new WriteParameter() {
+        Integer value;
+        @Override
+        public String pretty() {
+          String s = "addr[" + address + "]";
+          if (value != null) {
+            return s + ":" + value;
+          } else {
+            return s;
+          }
+        }
 
-    @Override
-    public String pretty(IntCode vm, int pc) {
-      int address = vm.getParameter(pc);
-      return "program[" + address + "]";
+        @Override
+        public void write(int value) {
+          this.value = value;
+          vm.put(address, value);
+        }
+
+        @Override
+        public Integer value() {
+          return value;
+        }
+      };
     }
   },
   IMMEDIATE {
     @Override
-    int readParameter(IntCode vm, int pc) {
-      return vm.getParameter(pc);
+    public ReadParameter resolveRead(IntCode vm, int pc) {
+      int value = vm.getParameter(pc);
+      return new ReadParameter() {
+        @Override
+        public String pretty() {
+          return Integer.toString(value);
+        }
+
+        @Override
+        public int value() {
+          return value;
+        }
+      };
     }
 
     @Override
-    public void writeValue(IntCode vm, int pc, int value) {
+    public WriteParameter resolveWrite(IntCode vm, int pc) {
       throw new IllegalStateException("Not allowed to write value in " + name() + " mode, at position " + pc);
     }
-
-    @Override
-    public String pretty(IntCode vm, int pc) {
-      return Integer.toString(vm.getParameter(pc));
-    }
   };
-
-  abstract int readParameter(IntCode vm, int pc);
-
-  public abstract void writeValue(IntCode vm, int pc, int value);
-
-  public abstract String pretty(IntCode vm, int pc);
 
   static ParameterMode from(int i) {
     return ParameterMode.values()[i];
@@ -52,4 +79,8 @@ enum ParameterMode {
       throw new RuntimeException("Expected " + expected.name() + " but got " + this.name());
     }
   }
+
+  public abstract ReadParameter resolveRead(IntCode vm, int pc);
+
+  public abstract WriteParameter resolveWrite(IntCode vm, int pc);
 }

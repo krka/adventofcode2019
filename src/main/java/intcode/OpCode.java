@@ -3,7 +3,7 @@ package intcode;
 public interface OpCode {
   int size();
 
-  String pretty(IntCode vm, int pc);
+  String pretty();
 
   IntCode.State execute(IntCode vm);
 
@@ -16,29 +16,28 @@ public interface OpCode {
     ParameterMode secondParam = ParameterMode.from((opcode / 1000) % 10);
     ParameterMode thirdParam = ParameterMode.from((opcode / 10000) % 10);
     switch (op) {
-      case 1: return new Add(firstParam, secondParam, thirdParam);
-      case 2: return new Mul(firstParam, secondParam, thirdParam);
-      case 3: return new Input(firstParam, secondParam, thirdParam);
-      case 4: return new Output(firstParam, secondParam, thirdParam);
-      case 5: return new JumpIf(true, firstParam, secondParam, thirdParam);
-      case 6: return new JumpIf(false, firstParam, secondParam, thirdParam);
-      case 7: return new LessThan(firstParam, secondParam, thirdParam);
-      case 8: return new Equals(firstParam, secondParam, thirdParam);
-      case 99: return new Halt(firstParam, secondParam, thirdParam);
+      case 1: return new Add(vm, pc, firstParam, secondParam, thirdParam);
+      case 2: return new Mul(vm, pc, firstParam, secondParam, thirdParam);
+      case 3: return new Input(vm, pc, firstParam, secondParam, thirdParam);
+      case 4: return new Output(vm, pc, firstParam, secondParam, thirdParam);
+      case 5: return new JumpIf(true, vm, pc, firstParam, secondParam, thirdParam);
+      case 6: return new JumpIf(false, vm, pc, firstParam, secondParam, thirdParam);
+      case 7: return new LessThan(vm, pc, firstParam, secondParam, thirdParam);
+      case 8: return new Equals(vm, pc, firstParam, secondParam, thirdParam);
+      case 99: return new Halt(vm, pc, firstParam, secondParam, thirdParam);
     }
     throw new IllegalStateException("Unknown opcode: " + opcode + " at position " + pc);
   }
 
   class Add implements OpCode {
+    private final ReadParameter first;
+    private final ReadParameter second;
+    private final WriteParameter target;
 
-    private final ParameterMode firstParam;
-    private final ParameterMode secondParam;
-    private final ParameterMode thirdParam;
-
-    public Add(ParameterMode firstParam, ParameterMode secondParam, ParameterMode thirdParam) {
-      this.firstParam = firstParam;
-      this.secondParam = secondParam;
-      this.thirdParam = thirdParam;
+    public Add(IntCode vm, int pc, ParameterMode firstParam, ParameterMode secondParam, ParameterMode thirdParam) {
+      first = firstParam.resolveRead(vm, pc + 1);
+      second = secondParam.resolveRead(vm, pc + 2);
+      target = thirdParam.resolveWrite(vm, pc + 3);
     }
 
     @Override
@@ -47,18 +46,13 @@ public interface OpCode {
     }
 
     @Override
-    public String pretty(IntCode vm, int pc) {
-      return thirdParam.pretty(vm,pc + 3) + " = " +
-              firstParam.pretty(vm, pc + 1) + " + " +
-              secondParam.pretty(vm, pc + 2);
+    public String pretty() {
+      return target.pretty() + " = " + first.pretty() + " + " + second.pretty();
     }
 
     @Override
     public IntCode.State execute(IntCode vm) {
-      int pc = vm.pc();
-      int first = firstParam.readParameter(vm, pc + 1);
-      int second = secondParam.readParameter(vm, pc + 2);
-      thirdParam.writeValue(vm, pc + 3, first + second);
+      target.write(first.value() + second.value());
       return IntCode.State.RUNNING;
     }
 
@@ -69,15 +63,14 @@ public interface OpCode {
   }
 
   class Mul implements OpCode {
+    private final ReadParameter first;
+    private final ReadParameter second;
+    private final WriteParameter target;
 
-    private final ParameterMode firstParam;
-    private final ParameterMode secondParam;
-    private final ParameterMode thirdParam;
-
-    public Mul(ParameterMode firstParam, ParameterMode secondParam, ParameterMode thirdParam) {
-      this.firstParam = firstParam;
-      this.secondParam = secondParam;
-      this.thirdParam = thirdParam;
+    public Mul(IntCode vm, int pc, ParameterMode firstParam, ParameterMode secondParam, ParameterMode thirdParam) {
+      first = firstParam.resolveRead(vm, pc + 1);
+      second = secondParam.resolveRead(vm, pc + 2);
+      target = thirdParam.resolveWrite(vm, pc + 3);
     }
 
     @Override
@@ -86,18 +79,13 @@ public interface OpCode {
     }
 
     @Override
-    public String pretty(IntCode vm, int pc) {
-      return thirdParam.pretty(vm,pc + 3) + " = " +
-              firstParam.pretty(vm, pc + 1) + " * " +
-              secondParam.pretty(vm, pc + 2);
+    public String pretty() {
+      return target.pretty() + " = " + first.pretty() + " * " + second.pretty();
     }
 
     @Override
     public IntCode.State execute(IntCode vm) {
-      int pc = vm.pc();
-      int first = firstParam.readParameter(vm, pc + 1);
-      int second = secondParam.readParameter(vm, pc + 2);
-      thirdParam.writeValue(vm, pc + 3, first * second);
+      target.write(first.value() * second.value());
       return IntCode.State.RUNNING;
     }
 
@@ -108,11 +96,10 @@ public interface OpCode {
   }
 
   class Input implements OpCode {
-    private final ParameterMode firstParam;
+    private final WriteParameter target;
 
-    public Input(ParameterMode firstParam, ParameterMode secondParam, ParameterMode thirdParam) {
-      this.firstParam = firstParam;
-      firstParam.assertType(ParameterMode.POSITION);
+    public Input(IntCode vm, int pc, ParameterMode firstParam, ParameterMode secondParam, ParameterMode thirdParam) {
+      target = firstParam.resolveWrite(vm, pc + 1);
       secondParam.assertType(ParameterMode.POSITION);
       thirdParam.assertType(ParameterMode.POSITION);
     }
@@ -123,7 +110,7 @@ public interface OpCode {
       if (value == null) {
         return IntCode.State.WAITING_FOR_INPUT;
       }
-      firstParam.writeValue(vm, vm.pc() + 1, value);
+      target.write(value);
       return IntCode.State.RUNNING;
     }
 
@@ -138,24 +125,23 @@ public interface OpCode {
     }
 
     @Override
-    public String pretty(IntCode vm, int pc) {
-      return firstParam.pretty(vm, pc + 1) + " = stdin()";
+    public String pretty() {
+      return target.pretty() + " = stdin()";
     }
   }
 
   class Output implements OpCode {
-    private final ParameterMode firstParam;
+    private final ReadParameter input;
 
-    public Output(ParameterMode firstParam, ParameterMode secondParam, ParameterMode thirdParam) {
-      this.firstParam = firstParam;
+    public Output(IntCode vm, int pc, ParameterMode firstParam, ParameterMode secondParam, ParameterMode thirdParam) {
+      input = firstParam.resolveRead(vm, pc + 1);
       secondParam.assertType(ParameterMode.POSITION);
       thirdParam.assertType(ParameterMode.POSITION);
     }
 
     @Override
     public IntCode.State execute(IntCode vm) {
-      int value = firstParam.readParameter(vm, vm.pc() + 1);
-      vm.writeStdout(value);
+      vm.writeStdout(input.value());
       return IntCode.State.RUNNING;
     }
 
@@ -170,31 +156,28 @@ public interface OpCode {
     }
 
     @Override
-    public String pretty(IntCode vm, int pc) {
-      return "put " + firstParam.pretty(vm, pc + 1);
+    public String pretty() {
+      return input.pretty();
     }
   }
 
   class JumpIf implements OpCode {
     private final boolean expected;
-    private final ParameterMode firstParam;
-    private final ParameterMode secondParam;
+    private final ReadParameter val;
+    private final ReadParameter target;
 
-    public JumpIf(boolean expected, ParameterMode firstParam, ParameterMode secondParam, ParameterMode thirdParam) {
+    public JumpIf(boolean expected, IntCode vm, int pc, ParameterMode firstParam, ParameterMode secondParam, ParameterMode thirdParam) {
       this.expected = expected;
-      this.firstParam = firstParam;
-      this.secondParam = secondParam;
+      val = firstParam.resolveRead(vm, pc + 1);
+      target = secondParam.resolveRead(vm, pc + 2);
       thirdParam.assertType(ParameterMode.POSITION);
     }
 
     @Override
     public IntCode.State execute(IntCode vm) {
-      int val = firstParam.readParameter(vm, vm.pc() + 1);
-      int target = secondParam.readParameter(vm, vm.pc() + 2);
-
-      boolean cmp = val != 0;
+      boolean cmp = val.value() != 0;
       if (cmp == expected) {
-        vm.jumpTo(target);
+        vm.jumpTo(target.value());
       }
       return IntCode.State.RUNNING;
     }
@@ -210,32 +193,26 @@ public interface OpCode {
     }
 
     @Override
-    public String pretty(IntCode vm, int pc) {
-      String condition = firstParam.pretty(vm, pc + 1);
-      String target = secondParam.pretty(vm, pc + 2);
-      return "jump to " + target + " if " + condition + " is " + expected;
+    public String pretty() {
+      return "jump to " + target.pretty() + " if " + val.pretty() + " is " + (expected ? "1" : "");
     }
   }
 
   class LessThan implements OpCode {
-    private final ParameterMode firstParam;
-    private final ParameterMode secondParam;
-    private final ParameterMode thirdParam;
+    private final ReadParameter first;
+    private final ReadParameter second;
+    private final WriteParameter target;
 
-    public LessThan(ParameterMode firstParam, ParameterMode secondParam, ParameterMode thirdParam) {
-      this.firstParam = firstParam;
-      this.secondParam = secondParam;
-      this.thirdParam = thirdParam;
-      thirdParam.assertType(ParameterMode.POSITION);
+    public LessThan(IntCode vm, int pc, ParameterMode firstParam, ParameterMode secondParam, ParameterMode thirdParam) {
+      first = firstParam.resolveRead(vm, pc + 1);
+      second = secondParam.resolveRead(vm, pc + 2);
+      target = thirdParam.resolveWrite(vm, pc + 3);
     }
 
     @Override
     public IntCode.State execute(IntCode vm) {
-      int first = firstParam.readParameter(vm, vm.pc() + 1);
-      int second = secondParam.readParameter(vm, vm.pc() + 2);
-
-      int res = first < second ? 1 : 0;
-      thirdParam.writeValue(vm, vm.pc() + 3, res);
+      int res = first.value() < second.value() ? 1 : 0;
+      target.write(res);
       return IntCode.State.RUNNING;
     }
 
@@ -250,32 +227,26 @@ public interface OpCode {
     }
 
     @Override
-    public String pretty(IntCode vm, int pc) {
-      String first = firstParam.pretty(vm, pc + 1);
-      String second = secondParam.pretty(vm, pc + 2);
-      return thirdParam.pretty(vm, vm.pc() + 3) + " = " + first + " < " + second;
+    public String pretty() {
+      return target.pretty() + " = " + first.pretty() + " < " + second.pretty();
     }
   }
 
   class Equals implements OpCode {
-    private final ParameterMode firstParam;
-    private final ParameterMode secondParam;
-    private final ParameterMode thirdParam;
+    private final ReadParameter first;
+    private final ReadParameter second;
+    private final WriteParameter target;
 
-    public Equals(ParameterMode firstParam, ParameterMode secondParam, ParameterMode thirdParam) {
-      this.firstParam = firstParam;
-      this.secondParam = secondParam;
-      this.thirdParam = thirdParam;
-      thirdParam.assertType(ParameterMode.POSITION);
+    public Equals(IntCode vm, int pc, ParameterMode firstParam, ParameterMode secondParam, ParameterMode thirdParam) {
+      first = firstParam.resolveRead(vm, pc + 1);
+      second = secondParam.resolveRead(vm, pc + 2);
+      target = thirdParam.resolveWrite(vm, pc + 3);
     }
 
     @Override
     public IntCode.State execute(IntCode vm) {
-      int first = firstParam.readParameter(vm, vm.pc() + 1);
-      int second = secondParam.readParameter(vm, vm.pc() + 2);
-
-      int res = first == second ? 1 : 0;
-      thirdParam.writeValue(vm, vm.pc() + 3, res);
+      int res = first.value() == second.value() ? 1 : 0;
+      target.write(res);
       return IntCode.State.RUNNING;
     }
 
@@ -290,15 +261,13 @@ public interface OpCode {
     }
 
     @Override
-    public String pretty(IntCode vm, int pc) {
-      String first = firstParam.pretty(vm, pc + 1);
-      String second = secondParam.pretty(vm, pc + 2);
-      return thirdParam.pretty(vm, vm.pc() + 3) + " = " + first + " == " + second;
+    public String pretty() {
+      return target.pretty() + " = " + first.pretty() + " == " + second.pretty();
     }
   }
 
   class Halt implements OpCode {
-    public Halt(ParameterMode firstParam, ParameterMode secondParam, ParameterMode thirdParam) {
+    public Halt(IntCode vm, int pc, ParameterMode firstParam, ParameterMode secondParam, ParameterMode thirdParam) {
       firstParam.assertType(ParameterMode.POSITION);
       secondParam.assertType(ParameterMode.POSITION);
       thirdParam.assertType(ParameterMode.POSITION);
@@ -320,8 +289,8 @@ public interface OpCode {
     }
 
     @Override
-    public String pretty(IntCode vm, int pc) {
-      return "";
+    public String pretty() {
+      return "HALT";
     }
   }
 }

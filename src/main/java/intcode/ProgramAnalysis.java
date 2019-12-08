@@ -47,8 +47,12 @@ public class ProgramAnalysis {
     String param = (state & OPCODE_PARAM) != 0 ? "param": "";
     String read = (state & READ_VALUE) != 0 ? "r": "";
     String write = (state & WRITE_VALUE) != 0 ? "w": "";
-    String label = (state & LABEL) != 0 ? "lbl": "";
-    String opcode = (state & OPCODE) != 0 ? opcodes[i].name() + " (" + numVisits[i] + ")" : "";
-    return String.format(Locale.ROOT, "%5s %1s %1s %3s %s", param, read, write, label, opcode);
+    String label = (state & LABEL) != 0 ? "label": "";
+    String opcode = (state & OPCODE) != 0 ? opcodes[i].name() + " " + opcodes[i].pretty(): "";
+    return String.format(Locale.ROOT, "%05d  %10d   %5s %1s %1s %5s %s", i, program[i], param, read, write, label, opcode);
+  }
+
+  public String header() {
+    return String.format(Locale.ROOT, "%5s  %10s   %5s %1s %1s %5s %-40s", "Addr", "Program", "Param", "R", "W", "Label", "Operation");
   }
 }
