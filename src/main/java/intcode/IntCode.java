@@ -94,7 +94,6 @@ public class IntCode implements Runnable {
       while (true) {
         int startPC = pc;
         OpCode opCode = OpCode.fetchOpcode(this, pc);
-        //System.out.println(pc + ": " + opCode.name() + " " + opCode.pretty(this, pc));
         this.state = opCode.execute(this);
         if (state == State.WAITING_FOR_INPUT) {
           return;
@@ -126,10 +125,6 @@ public class IntCode implements Runnable {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
-  }
-
-  public int pc() {
-    return pc;
   }
 
   public int getParameter(int pc) {

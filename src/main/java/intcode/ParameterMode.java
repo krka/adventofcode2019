@@ -40,10 +40,6 @@ enum ParameterMode {
           vm.put(address, value);
         }
 
-        @Override
-        public Integer value() {
-          return value;
-        }
       };
     }
   },
