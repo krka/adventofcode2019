@@ -1,6 +1,10 @@
+import java.util.Locale;
+
 public class ProgramAnalysis {
   private final int[] program;
   private final int[] states;
+  private final int[] numVisits;
+  private final OpCode[] opcodes;
 
   private static final int OPCODE = 1;
   private static final int OPCODE_PARAM = 2;
@@ -11,45 +15,38 @@ public class ProgramAnalysis {
   public ProgramAnalysis(int[] program) {
     this.program = program;
     this.states = new int[program.length];
+    this.opcodes = new OpCode[program.length];
+    this.numVisits = new int[program.length];
   }
 
-  public void markOpCode(int pc, int numParams) {
+  public void markOpCode(int pc, OpCode opCode) {
     states[pc] |= OPCODE;
-    for (int i = 1; i <= numParams; i++) {
+    for (int i = 1; i <= opCode.size() - 1; i++) {
       states[pc + i] |= OPCODE_PARAM;
     }
+    opcodes[pc] = opCode;
+    numVisits[pc]++;
   }
 
-  public void markRead(int pc) {
-    states[pc] |= READ_VALUE;
+  public void markRead(int address) {
+    states[address] |= READ_VALUE;
   }
 
-  public void markWrite(int pc) {
-    states[pc] |= WRITE_VALUE;
+  public void markWrite(int address) {
+    states[address] |= WRITE_VALUE;
   }
 
-  public void markLabel(int pc) {
-    states[pc] |= LABEL;
+  public void markLabel(int address) {
+    states[address] |= LABEL;
   }
 
   public String toString(int i) {
     int state = states[i];
-    StringBuilder sb = new StringBuilder();
-    if ((state & OPCODE) != 0) {
-      sb.append(" opcode");
-    }
-    if ((state & OPCODE_PARAM) != 0) {
-      sb.append(" param");
-    }
-    if ((state & READ_VALUE) != 0) {
-      sb.append(" read");
-    }
-    if ((state & WRITE_VALUE) != 0) {
-      sb.append(" write");
-    }
-    if ((state & LABEL) != 0) {
-      sb.append(" label");
-    }
-    return sb.toString();
+    String param = (state & OPCODE_PARAM) != 0 ? "param": "";
+    String read = (state & READ_VALUE) != 0 ? "r": "";
+    String write = (state & WRITE_VALUE) != 0 ? "w": "";
+    String label = (state & LABEL) != 0 ? "lbl": "";
+    String opcode = (state & OPCODE) != 0 ? opcodes[i].name() + " (" + numVisits[i] + ")" : "";
+    return String.format(Locale.ROOT, "%5s %1s %1s %3s %s", param, read, write, label, opcode);
   }
 }

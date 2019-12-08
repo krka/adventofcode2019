@@ -33,10 +33,10 @@ public class Day7Part2 {
         if (value == null) {
           for (int j = 0; j < 5; j++) {
             if (IntCode.State.HALTED != vms[j].getState()) {
-              throw new RuntimeException("Unexpected state: " + vm.getState());
+              throw new RuntimeException("Unexpected state: " + vms[j].getState());
             }
             if (firstRun) {
-              vms[j].printAnalysis("day7-part2-vm-" + i + ".txt");
+              vms[j].printAnalysis("day7-part2-vm-" + j + ".txt");
             }
           }
           firstRun = false;

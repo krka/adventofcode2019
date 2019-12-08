@@ -85,43 +85,28 @@ public class IntCode implements Runnable {
       throw exception;
     }
 
-    int restorePC = 0;
+
     try {
       while (true) {
-        restorePC = pc;
-        int opcode = consume();
-        int op = opcode % 100;
-        ParamType firstParam = ParamType.from((opcode / 100) % 10);
-        ParamType secondParam = ParamType.from((opcode / 1000) % 10);
-        ParamType thirdParam = ParamType.from((opcode / 10000) % 10);
-        switch (op) {
-          case 1: opAdd(firstParam, secondParam, thirdParam); break;
-          case 2: opMul(firstParam, secondParam, thirdParam); break;
-          case 3: opInput(firstParam, secondParam, thirdParam); break;
-          case 4: opOutput(firstParam, secondParam, thirdParam); break;
-          case 5: jumpIfTrue(firstParam, secondParam, thirdParam); break;
-          case 6: jumpIfFalse(firstParam, secondParam, thirdParam); break;
-          case 7: lessThan(firstParam, secondParam, thirdParam); break;
-          case 8: equals(firstParam, secondParam, thirdParam); break;
-          case 99: halt(); break;
-          default: throw new RuntimeException("Unknown opcode: " + opcode + " at position " + (pc - 1));
+        int startPC = pc;
+        OpCode opCode = OpCode.fetchOpcode(this, pc);
+        //System.out.println(pc + ": " + opCode.name() + " " + opCode.pretty(this, pc));
+        this.state = opCode.execute(this);
+        if (state != State.RUNNING) {
+          return;
+        }
+        analysis.markOpCode(startPC, opCode);
+        if (startPC == pc) {
+          pc += opCode.size();
+        } else {
+          analysis.markLabel(pc);
         }
       }
-    } catch (Halt e) {
-      state = State.HALTED;
-    } catch (WaitForStdin e) {
-      state = State.WAITING_FOR_INPUT;
-      pc = restorePC;
     } catch (Exception e) {
       state = State.CRASHED;
       exception = new RuntimeException(e);
       throw exception;
     }
-  }
-
-  private void halt() throws Halt {
-    analysis.markOpCode(pc - 1, 0);
-    throw Halt.INSTANCE;
   }
 
   public void printAnalysis(String filename) {
@@ -135,131 +120,34 @@ public class IntCode implements Runnable {
     }
   }
 
-  private void lessThan(ParamType firstParam, ParamType secondParam, ParamType thirdParam) {
-    analysis.markOpCode(pc - 1, 3);
-
-    int firstArg = resolveSrc(firstParam);
-    int secondArg = resolveSrc(secondParam);
-
-    assertPosition(thirdParam);
-    int res = firstArg < secondArg ? 1 : 0;
-
-    writeMemory(consume(), res);
+  public int pc() {
+    return pc;
   }
 
-  private void writeMemory(int position, int value) {
-    analysis.markWrite(position);
-    program[position] = value;
+  public int getParameter(int pc) {
+    return program[pc];
   }
 
-  private void equals(ParamType firstParam, ParamType secondParam, ParamType thirdParam) {
-    analysis.markOpCode(pc - 1, 3);
-
-    int firstArg = resolveSrc(firstParam);
-    int secondArg = resolveSrc(secondParam);
-
-    assertPosition(thirdParam);
-    int res = firstArg == secondArg ? 1 : 0;
-
-    writeMemory(consume(), res);
+  public int readValue(int address) {
+    analysis.markRead(address);
+    return program[address];
   }
 
-  private void jumpIfTrue(ParamType firstParam, ParamType secondParam, ParamType thirdParam) {
-    analysis.markOpCode(pc - 1, 2);
-
-    int firstArg = resolveSrc(firstParam);
-    int secondArg = resolveSrc(secondParam);
-    assertPosition(thirdParam);
-    if (firstArg != 0) {
-      analysis.markLabel(secondArg);
-      pc = secondArg;
-    }
+  public void put(int address, int value) {
+    analysis.markWrite(address);
+    program[address] = value;
   }
 
-  private void jumpIfFalse(ParamType firstParam, ParamType secondParam, ParamType thirdParam) {
-    analysis.markOpCode(pc - 1, 2);
-
-    int firstArg = resolveSrc(firstParam);
-    int secondArg = resolveSrc(secondParam);
-    assertPosition(thirdParam);
-    if (firstArg == 0) {
-      analysis.markLabel(secondArg);
-      pc = secondArg;
-    }
+  public Integer pollStdin() {
+    return stdin.poll();
   }
 
-  private void opAdd(ParamType firstParam, ParamType secondParam, ParamType thirdParam) {
-    analysis.markOpCode(pc - 1, 3);
-
-    int firstArg = resolveSrc(firstParam);
-    int secondArg = resolveSrc(secondParam);
-
-    assertPosition(thirdParam);
-    writeMemory(consume(), firstArg + secondArg);
+  public void jumpTo(int target) {
+    pc = target;
   }
 
-  private void opMul(ParamType firstParam, ParamType secondParam, ParamType thirdParam) {
-    analysis.markOpCode(pc - 1, 3);
-
-    int firstArg = resolveSrc(firstParam);
-    int secondArg = resolveSrc(secondParam);
-
-    assertPosition(thirdParam);
-    writeMemory(consume(), firstArg * secondArg);
-  }
-
-  private void opInput(ParamType firstParam, ParamType secondParam, ParamType thirdParam) throws WaitForStdin {
-    analysis.markOpCode(pc - 1, 1);
-
-    Integer value = stdin.poll();
-    if (value == null) {
-      throw WaitForStdin.INSTANCE;
-    }
-
-    assertPosition(firstParam);
-    assertPosition(secondParam);
-
-    assertPosition(thirdParam);
-    writeMemory(consume(), value);
-  }
-
-  private void opOutput(ParamType firstParam, ParamType secondParam, ParamType thirdParam) {
-    analysis.markOpCode(pc - 1, 1);
-
-    assertPosition(secondParam);
-    assertPosition(thirdParam);
-
-    stdout.add(resolveSrc(firstParam));
-  }
-
-  private int resolveSrc(ParamType param) {
-    int value = consume();
-    if (param == ParamType.POSITION) {
-      analysis.markRead(value);
-      return program[value];
-    } else {
-      // IMMEDIATE
-      return value;
-    }
-  }
-
-  private void assertPosition(ParamType thirdParam) {
-    if (thirdParam != ParamType.POSITION) {
-      throw new RuntimeException("Unexpected " + thirdParam + " at position " + (pc - 1));
-    }
-  }
-
-  private int consume() {
-    return program[pc++];
-  }
-
-  private enum ParamType {
-    POSITION,
-    IMMEDIATE;
-
-    static ParamType from(int i) {
-      return ParamType.values()[i];
-    }
+  public void writeStdout(int value) {
+    stdout.add(value);
   }
 
   public enum State {
@@ -267,13 +155,5 @@ public class IntCode implements Runnable {
     WAITING_FOR_INPUT,
     HALTED,
     CRASHED
-  }
-
-  private static class WaitForStdin extends Exception {
-    private static final WaitForStdin INSTANCE = new WaitForStdin();
-  }
-
-  private static class Halt extends Exception {
-    private static final Halt INSTANCE = new Halt();
   }
 }
