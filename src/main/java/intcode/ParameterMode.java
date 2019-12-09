@@ -64,7 +64,50 @@ enum ParameterMode {
     public WriteParameter resolveWrite(IntCode vm, int pc) {
       throw new IllegalStateException("Not allowed to write value in " + name() + " mode, at position " + pc);
     }
-  };
+  },
+  RELATIVE {
+    @Override
+    public ReadParameter resolveRead(IntCode vm, int pc) {
+      int address = vm.getParameter(pc);
+      int value = vm.readValue(vm.getRelativeBase() + address);
+      return new ReadParameter() {
+        @Override
+        public String pretty() {
+          return "addr[" + vm.getRelativeBase() + "+" + address + "]:" + value;
+        }
+
+        @Override
+        public int value() {
+          return value;
+        }
+      };
+    }
+
+    @Override
+    public WriteParameter resolveWrite(IntCode vm, int pc) {
+      int address = vm.getParameter(pc);
+      return new WriteParameter() {
+        Integer value;
+        @Override
+        public String pretty() {
+          String s = "addr[" + address + "]";
+          if (value != null) {
+            return s + ":" + value;
+          } else {
+            return s;
+          }
+        }
+
+        @Override
+        public void write(int value) {
+          this.value = value;
+          vm.put(address, value);
+        }
+
+      };
+    }
+  }
+  ;
 
   static ParameterMode from(int i) {
     return ParameterMode.values()[i];

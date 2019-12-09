@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Reader;
+import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,19 +23,17 @@ public class IntCode implements Runnable {
   private final Queue<Integer> stdin = new LinkedBlockingQueue<>();
 
   private final String name;
-  private final int[] program;
+  private final Memory memory;
   private final ProgramAnalysis analysis;
   private int pc;
   private State state = State.WAITING_FOR_INPUT;
   private RuntimeException exception;
+  private int relativeBase = 0;
 
   private IntCode(String name, List<Integer> program) {
     this.name = name;
-    this.program = new int[program.size()];
-    for (int i = 0; i < this.program.length; i++) {
-      this.program[i] = program.get(i);
-    }
-    this.analysis = new ProgramAnalysis(this.program);
+    this.memory = new Memory(program);
+    this.analysis = new ProgramAnalysis(this.memory);
     run();
   }
 
@@ -59,6 +58,10 @@ public class IntCode implements Runnable {
       }
       res.add(value);
     }
+  }
+
+  public static IntCode fromString(String s) {
+    return fromResource("code", new StringReader(s));
   }
 
   public static IntCode fromResource(String name) {
@@ -118,27 +121,24 @@ public class IntCode implements Runnable {
   public void printAnalysis(String filename) {
     try (PrintWriter writer = new PrintWriter(new File(filename), StandardCharsets.UTF_8)) {
       writer.println("Analysis of " + name);
-      writer.println(analysis.header());
-      for (int i = 0; i < program.length; i++) {
-        writer.println(analysis.toString(i));
-      }
+      analysis.printAnalysis(writer);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
   }
 
   public int getParameter(int pc) {
-    return program[pc];
+    return memory.read(pc);
   }
 
   public int readValue(int address) {
     analysis.markRead(address);
-    return program[address];
+    return memory.read(address);
   }
 
   public void put(int address, int value) {
     analysis.markWrite(address);
-    program[address] = value;
+    memory.write(address, value);
   }
 
   public Integer pollStdin() {
@@ -151,6 +151,14 @@ public class IntCode implements Runnable {
 
   public void writeStdout(int value) {
     stdout.add(value);
+  }
+
+  public void adjustRelativeBase(int value) {
+    relativeBase += value;
+  }
+
+  public int getRelativeBase() {
+    return relativeBase;
   }
 
   public enum State {

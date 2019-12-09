@@ -24,6 +24,7 @@ public interface OpCode {
       case 6: return new JumpIf(false, vm, pc, firstParam, secondParam, thirdParam);
       case 7: return new LessThan(vm, pc, firstParam, secondParam, thirdParam);
       case 8: return new Equals(vm, pc, firstParam, secondParam, thirdParam);
+      case 9: return new SetRelBase(vm, pc, firstParam, secondParam, thirdParam);
       case 99: return new Halt(vm, pc, firstParam, secondParam, thirdParam);
     }
     throw new IllegalStateException("Unknown opcode: " + opcode + " at position " + pc);
@@ -263,6 +264,37 @@ public interface OpCode {
     @Override
     public String pretty() {
       return target.pretty() + " <- " + first.pretty() + " == " + second.pretty();
+    }
+  }
+
+  class SetRelBase implements OpCode {
+    private final ReadParameter first;
+
+    public SetRelBase(IntCode vm, int pc, ParameterMode firstParam, ParameterMode secondParam, ParameterMode thirdParam) {
+      first = firstParam.resolveRead(vm, pc + 1);
+      secondParam.assertType(ParameterMode.POSITION);
+      thirdParam.assertType(ParameterMode.POSITION);
+    }
+
+    @Override
+    public IntCode.State execute(IntCode vm) {
+      vm.adjustRelativeBase(first.value());
+      return IntCode.State.RUNNING;
+    }
+
+    @Override
+    public String name() {
+      return "ARB";
+    }
+
+    @Override
+    public int size() {
+      return 2;
+    }
+
+    @Override
+    public String pretty() {
+      return first.pretty();
     }
   }
 
