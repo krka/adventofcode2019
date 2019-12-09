@@ -1,31 +1,34 @@
 package intcode;
 
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class Memory {
-  Map<Integer, Integer> data = new HashMap<>();
+  Map<BigInteger, BigInteger> data = new HashMap<>();
 
-  int end;
+  BigInteger end;
 
-  public Memory(List<Integer> initial) {
+  public Memory(List<BigInteger> initial) {
+    end = BigInteger.valueOf(initial.size() - 1);
     for (int i = 0; i < initial.size(); i++) {
-      write(i, initial.get(i));
+      write(BigInteger.valueOf(i), initial.get(i));
     }
-    end = initial.size();
   }
 
-  public int read(int address) {
-    return data.getOrDefault(address,0);
+  public BigInteger read(BigInteger address) {
+    return data.getOrDefault(address,BigInteger.ZERO);
   }
 
-  public void write(int address, int value) {
+  public void write(BigInteger address, BigInteger value) {
     data.put(address, value);
-    end = Math.max(end, address + 1);
+    if (end.compareTo(address) < 0) {
+      end = address;
+    }
   }
 
-  public boolean contains(int address) {
+  public boolean contains(BigInteger address) {
     return data.containsKey(address);
   }
 }

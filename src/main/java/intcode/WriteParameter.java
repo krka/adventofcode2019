@@ -1,6 +1,8 @@
 package intcode;
 
+import java.math.BigInteger;
+
 public interface WriteParameter {
   String pretty();
-  void write(int value);
+  void write(BigInteger value);
 }

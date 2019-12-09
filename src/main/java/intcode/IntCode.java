@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringReader;
+import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,18 +20,18 @@ public class IntCode implements Runnable {
 
   private static final Pattern DELIMITER = Pattern.compile("[,\n\r]+");
 
-  private final Queue<Integer> stdout = new LinkedBlockingQueue<>();
-  private final Queue<Integer> stdin = new LinkedBlockingQueue<>();
+  private final Queue<BigInteger> stdout = new LinkedBlockingQueue<>();
+  private final Queue<BigInteger> stdin = new LinkedBlockingQueue<>();
 
   private final String name;
   private final Memory memory;
   private final ProgramAnalysis analysis;
-  private int pc;
+  private BigInteger pc = BigInteger.ZERO;
   private State state = State.WAITING_FOR_INPUT;
   private RuntimeException exception;
-  private int relativeBase = 0;
+  private BigInteger relativeBase = BigInteger.ZERO;
 
-  private IntCode(String name, List<Integer> program) {
+  private IntCode(String name, List<BigInteger> program) {
     this.name = name;
     this.memory = new Memory(program);
     this.analysis = new ProgramAnalysis(this.memory);
@@ -41,18 +42,22 @@ public class IntCode implements Runnable {
     return state;
   }
 
-  public void writeStdin(int value) {
+  public void writeStdin(BigInteger value) {
     stdin.add(value);
   }
 
-  public Queue<Integer> getStdout() {
+  public void writeStdin(int value) {
+    writeStdin(BigInteger.valueOf(value));
+  }
+
+  public Queue<BigInteger> getStdout() {
     return stdout;
   }
 
-  public List<Integer> drainStdout() {
-    ArrayList<Integer> res = new ArrayList<>();
+  public List<BigInteger> drainStdout() {
+    ArrayList<BigInteger> res = new ArrayList<>();
     while (true) {
-      Integer value = stdout.poll();
+      BigInteger value = stdout.poll();
       if (value == null) {
         return res;
       }
@@ -69,12 +74,12 @@ public class IntCode implements Runnable {
   }
 
   private static IntCode fromResource(String name, Reader input) {
-    List<Integer> program = new ArrayList<>();
+    List<BigInteger> program = new ArrayList<>();
     try (Scanner scanner = new Scanner(input)) {
       scanner.useDelimiter(DELIMITER);
       while (scanner.hasNext()) {
         String token = scanner.next();
-        program.add(Integer.parseInt(token));
+        program.add(new BigInteger(token));
       }
     }
     return new IntCode(name, program);
@@ -95,7 +100,7 @@ public class IntCode implements Runnable {
 
     try {
       while (true) {
-        int startPC = pc;
+        BigInteger startPC = pc;
         OpCode opCode = OpCode.fetchOpcode(this, pc);
         this.state = opCode.execute(this);
         if (state == State.WAITING_FOR_INPUT) {
@@ -103,7 +108,7 @@ public class IntCode implements Runnable {
         }
         analysis.markOpCode(startPC, opCode);
         if (startPC == pc) {
-          pc += opCode.size();
+          pc = pc.add(BigInteger.valueOf(opCode.size()));
         } else {
           analysis.markLabel(pc);
         }
@@ -127,37 +132,37 @@ public class IntCode implements Runnable {
     }
   }
 
-  public int getParameter(int pc) {
+  public BigInteger getParameter(BigInteger pc) {
     return memory.read(pc);
   }
 
-  public int readValue(int address) {
+  public BigInteger readValue(BigInteger address) {
     analysis.markRead(address);
     return memory.read(address);
   }
 
-  public void put(int address, int value) {
+  public void put(BigInteger address, BigInteger value) {
     analysis.markWrite(address);
     memory.write(address, value);
   }
 
-  public Integer pollStdin() {
+  public BigInteger pollStdin() {
     return stdin.poll();
   }
 
-  public void jumpTo(int target) {
+  public void jumpTo(BigInteger target) {
     pc = target;
   }
 
-  public void writeStdout(int value) {
+  public void writeStdout(BigInteger value) {
     stdout.add(value);
   }
 
-  public void adjustRelativeBase(int value) {
-    relativeBase += value;
+  public void adjustRelativeBase(BigInteger value) {
+    relativeBase = relativeBase.add(value);
   }
 
-  public int getRelativeBase() {
+  public BigInteger getRelativeBase() {
     return relativeBase;
   }
 

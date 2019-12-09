@@ -1,6 +1,7 @@
 package aoc;
 
 import aoc.Day5;
+import aoc.Util;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -13,13 +14,13 @@ public class Day5Test {
   public void testPart1() {
     List<Integer> expected = Arrays.asList(0, 0, 0, 0, 0, 0, 0, 0, 0, 16348437);
 
-    assertEquals(expected, Day5.part1());
+    assertEquals(Util.toBigInt(expected), Day5.part1());
   }
 
   @Test
   public void testPart2() {
     List<Integer> expected = Arrays.asList(6959377);
 
-    assertEquals(expected, Day5.part2());
+    assertEquals(Util.toBigInt(expected), Day5.part2());
   }
 }

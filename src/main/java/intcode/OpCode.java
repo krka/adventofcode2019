@@ -1,5 +1,9 @@
 package intcode;
 
+import aoc.Util;
+
+import java.math.BigInteger;
+
 public interface OpCode {
   int size();
 
@@ -9,8 +13,8 @@ public interface OpCode {
 
   String name();
 
-  static OpCode fetchOpcode(IntCode vm, int pc) {
-    int opcode = vm.getParameter(pc);
+  static OpCode fetchOpcode(IntCode vm, BigInteger pc) {
+    int opcode = vm.getParameter(pc).intValueExact();
     int op = opcode % 100;
     ParameterMode firstParam = ParameterMode.from((opcode / 100) % 10);
     ParameterMode secondParam = ParameterMode.from((opcode / 1000) % 10);
@@ -35,10 +39,10 @@ public interface OpCode {
     private final ReadParameter second;
     private final WriteParameter target;
 
-    public Add(IntCode vm, int pc, ParameterMode firstParam, ParameterMode secondParam, ParameterMode thirdParam) {
-      first = firstParam.resolveRead(vm, pc + 1);
-      second = secondParam.resolveRead(vm, pc + 2);
-      target = thirdParam.resolveWrite(vm, pc + 3);
+    public Add(IntCode vm, BigInteger pc, ParameterMode firstParam, ParameterMode secondParam, ParameterMode thirdParam) {
+      first = firstParam.resolveRead(vm, Util.plus1(pc));
+      second = secondParam.resolveRead(vm, Util.plus2(pc));
+      target = thirdParam.resolveWrite(vm, Util.plus3(pc));
     }
 
     @Override
@@ -53,7 +57,7 @@ public interface OpCode {
 
     @Override
     public IntCode.State execute(IntCode vm) {
-      target.write(first.value() + second.value());
+      target.write(first.value().add(second.value()));
       return IntCode.State.RUNNING;
     }
 
@@ -68,10 +72,10 @@ public interface OpCode {
     private final ReadParameter second;
     private final WriteParameter target;
 
-    public Mul(IntCode vm, int pc, ParameterMode firstParam, ParameterMode secondParam, ParameterMode thirdParam) {
-      first = firstParam.resolveRead(vm, pc + 1);
-      second = secondParam.resolveRead(vm, pc + 2);
-      target = thirdParam.resolveWrite(vm, pc + 3);
+    public Mul(IntCode vm, BigInteger pc, ParameterMode firstParam, ParameterMode secondParam, ParameterMode thirdParam) {
+      first = firstParam.resolveRead(vm, Util.plus1(pc));
+      second = secondParam.resolveRead(vm, Util.plus2(pc));
+      target = thirdParam.resolveWrite(vm, Util.plus3(pc));
     }
 
     @Override
@@ -86,7 +90,7 @@ public interface OpCode {
 
     @Override
     public IntCode.State execute(IntCode vm) {
-      target.write(first.value() * second.value());
+      target.write(first.value().multiply(second.value()));
       return IntCode.State.RUNNING;
     }
 
@@ -99,15 +103,15 @@ public interface OpCode {
   class Input implements OpCode {
     private final WriteParameter target;
 
-    public Input(IntCode vm, int pc, ParameterMode firstParam, ParameterMode secondParam, ParameterMode thirdParam) {
-      target = firstParam.resolveWrite(vm, pc + 1);
+    public Input(IntCode vm, BigInteger pc, ParameterMode firstParam, ParameterMode secondParam, ParameterMode thirdParam) {
+      target = firstParam.resolveWrite(vm, Util.plus1(pc));
       secondParam.assertType(ParameterMode.POSITION);
       thirdParam.assertType(ParameterMode.POSITION);
     }
 
     @Override
     public IntCode.State execute(IntCode vm) {
-      Integer value = vm.pollStdin();
+      BigInteger value = vm.pollStdin();
       if (value == null) {
         return IntCode.State.WAITING_FOR_INPUT;
       }
@@ -134,8 +138,8 @@ public interface OpCode {
   class Output implements OpCode {
     private final ReadParameter input;
 
-    public Output(IntCode vm, int pc, ParameterMode firstParam, ParameterMode secondParam, ParameterMode thirdParam) {
-      input = firstParam.resolveRead(vm, pc + 1);
+    public Output(IntCode vm, BigInteger pc, ParameterMode firstParam, ParameterMode secondParam, ParameterMode thirdParam) {
+      input = firstParam.resolveRead(vm, Util.plus1(pc));
       secondParam.assertType(ParameterMode.POSITION);
       thirdParam.assertType(ParameterMode.POSITION);
     }
@@ -167,16 +171,16 @@ public interface OpCode {
     private final ReadParameter val;
     private final ReadParameter target;
 
-    public JumpIf(boolean expected, IntCode vm, int pc, ParameterMode firstParam, ParameterMode secondParam, ParameterMode thirdParam) {
+    public JumpIf(boolean expected, IntCode vm, BigInteger pc, ParameterMode firstParam, ParameterMode secondParam, ParameterMode thirdParam) {
       this.expected = expected;
-      val = firstParam.resolveRead(vm, pc + 1);
-      target = secondParam.resolveRead(vm, pc + 2);
+      val = firstParam.resolveRead(vm, Util.plus1(pc));
+      target = secondParam.resolveRead(vm, Util.plus2(pc));
       thirdParam.assertType(ParameterMode.POSITION);
     }
 
     @Override
     public IntCode.State execute(IntCode vm) {
-      boolean cmp = val.value() != 0;
+      boolean cmp = val.value().compareTo(BigInteger.ZERO) != 0;
       if (cmp == expected) {
         vm.jumpTo(target.value());
       }
@@ -204,15 +208,15 @@ public interface OpCode {
     private final ReadParameter second;
     private final WriteParameter target;
 
-    public LessThan(IntCode vm, int pc, ParameterMode firstParam, ParameterMode secondParam, ParameterMode thirdParam) {
-      first = firstParam.resolveRead(vm, pc + 1);
-      second = secondParam.resolveRead(vm, pc + 2);
-      target = thirdParam.resolveWrite(vm, pc + 3);
+    public LessThan(IntCode vm, BigInteger pc, ParameterMode firstParam, ParameterMode secondParam, ParameterMode thirdParam) {
+      first = firstParam.resolveRead(vm, Util.plus1(pc));
+      second = secondParam.resolveRead(vm, Util.plus2(pc));
+      target = thirdParam.resolveWrite(vm, Util.plus3(pc));
     }
 
     @Override
     public IntCode.State execute(IntCode vm) {
-      int res = first.value() < second.value() ? 1 : 0;
+      BigInteger res = first.value().compareTo(second.value()) < 0 ? BigInteger.ONE : BigInteger.ZERO;
       target.write(res);
       return IntCode.State.RUNNING;
     }
@@ -238,15 +242,15 @@ public interface OpCode {
     private final ReadParameter second;
     private final WriteParameter target;
 
-    public Equals(IntCode vm, int pc, ParameterMode firstParam, ParameterMode secondParam, ParameterMode thirdParam) {
-      first = firstParam.resolveRead(vm, pc + 1);
-      second = secondParam.resolveRead(vm, pc + 2);
-      target = thirdParam.resolveWrite(vm, pc + 3);
+    public Equals(IntCode vm, BigInteger pc, ParameterMode firstParam, ParameterMode secondParam, ParameterMode thirdParam) {
+      first = firstParam.resolveRead(vm, Util.plus1(pc));
+      second = secondParam.resolveRead(vm, Util.plus2(pc));
+      target = thirdParam.resolveWrite(vm, Util.plus3(pc));
     }
 
     @Override
     public IntCode.State execute(IntCode vm) {
-      int res = first.value() == second.value() ? 1 : 0;
+      BigInteger res = first.value().compareTo(second.value()) == 0 ? BigInteger.ONE : BigInteger.ZERO;
       target.write(res);
       return IntCode.State.RUNNING;
     }
@@ -270,8 +274,8 @@ public interface OpCode {
   class SetRelBase implements OpCode {
     private final ReadParameter first;
 
-    public SetRelBase(IntCode vm, int pc, ParameterMode firstParam, ParameterMode secondParam, ParameterMode thirdParam) {
-      first = firstParam.resolveRead(vm, pc + 1);
+    public SetRelBase(IntCode vm, BigInteger pc, ParameterMode firstParam, ParameterMode secondParam, ParameterMode thirdParam) {
+      first = firstParam.resolveRead(vm, Util.plus1(pc));
       secondParam.assertType(ParameterMode.POSITION);
       thirdParam.assertType(ParameterMode.POSITION);
     }
@@ -299,7 +303,7 @@ public interface OpCode {
   }
 
   class Halt implements OpCode {
-    public Halt(IntCode vm, int pc, ParameterMode firstParam, ParameterMode secondParam, ParameterMode thirdParam) {
+    public Halt(IntCode vm, BigInteger pc, ParameterMode firstParam, ParameterMode secondParam, ParameterMode thirdParam) {
       firstParam.assertType(ParameterMode.POSITION);
       secondParam.assertType(ParameterMode.POSITION);
       thirdParam.assertType(ParameterMode.POSITION);

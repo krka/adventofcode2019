@@ -2,6 +2,7 @@ package aoc;
 
 import intcode.IntCode;
 
+import java.math.BigInteger;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -15,18 +16,18 @@ public class Day7 {
 
   int solve() {
     return Permutation.of(IntStream.range(0, 5).boxed().collect(Collectors.toList()))
-            .mapToInt(this::evaluate).max().getAsInt();
+            .map(this::evaluate).max(BigInteger::compareTo).get().intValueExact();
   }
 
-  private int evaluate(List<Integer> phases) {
-    int value = 0;
+  private BigInteger evaluate(List<Integer> phases) {
+    BigInteger value = BigInteger.ZERO;
     for (Integer phase : phases) {
       IntCode intCode = IntCode.fromResource(name);
       intCode.writeStdin(phase);
       intCode.writeStdin(value);
       intCode.run();
       intCode.printAnalysis("day7-part1.txt");
-      List<Integer> list = intCode.drainStdout();
+      List<BigInteger> list = intCode.drainStdout();
       if (list.size() != 1) {
         throw new RuntimeException("Unexpected list: " + list + " for phase " + phase + " of " + phases);
       }
