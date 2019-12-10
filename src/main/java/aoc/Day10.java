@@ -54,7 +54,6 @@ public class Day10 {
             bestCol = col;
             best = (int) count;
           }
-          data[row][col] = true;
         }
       }
     }
@@ -65,21 +64,22 @@ public class Day10 {
   public List<Point> getOrdering(int col, int row) {
     TreeMap<Double, TreeSet<Point>> points = new TreeMap<>();
 
-    data[row][col] = false;
     for (int r = 0; r < height; r++) {
       for (int c = 0; c < width; c++) {
         if (data[r][c]) {
           int rowDiff = row - r;
           int colDiff = col - c;
-          double angle;
-          if (colDiff == 0 && rowDiff > 0) {
-            angle = -Math.PI;
-          } else {
-            angle = Math.atan2(colDiff, -rowDiff);
+          if (rowDiff != 0 || colDiff != 0) {
+            double angle;
+            if (colDiff == 0 && rowDiff > 0) {
+              angle = -Math.PI;
+            } else {
+              angle = Math.atan2(colDiff, -rowDiff);
+            }
+            int distance = rowDiff * rowDiff + colDiff * colDiff;
+            Point point = new Point(r, c, distance, angle);
+            points.computeIfAbsent(angle, a -> new TreeSet<>(Comparator.comparingInt(Point::getDistance))).add(point);
           }
-          int distance = rowDiff * rowDiff + colDiff * colDiff;
-          Point point = new Point(r, c, distance, angle);
-          points.computeIfAbsent(angle, a -> new TreeSet<>(Comparator.comparingInt(Point::getDistance))).add(point);
         }
       }
     }
