@@ -65,7 +65,7 @@ public class Day9Test {
     vm.run();
     vm.printAnalysis("day9.txt");
     List<BigInteger> output = vm.drainStdout();
-    List<BigInteger> expected = Arrays.asList(new BigInteger("3335138414"));
+    List<BigInteger> expected = Arrays.asList(new BigInteger("49122"));
     assertEquals(expected, output);
 
   }
