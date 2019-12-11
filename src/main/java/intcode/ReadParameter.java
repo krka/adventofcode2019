@@ -3,6 +3,6 @@ package intcode;
 import java.math.BigInteger;
 
 public interface ReadParameter {
-  String pretty();
-  BigInteger value();
+  BigInteger getValue(IntCode vm);
+  String withValue(BigInteger value);
 }

@@ -20,8 +20,6 @@ public class Day7Part2 {
             .map(this::evaluate).max(BigInteger::compareTo).get().intValueExact();
   }
 
-  static boolean firstRun = true;
-
   private BigInteger evaluate(List<Integer> phases) {
     IntCode[] vms = new IntCode[5];
     for (int i = 0; i < 5; i++) {
@@ -40,11 +38,7 @@ public class Day7Part2 {
             if (IntCode.State.HALTED != vms[j].getState()) {
               throw new RuntimeException("Unexpected state: " + vms[j].getState());
             }
-            if (firstRun) {
-              vms[j].printAnalysis("day7-part2-vm-" + j + ".txt");
-            }
           }
-          firstRun = false;
           return prev;
         } else {
           prev = value;

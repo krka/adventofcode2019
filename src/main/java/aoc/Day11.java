@@ -24,6 +24,7 @@ public class Day11 {
       map.put(x + "," + y, 1);
     }
 
+    intCode.run();
     while (intCode.getState() == IntCode.State.WAITING_FOR_INPUT) {
       String coord = x + "," + y;
       int current = map.getOrDefault(coord, 0);

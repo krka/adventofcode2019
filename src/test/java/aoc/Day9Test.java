@@ -52,7 +52,6 @@ public class Day9Test {
     IntCode vm = IntCode.fromResource("day9.in");
     vm.writeStdin(1);
     vm.run();
-    vm.printAnalysis("day9.txt");
     List<BigInteger> output = vm.drainStdout();
     List<BigInteger> expected = Arrays.asList(new BigInteger("3335138414"));
     assertEquals(expected, output);
@@ -63,7 +62,6 @@ public class Day9Test {
     IntCode vm = IntCode.fromResource("day9.in");
     vm.writeStdin(2);
     vm.run();
-    vm.printAnalysis("day9.txt");
     List<BigInteger> output = vm.drainStdout();
     List<BigInteger> expected = Arrays.asList(new BigInteger("49122"));
     assertEquals(expected, output);

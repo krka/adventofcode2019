@@ -13,7 +13,6 @@ public class Day5 {
     vm.writeStdin(1);
     vm.run();
     assertEquals(IntCode.State.HALTED, vm.getState());
-    vm.printAnalysis("day5-part1.txt");
     return vm.drainStdout();
   }
 
@@ -22,7 +21,6 @@ public class Day5 {
     vm.writeStdin(5);
     vm.run();
     assertEquals(IntCode.State.HALTED, vm.getState());
-    vm.printAnalysis("day5-part2.txt");
     return vm.drainStdout();
   }
 }

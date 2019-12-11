@@ -5,107 +5,109 @@ import java.math.BigInteger;
 enum ParameterMode {
   POSITION {
     @Override
-    public ReadParameter resolveRead(IntCode vm, BigInteger pc) {
-      BigInteger address = vm.getParameter(pc);
-      BigInteger value = vm.readValue(address);
+    protected ReadParameter resolveRead(BigInteger address) {
       return new ReadParameter() {
         @Override
-        public String pretty() {
-          return "addr[" + address + "]:" + value;
+        public BigInteger getValue(IntCode vm) {
+          return vm.readValue(address);
         }
 
         @Override
-        public BigInteger value() {
-          return value;
+        public String toString() {
+          return "mem[" + address + "]";
+        }
+
+        @Override
+        public String withValue(BigInteger value) {
+          return toString() + ":" + value;
         }
       };
     }
 
     @Override
-    public WriteParameter resolveWrite(IntCode vm, BigInteger pc) {
-      BigInteger address = vm.getParameter(pc);
+    protected WriteParameter resolveWrite(BigInteger address) {
       return new WriteParameter() {
-        BigInteger value;
         @Override
-        public String pretty() {
-          String s = "addr[" + address + "]";
-          if (value != null) {
-            return s + ":" + value;
-          } else {
-            return s;
-          }
-        }
-
-        @Override
-        public void write(BigInteger value) {
-          this.value = value;
+        public void writeValue(IntCode vm, BigInteger value) {
           vm.put(address, value);
         }
 
+        @Override
+        public String withValue(BigInteger value) {
+          return toString() + ":" + value;
+        }
+
+        @Override
+        public String toString() {
+          return "mem[" + address + "]";
+        }
       };
     }
   },
   IMMEDIATE {
     @Override
-    public ReadParameter resolveRead(IntCode vm, BigInteger pc) {
-      BigInteger value = vm.getParameter(pc);
+    protected ReadParameter resolveRead(BigInteger value) {
       return new ReadParameter() {
         @Override
-        public String pretty() {
+        public BigInteger getValue(IntCode vm) {
+          return value;
+        }
+
+        @Override
+        public String withValue(BigInteger value) {
           return value.toString();
         }
 
         @Override
-        public BigInteger value() {
-          return value;
+        public String toString() {
+          return value.toString();
         }
       };
     }
 
     @Override
-    public WriteParameter resolveWrite(IntCode vm, BigInteger pc) {
-      throw new IllegalStateException("Not allowed to write value in " + name() + " mode, at position " + pc);
+    protected WriteParameter resolveWrite(BigInteger value) {
+      throw new IllegalStateException("Not allowed to write value in " + name() + " mode, at position " + value);
     }
   },
   RELATIVE {
     @Override
-    public ReadParameter resolveRead(IntCode vm, BigInteger pc) {
-      BigInteger address = vm.getParameter(pc);
-      BigInteger value = vm.readValue(address.add(vm.getRelativeBase()));
+    protected ReadParameter resolveRead(BigInteger address) {
       return new ReadParameter() {
         @Override
-        public String pretty() {
-          return "addr[" + vm.getRelativeBase() + "+" + address + "]:" + value;
+        public BigInteger getValue(IntCode vm) {
+          return vm.readValue(address.add(vm.getRelativeBase()));
         }
 
         @Override
-        public BigInteger value() {
-          return value;
+        public String withValue(BigInteger value) {
+          return toString() + ":" + value;
+        }
+
+        @Override
+        public String toString() {
+          return "mem[SP+" + address + "]";
         }
       };
     }
 
     @Override
-    public WriteParameter resolveWrite(IntCode vm, BigInteger pc) {
-      BigInteger address = vm.getParameter(pc);
+    protected WriteParameter resolveWrite(BigInteger address) {
       return new WriteParameter() {
-        BigInteger value;
         @Override
-        public String pretty() {
-          String s = "addr[" + vm.getRelativeBase() + "+" + address + "]";
-          if (value != null) {
-            return s + ":" + value;
-          } else {
-            return s;
-          }
-        }
-
-        @Override
-        public void write(BigInteger value) {
-          this.value = value;
+        public void writeValue(IntCode vm, BigInteger value) {
           vm.put(address.add(vm.getRelativeBase()), value);
         }
 
+        @Override
+        public String withValue(BigInteger value) {
+          return toString() + ":" + value;
+        }
+
+        @Override
+        public String toString() {
+          return "mem[SP+" + address + "]";
+        }
       };
     }
   }
@@ -121,7 +123,17 @@ enum ParameterMode {
     }
   }
 
-  public abstract ReadParameter resolveRead(IntCode vm, BigInteger pc);
+  public ReadParameter resolveRead(Memory memory, BigInteger opcodeAddress, int offset) {
+    BigInteger param = memory.read(opcodeAddress.add(BigInteger.valueOf(offset)));
+    return resolveRead(param);
+  }
 
-  public abstract WriteParameter resolveWrite(IntCode vm, BigInteger pc);
+  public WriteParameter resolveWrite(Memory memory, BigInteger opcodeAddress, int offset) {
+    BigInteger param = memory.read(opcodeAddress.add(BigInteger.valueOf(offset)));
+    return resolveWrite(param);
+  }
+
+  protected abstract WriteParameter resolveWrite(BigInteger param);
+
+  protected abstract ReadParameter resolveRead(BigInteger param);
 }

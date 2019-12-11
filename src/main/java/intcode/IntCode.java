@@ -2,18 +2,15 @@ package intcode;
 
 import aoc.Util;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringReader;
 import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 import java.util.Scanner;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
 public class IntCode implements Runnable {
@@ -23,19 +20,23 @@ public class IntCode implements Runnable {
   private final Queue<BigInteger> stdout = new LinkedBlockingQueue<>();
   private final Queue<BigInteger> stdin = new LinkedBlockingQueue<>();
 
-  private final String name;
   private final Memory memory;
-  private final ProgramAnalysis analysis;
   private BigInteger pc = BigInteger.ZERO;
-  private State state = State.WAITING_FOR_INPUT;
+  private State state = State.NOT_STARTED;
   private RuntimeException exception;
   private BigInteger relativeBase = BigInteger.ZERO;
+  private Consumer<String> debugger = s -> {};
 
-  private IntCode(String name, List<BigInteger> program) {
-    this.name = name;
+  private IntCode(List<BigInteger> program) {
     this.memory = new Memory(program);
-    this.analysis = new ProgramAnalysis(this.memory);
-    run();
+  }
+
+  public void setDebugger(boolean enabled) {
+    if (enabled) {
+      debugger = s -> System.out.printf("%05d: %s%n", pc, s);
+    } else {
+      debugger = s -> {};
+    }
   }
 
   public State getState() {
@@ -82,14 +83,11 @@ public class IntCode implements Runnable {
         program.add(new BigInteger(token));
       }
     }
-    return new IntCode(name, program);
+    return new IntCode(program);
   }
 
   @Override
   public void run() {
-    if (state == State.RUNNING) {
-      return;
-    }
     if (state == State.HALTED) {
       return;
     }
@@ -97,22 +95,24 @@ public class IntCode implements Runnable {
       throw exception;
     }
 
+    if (state != State.WAITING_FOR_INPUT && state != State.NOT_STARTED) {
+      throw new RuntimeException("Unexpected state: " + state);
+    }
+    state = State.RUNNING;
 
     try {
       while (true) {
-        BigInteger startPC = pc;
-        OpCode opCode = OpCode.fetchOpcode(this, pc);
-        this.state = opCode.execute(this);
-        if (state == State.WAITING_FOR_INPUT) {
+        OpCode opcode = OpCode.decode(memory, pc);
+        try {
+          opcode.execute(this, debugger);
+          pc = pc.add(BigInteger.valueOf(opcode.size()));
+        } catch (JumpTo jump) {
+          pc = jump.getAddress();
+        } catch (WaitForInput e) {
+          state = State.WAITING_FOR_INPUT;
           return;
-        }
-        analysis.markOpCode(startPC, opCode);
-        if (startPC == pc) {
-          pc = pc.add(BigInteger.valueOf(opCode.size()));
-        } else {
-          analysis.markLabel(pc);
-        }
-        if (state == State.HALTED) {
+        } catch (OpCode.Halt e) {
+          state = State.HALTED;
           return;
         }
       }
@@ -123,35 +123,16 @@ public class IntCode implements Runnable {
     }
   }
 
-  public void printAnalysis(String filename) {
-    try (PrintWriter writer = new PrintWriter(new File(filename), StandardCharsets.UTF_8)) {
-      writer.println("Analysis of " + name);
-      analysis.printAnalysis(writer);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  public BigInteger getParameter(BigInteger pc) {
-    return memory.read(pc);
-  }
-
   public BigInteger readValue(BigInteger address) {
-    analysis.markRead(address);
     return memory.read(address);
   }
 
   public void put(BigInteger address, BigInteger value) {
-    analysis.markWrite(address);
     memory.write(address, value);
   }
 
   public BigInteger pollStdin() {
     return stdin.poll();
-  }
-
-  public void jumpTo(BigInteger target) {
-    pc = target;
   }
 
   public void writeStdout(BigInteger value) {
@@ -167,6 +148,7 @@ public class IntCode implements Runnable {
   }
 
   public enum State {
+    NOT_STARTED,
     RUNNING,
     WAITING_FOR_INPUT,
     HALTED,
