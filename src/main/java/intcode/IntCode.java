@@ -67,14 +67,22 @@ public class IntCode implements Runnable {
   }
 
   public static IntCode fromString(String s) {
-    return fromResource("code", new StringReader(s));
+    return fromResource(new StringReader(s));
   }
 
   public static IntCode fromResource(String name) {
-    return fromResource(name, Util.fromResource(name));
+    return new IntCode(readProgram(name));
   }
 
-  private static IntCode fromResource(String name, Reader input) {
+  public static IntCode fromResource(Reader input) {
+    return new IntCode(readProgram(input));
+  }
+
+  public static List<BigInteger> readProgram(String name) {
+    return readProgram(Util.fromResource(name));
+  }
+
+  static List<BigInteger> readProgram(Reader input) {
     List<BigInteger> program = new ArrayList<>();
     try (Scanner scanner = new Scanner(input)) {
       scanner.useDelimiter(DELIMITER);
@@ -83,7 +91,7 @@ public class IntCode implements Runnable {
         program.add(new BigInteger(token));
       }
     }
-    return new IntCode(program);
+    return program;
   }
 
   @Override

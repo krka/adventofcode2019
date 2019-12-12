@@ -16,4 +16,33 @@ public class IntCodeTest {
     String output = intCode.drainStdout().stream().map(Object::toString).collect(Collectors.joining(","));
     assertEquals(input, output);
   }
+
+  @Test(expected = RuntimeException.class)
+  public void testDecompilerDay5() {
+    Decompiler decompiler = new Decompiler(IntCode.readProgram("day5.in"));
+    decompiler.decompile();
+    decompiler.print();
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void testDecompilerDay7() {
+    Decompiler decompiler = new Decompiler(IntCode.readProgram("day7.in"));
+    decompiler.decompile();
+    decompiler.print();
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void testDecompilerDay9() {
+    Decompiler decompiler = new Decompiler(IntCode.readProgram("day9.in"));
+    decompiler.decompile();
+    decompiler.print();
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void testDecompilerDay11() {
+    Decompiler decompiler = new Decompiler(IntCode.readProgram("day11.in"));
+    decompiler.decompile();
+    decompiler.print();
+  }
+
 }

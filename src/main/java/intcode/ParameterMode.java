@@ -21,6 +21,11 @@ enum ParameterMode {
         public String withValue(BigInteger value) {
           return toString() + ":" + value;
         }
+
+        @Override
+        public BigInteger getConstant() {
+          return null;
+        }
       };
     }
 
@@ -35,6 +40,11 @@ enum ParameterMode {
         @Override
         public String withValue(BigInteger value) {
           return toString() + ":" + value;
+        }
+
+        @Override
+        public BigInteger getConstantAddress() {
+          return address;
         }
 
         @Override
@@ -56,6 +66,11 @@ enum ParameterMode {
         @Override
         public String withValue(BigInteger value) {
           return value.toString();
+        }
+
+        @Override
+        public BigInteger getConstant() {
+          return value;
         }
 
         @Override
@@ -85,6 +100,11 @@ enum ParameterMode {
         }
 
         @Override
+        public BigInteger getConstant() {
+          return null;
+        }
+
+        @Override
         public String toString() {
           return "mem[SP+" + address + "]";
         }
@@ -102,6 +122,11 @@ enum ParameterMode {
         @Override
         public String withValue(BigInteger value) {
           return toString() + ":" + value;
+        }
+
+        @Override
+        public BigInteger getConstantAddress() {
+          return null;
         }
 
         @Override
