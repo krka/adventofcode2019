@@ -87,11 +87,11 @@ enum ParameterMode {
   },
   RELATIVE {
     @Override
-    protected ReadParameter resolveRead(BigInteger address) {
+    protected ReadParameter resolveRead(BigInteger offset) {
       return new ReadParameter() {
         @Override
         public BigInteger getValue(IntCode vm) {
-          return vm.readValue(address.add(vm.getRelativeBase()));
+          return vm.readValue(offset.add(vm.getRelativeBase()));
         }
 
         @Override
@@ -106,17 +106,17 @@ enum ParameterMode {
 
         @Override
         public String toString() {
-          return "mem[SP+" + address + "]";
+          return toStringSPOffset(offset);
         }
       };
     }
 
     @Override
-    protected WriteParameter resolveWrite(BigInteger address) {
+    protected WriteParameter resolveWrite(BigInteger offset) {
       return new WriteParameter() {
         @Override
         public void writeValue(IntCode vm, BigInteger value) {
-          vm.put(address.add(vm.getRelativeBase()), value);
+          vm.put(offset.add(vm.getRelativeBase()), value);
         }
 
         @Override
@@ -131,12 +131,17 @@ enum ParameterMode {
 
         @Override
         public String toString() {
-          return "mem[SP+" + address + "]";
+          return toStringSPOffset(offset);
         }
       };
     }
   }
   ;
+
+  public static String toStringSPOffset(BigInteger offset) {
+    String extraPlus = offset.compareTo(BigInteger.ZERO) >= 0 ? "+": "";
+    return "mem[SP" + extraPlus + offset + "]";
+  }
 
   static ParameterMode from(int i) {
     return ParameterMode.values()[i];

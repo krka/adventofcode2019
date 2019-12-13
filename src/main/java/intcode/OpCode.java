@@ -218,9 +218,11 @@ public interface OpCode {
     private final boolean zero;
     private final ReadParameter target;
     private final ReadParameter test;
+    private final String zeroString;
 
     public JumpIf(boolean zero, Memory memory, BigInteger address, ParameterMode param1, ParameterMode param2, ParameterMode param3) {
       this.zero = zero;
+      this.zeroString = zero ? "0" : "not 0";
       this.address = address;
       test = param1.resolveRead(memory, address, 1);
       target = param2.resolveRead(memory, address, 2);
@@ -229,7 +231,7 @@ public interface OpCode {
 
     @Override
     public String toString() {
-      return String.format("JUMP: IF %s IS %s TO %s", test, zero ? "0" : "NOT 0", target);
+      return String.format("JUMP: Jump to %s if (%s is %s)", target, test, zeroString);
     }
 
     @Override
@@ -244,8 +246,8 @@ public interface OpCode {
       BigInteger targetValue = target.getValue(vm);
       boolean doJump = isZero == zero;
       debug.accept(String.format(
-              "JUMP: IF %s IS %s TO %s: %s",
-              test.withValue(value), zero ? "0" : "NOT 0", target.withValue(targetValue), doJump ? "Jumped!": "No jump!"));
+              "JUMP: Jump to %s if (%s is %s): %s",
+              target.withValue(targetValue), test.withValue(value), zeroString, doJump ? "Jumped!": "No jump!"));
       if (doJump) {
         throw new JumpTo(targetValue);
       }
@@ -394,7 +396,7 @@ public interface OpCode {
 
     @Override
     public String toString() {
-      return "SET_REL_BASE: " + value;
+      return "SP += " + value;
     }
 
     @Override
@@ -406,7 +408,13 @@ public interface OpCode {
     public void execute(IntCode vm, Consumer<String> debug) {
       BigInteger v = value.getValue(vm);
       vm.adjustRelativeBase(v);
-      debug.accept("SET_REL_BASE: " + value.withValue(v));
+      String s = value.withValue(v);
+      if (s.startsWith("-")) {
+        debug.accept("SP -= " + s.substring(1));
+      } else {
+        debug.accept("SP += " + s);
+
+      }
     }
 
     @Override
