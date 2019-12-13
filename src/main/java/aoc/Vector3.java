@@ -65,4 +65,17 @@ public class Vector3 {
   public int hashCode() {
     return hash;
   }
+
+  public Vector3 sub(Vector3 other) {
+    return new Vector3(x - other.x, y - other.y, z - other.z);
+  }
+
+  @Override
+  public String toString() {
+    return "(" +
+            "" + x +
+            ", " + y +
+            ", " + z +
+            ')';
+  }
 }
