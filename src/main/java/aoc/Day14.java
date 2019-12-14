@@ -1,5 +1,6 @@
 package aoc;
 
+import util.Graph;
 import util.Util;
 
 import java.io.BufferedReader;
@@ -8,16 +9,15 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class Day14 {
   public static final BigInteger TRILLION = BigInteger.valueOf(1000000000000L);
 
   private final Map<String, Req> mapping = new HashMap<>();
-  private final Map<String, BigInteger> required = new HashMap<>();
   private final List<String> topo;
 
   public Day14(String s) throws IOException {
@@ -40,7 +40,11 @@ public class Day14 {
         }
       }
     }
-    topo = topo();
+    Map<String, List<String>> dependencies = mapping.entrySet().stream()
+            .collect(Collectors.toMap(
+                    Map.Entry::getKey,
+                    e -> e.getValue().list.stream().map(r -> r.name).collect(Collectors.toList())));
+    topo = Graph.topo("FUEL", dependencies::get);
     Collections.reverse(topo);
   }
 
@@ -49,13 +53,6 @@ public class Day14 {
     int count = Integer.parseInt(split[0].trim());
     String name = split[1];
     return new Resource(count, name);
-  }
-
-  public List<String> topo() {
-    Set<String> visited = new HashSet<>();
-    ArrayList<String> res = new ArrayList<>();
-    topo("FUEL", res, visited);
-    return res;
   }
 
   private void topo(String node, ArrayList<String> res, Set<String> visited) {
@@ -75,29 +72,23 @@ public class Day14 {
   }
 
   public BigInteger solve(BigInteger fuel) {
-    required.clear();
+    Map<String, BigInteger> required = new HashMap<>();
     required.put("FUEL", fuel);
     for (String node : topo) {
-      consume(node);
+      Req req = mapping.get(node);
+      if (req != null) {
+        BigInteger required1 = required.getOrDefault(node, BigInteger.ZERO);
+        long c = req.target.count;
+
+        BigInteger a = required1.add(BigInteger.valueOf(c - 1)).divide(BigInteger.valueOf(c));
+        for (Resource other : req.list) {
+          BigInteger prev = required.getOrDefault(other.name, BigInteger.ZERO);
+          BigInteger newValue = prev.add(a.multiply(BigInteger.valueOf(other.count)));
+          required.put(other.name, newValue);
+        }
+      }
     }
     return required.get("ORE");
-  }
-
-  private void consume(String name) {
-    Req req = mapping.get(name);
-    if (req == null) {
-      return;
-    }
-
-    BigInteger required = this.required.getOrDefault(name, BigInteger.ZERO);
-    long c = req.target.count;
-
-    BigInteger a = required.add(BigInteger.valueOf(c - 1)).divide(BigInteger.valueOf(c));
-    for (Resource other : req.list) {
-      BigInteger prev = this.required.getOrDefault(other.name, BigInteger.ZERO);
-      BigInteger newValue = prev.add(a.multiply(BigInteger.valueOf(other.count)));
-      this.required.put(other.name, newValue);
-    }
   }
 
   public BigInteger solvePart2() {
