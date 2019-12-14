@@ -1,4 +1,4 @@
-package aoc;
+package util;
 
 import java.util.Objects;
 

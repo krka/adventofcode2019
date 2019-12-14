@@ -1,5 +1,7 @@
 package aoc;
 
+import util.Util;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Collections;

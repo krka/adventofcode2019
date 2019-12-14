@@ -1,4 +1,4 @@
-package aoc;
+package util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -7,7 +7,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class Permutation {
-  static <T> Stream<List<T>> of(List<T> input) {
+  public static <T> Stream<List<T>> of(List<T> input) {
     int n = input.size();
     if (n > 10) {
       throw new IllegalStateException("Input is too big!");

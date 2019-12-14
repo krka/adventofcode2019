@@ -1,6 +1,7 @@
 package aoc;
 
 import intcode.IntCode;
+import util.Vector3;
 
 import java.math.BigInteger;
 import java.util.HashMap;
@@ -39,9 +40,9 @@ public class Day13 {
   }
 
   private void movePaddle() {
-    long distance = paddle.y - ball.y;
-    long targetX = ball.x + ballDir.x * distance;
-    long paddleX = paddle.x;
+    long distance = paddle.getY() - ball.getY();
+    long targetX = ball.getX() + ballDir.getX() * distance;
+    long paddleX = paddle.getX();
     int dir = (int) Math .signum(targetX - paddleX);
 
     if (distance == 1) {
@@ -49,7 +50,7 @@ public class Day13 {
     }
     if (distance == 1 && dir == 0) {
       // Success! Where to go next? Depends on where it's coming from
-      if (ball.x < paddleX) {
+      if (ball.getX() < paddleX) {
         dir = -1;
       } else {
         dir = 1;

@@ -1,9 +1,6 @@
 package aoc;
 
-import aoc.Day5;
-import aoc.Util;
-import intcode.Decompiler;
-import intcode.IntCode;
+import util.Util;
 import org.junit.Test;
 
 import java.util.Arrays;

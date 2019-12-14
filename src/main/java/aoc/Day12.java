@@ -1,5 +1,8 @@
 package aoc;
 
+import util.Util;
+import util.Vector3;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -46,9 +49,10 @@ public class Day12 {
       long x = 0, y = 0, z = 0;
       for (int k = 0; k < n; k++) {
         Vector3 pair2 = positions.get(k);
-        x += Math.signum(pair2.x - pair1.x);
-        y += Math.signum(pair2.y - pair1.y);
-        z += Math.signum(pair2.z - pair1.z);
+        Vector3 diff = pair2.sub(pair1);
+        x += Math.signum(diff.getX());
+        y += Math.signum(diff.getY());
+        z += Math.signum(diff.getZ());
       }
       velocities.set(j, velocities.get(j).add(x, y, z));
     }

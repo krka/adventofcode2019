@@ -2,6 +2,7 @@ package aoc;
 
 import intcode.IntCode;
 import org.junit.Test;
+import util.Vector3;
 
 import java.math.BigInteger;
 import java.util.HashMap;

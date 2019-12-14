@@ -1,6 +1,6 @@
 package intcode;
 
-import aoc.Util;
+import util.Util;
 
 import java.io.Reader;
 import java.io.StringReader;
