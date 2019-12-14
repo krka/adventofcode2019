@@ -25,7 +25,7 @@ public class Day13Test {
       int tile = iterator.next().intValueExact();
       map.put(new Vector3(x, y, 0), tile);
     }
-    assertEquals(2, map.values().stream().filter(tile -> tile == 2).count());
+    assertEquals(412, map.values().stream().filter(tile -> tile == 2).count());
   }
 
   @Test
