@@ -1,10 +1,13 @@
 package util;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,5 +35,19 @@ public class Util {
 
   public static List<BigInteger> toBigInt(List<Integer> list) {
     return list.stream().map(BigInteger::valueOf).collect(Collectors.toList());
+  }
+
+  public static ArrayList<String> readResource(String name) throws IOException {
+    ArrayList<String> list = new ArrayList<>();
+    try (BufferedReader reader = new BufferedReader(fromResource(name))) {
+      while (true) {
+        String s = reader.readLine();
+        if (s == null) {
+          break;
+        }
+        list.add(s);
+      }
+    }
+    return list;
   }
 }
