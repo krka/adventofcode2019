@@ -4,6 +4,7 @@ import util.Util;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -18,21 +19,19 @@ public class Day8 {
   private final int width;
   private final int height;
 
-  public Day8(String name, int width, int height) throws IOException {
+  public Day8(String name, int width, int height) {
     this.width = width;
     this.height = height;
-    try (BufferedReader bufferedReader = new BufferedReader(Util.fromResource(name))) {
-      String line = bufferedReader.readLine();
-      int numPixels = width * height;
+    String line = Util.readResource(name).get(0);
+    int numPixels = width * height;
 
-      int numLayers = line.length() / numPixels;
-      if (numLayers * numPixels != line.length()) {
-        throw new RuntimeException("Line has wrong length");
-      }
-      layers = IntStream.range(0, numLayers)
-              .map(i -> i * numPixels)
-              .mapToObj(i -> line.substring(i, i + numPixels)).collect(Collectors.toList());
+    int numLayers = line.length() / numPixels;
+    if (numLayers * numPixels != line.length()) {
+      throw new RuntimeException("Line has wrong length");
     }
+    layers = IntStream.range(0, numLayers)
+            .map(i -> i * numPixels)
+            .mapToObj(i -> line.substring(i, i + numPixels)).collect(Collectors.toList());
   }
 
   public int part1() {

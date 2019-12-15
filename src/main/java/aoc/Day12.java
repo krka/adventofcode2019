@@ -3,8 +3,6 @@ package aoc;
 import util.Util;
 import util.Vector3;
 
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -15,16 +13,10 @@ public class Day12 {
   private final List<Vector3> positions = new ArrayList<>();
   private final List<Vector3> velocities = new ArrayList<>();
 
-  public Day12(String name) throws IOException {
-    try (BufferedReader reader = new BufferedReader(Util.fromResource(name))) {
-      while (true) {
-        String line = reader.readLine();
-        if (line == null || line.isEmpty()) {
-          break;
-        }
-        positions.add(Vector3.parse(line));
-        velocities.add(Vector3.zero());
-      }
+  public Day12(String name) {
+    for (String line : Util.readResource(name)) {
+      positions.add(Vector3.parse(line));
+      velocities.add(Vector3.zero());
     }
   }
 

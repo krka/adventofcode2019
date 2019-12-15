@@ -17,20 +17,9 @@ public class Day10 {
   private final int width;
 
   public Day10(String name) {
-    List<String> lines = new ArrayList<>();
-    try {
-      try (BufferedReader reader = new BufferedReader(Util.fromResource(name))) {
-        while (true) {
-          String line = reader.readLine();
-          if (line == null || line.isEmpty()) {
-            break;
-          }
-          lines.add(line);
-        }
-      }
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    List<String> lines = Util.readResource(name).stream()
+            .filter(line -> !line.isEmpty())
+            .collect(Collectors.toList());
     height = lines.size();
     width = lines.get(0).length();
     data = new boolean[height][width];

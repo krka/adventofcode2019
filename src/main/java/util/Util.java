@@ -23,22 +23,12 @@ public class Util {
     return new InputStreamReader(stream, StandardCharsets.UTF_8);
   }
 
-  public static BigInteger plus1(BigInteger x) {
-    return x.add(BigInteger.ONE);
-  }
-  public static BigInteger plus2(BigInteger x) {
-    return x.add(BigInteger.TWO);
-  }
-  public static BigInteger plus3(BigInteger x) {
-    return x.add(THREE);
-  }
-
   public static List<BigInteger> toBigInt(List<Integer> list) {
     return list.stream().map(BigInteger::valueOf).collect(Collectors.toList());
   }
 
-  public static ArrayList<String> readResource(String name) throws IOException {
-    ArrayList<String> list = new ArrayList<>();
+  public static List<String> readResource(String name) {
+    List<String> list = new ArrayList<>();
     try (BufferedReader reader = new BufferedReader(fromResource(name))) {
       while (true) {
         String s = reader.readLine();
@@ -47,6 +37,8 @@ public class Util {
         }
         list.add(s);
       }
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
     return list;
   }

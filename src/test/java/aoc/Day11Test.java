@@ -28,7 +28,6 @@ public class Day11Test {
       maxx = Math.max(maxx, x);
       maxy = Math.max(maxy, y);
     }
-    System.out.println(minx + ", " + maxx + ", " + miny + ", " + maxy);
 
     int rows = maxy - miny + 1;
     int width = maxx - minx + 1;

@@ -3,15 +3,12 @@ package aoc;
 import util.Graph;
 import util.Util;
 
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Day14 {
@@ -20,24 +17,18 @@ public class Day14 {
   private final Map<String, Req> mapping = new HashMap<>();
   private final List<String> topo;
 
-  public Day14(String s) throws IOException {
-    try (BufferedReader reader = new BufferedReader(Util.fromResource(s))) {
-      while (true) {
-        String line = reader.readLine();
-        if (line == null || line.isEmpty()) {
-          break;
-        }
-        String[] parts = line.split("=>");
-        String target = parts[1].trim();
-        ArrayList<Resource> list = new ArrayList<>();
-        for (String part : parts[0].split(",")) {
-          list.add(parseResource(part));
-        }
-        Resource targetR = parseResource(target);
-        Req prev = mapping.put(targetR.name, new Req(targetR, list));
-        if (prev != null) {
-          throw new RuntimeException("Multiple ways to produce " + targetR.name);
-        }
+  public Day14(String name) {
+    for (String line : Util.readResource(name)) {
+      String[] parts = line.split("=>");
+      String target = parts[1].trim();
+      ArrayList<Resource> list = new ArrayList<>();
+      for (String part : parts[0].split(",")) {
+        list.add(parseResource(part));
+      }
+      Resource targetR = parseResource(target);
+      Req prev = mapping.put(targetR.name, new Req(targetR, list));
+      if (prev != null) {
+        throw new RuntimeException("Multiple ways to produce " + targetR.name);
       }
     }
     Map<String, List<String>> dependencies = mapping.entrySet().stream()
@@ -53,22 +44,6 @@ public class Day14 {
     int count = Integer.parseInt(split[0].trim());
     String name = split[1];
     return new Resource(count, name);
-  }
-
-  private void topo(String node, ArrayList<String> res, Set<String> visited) {
-    if (!visited.add(node)) {
-      return;
-    }
-    Req req = mapping.get(node);
-    if (req == null) {
-      res.add(node);
-      return;
-    }
-
-    for (Resource other : req.list) {
-      topo(other.name, res, visited);
-    }
-    res.add(node);
   }
 
   public BigInteger solve(BigInteger fuel) {

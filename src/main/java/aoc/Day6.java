@@ -2,8 +2,6 @@ package aoc;
 
 import util.Util;
 
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -11,18 +9,13 @@ public class Day6 {
   private final HashMap<String, String> orbits = new HashMap<>();
   private final HashMap<String, Integer> distances = new HashMap<>();
 
-  Day6(String name) throws IOException {
-    try (BufferedReader bufferedReader = new BufferedReader(Util.fromResource(name))) {
-      while (true) {
-        String line = bufferedReader.readLine();
-        if (line == null) {
-          break;
-        }
-        String[] split = line.split("\\)");
-        if (split.length == 2) {
-          orbits.put(split[1], split[0]);
-        }
+  Day6(String name) {
+    for (String line : Util.readResource(name)) {
+      String[] split = line.split("\\)");
+      if (split.length == 2) {
+        orbits.put(split[1], split[0]);
       }
+
     }
   }
 

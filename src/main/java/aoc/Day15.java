@@ -30,7 +30,7 @@ public class Day15 {
 
   int[] reverse = new int[]{-1, 2, 1, 4, 3};
 
-  public Day15(String name) throws IOException {
+  public Day15(String name) {
     intCode = IntCode.fromResource(name);
   }
 
