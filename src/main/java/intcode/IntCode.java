@@ -12,6 +12,7 @@ import java.util.Scanner;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class IntCode implements Runnable {
 
@@ -29,6 +30,12 @@ public class IntCode implements Runnable {
 
   private IntCode(List<BigInteger> program) {
     this.memory = new Memory(program);
+  }
+
+  public static String asASCII(List<BigInteger> output) {
+    return output.stream().mapToInt(BigInteger::intValueExact)
+            .mapToObj(Character::toString)
+            .collect(Collectors.joining());
   }
 
   public void setDebugger(boolean enabled) {
@@ -153,6 +160,41 @@ public class IntCode implements Runnable {
 
   public BigInteger getRelativeBase() {
     return relativeBase;
+  }
+
+  public void writeASCIILine(String s) {
+    s.chars().forEach(this::writeStdin);
+    writeStdin(10);
+  }
+
+  public String readASCIILine() {
+    if (stdout.isEmpty()) {
+      return null;
+    }
+    StringBuilder sb = new StringBuilder();
+    while (true) {
+      BigInteger value = stdout.poll();
+      if (value == null) {
+        throw new RuntimeException("Unfinished ascii line: '" + sb.toString() + "'");
+      }
+      if (value.intValueExact() == 10) {
+        return sb.toString();
+      } else {
+        sb.append((char) (value.intValueExact()));
+      }
+    }
+  }
+
+  public List<String> readAllASCIILines() {
+    ArrayList<String> res = new ArrayList<>();
+    while (true) {
+      String s = readASCIILine();
+      if (s == null) {
+        return res;
+      } else {
+        res.add(s);
+      }
+    }
   }
 
   public enum State {
