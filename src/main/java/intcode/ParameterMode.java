@@ -26,6 +26,11 @@ enum ParameterMode {
         public BigInteger getConstant() {
           return null;
         }
+
+        @Override
+        public BigInteger getOffset() {
+          return null;
+        }
       };
     }
 
@@ -45,6 +50,11 @@ enum ParameterMode {
         @Override
         public BigInteger getConstantAddress() {
           return address;
+        }
+
+        @Override
+        public BigInteger getRelativeOffset() {
+          return null;
         }
 
         @Override
@@ -71,6 +81,11 @@ enum ParameterMode {
         @Override
         public BigInteger getConstant() {
           return value;
+        }
+
+        @Override
+        public BigInteger getOffset() {
+          return null;
         }
 
         @Override
@@ -105,6 +120,11 @@ enum ParameterMode {
         }
 
         @Override
+        public BigInteger getOffset() {
+          return offset;
+        }
+
+        @Override
         public String toString() {
           return toStringSPOffset(offset);
         }
@@ -127,6 +147,11 @@ enum ParameterMode {
         @Override
         public BigInteger getConstantAddress() {
           return null;
+        }
+
+        @Override
+        public BigInteger getRelativeOffset() {
+          return offset;
         }
 
         @Override

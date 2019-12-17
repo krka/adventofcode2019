@@ -7,4 +7,6 @@ public interface WriteParameter {
   String withValue(BigInteger value);
 
   BigInteger getConstantAddress();
+
+  BigInteger getRelativeOffset();
 }

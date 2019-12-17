@@ -15,16 +15,19 @@ public interface OpCode {
   }
 
   default OpCodeEval evaluate() {
-    return OpCodeEval.jumpTo(nextAddress());
+    return new OpCodeEval(nextAddress(), null, null, null, null, null);
   }
 
-  default OpCodeEval evaluateWriteOperation(WriteParameter writeTarget) {
+  default OpCodeEval evaluateWriteOperation(WriteParameter writeTarget, BigInteger writeValue) {
     BigInteger writeAddress = writeTarget.getConstantAddress();
-    if (writeAddress == null) {
-      throw new RuntimeException("Non-constant memory target at " + address());
+    BigInteger offset = writeTarget.getRelativeOffset();
+    if (writeAddress != null) {
+      return new OpCodeEval(nextAddress(), null, null, writeAddress, null, writeValue);
+    } else if (offset != null) {
+      return new OpCodeEval(nextAddress(), null, null, null, offset, writeValue);
     }
+    throw new RuntimeException("Non-constant memory target at " + address());
 
-    return new OpCodeEval(nextAddress(), null, writeAddress);
   }
 
   static OpCode decode(Memory memory, BigInteger address) {
@@ -44,7 +47,7 @@ public interface OpCode {
       case 8: return new Equals(memory, address, param1, param2, param3);
       case 9: return new SetRelBase(memory, address, param1, param2, param3);
       case 99: return Halt.INSTANCE;
-      default: throw new RuntimeException("Unknown opcode: " + op);
+      default: throw new RuntimeException("Unknown opcode: " + op + " at address " + address);
     }
   }
 
@@ -88,7 +91,13 @@ public interface OpCode {
 
     @Override
     public OpCodeEval evaluate() {
-      return evaluateWriteOperation(target);
+      BigInteger v1 = param1.getConstant();
+      BigInteger v2 = param2.getConstant();
+      BigInteger writeValue = null;
+      if (v1 != null && v2 != null) {
+        writeValue = v1.add(v2);
+      }
+      return evaluateWriteOperation(target, writeValue);
     }
   }
 
@@ -132,7 +141,15 @@ public interface OpCode {
 
     @Override
     public OpCodeEval evaluate() {
-      return evaluateWriteOperation(target);
+      BigInteger v1 = param1.getConstant();
+      BigInteger v2 = param2.getConstant();
+      BigInteger writeValue = null;
+      if (v1 != null && v2 != null) {
+        writeValue = v1.multiply(v2);
+      } else if (BigInteger.ZERO.equals(v1) || BigInteger.ZERO.equals(v2)) {
+        writeValue = BigInteger.ZERO;
+      }
+      return evaluateWriteOperation(target, writeValue);
     }
   }
 
@@ -175,7 +192,7 @@ public interface OpCode {
 
     @Override
     public OpCodeEval evaluate() {
-      return evaluateWriteOperation(target);
+      return evaluateWriteOperation(target, null);
     }
   }
 
@@ -214,6 +231,8 @@ public interface OpCode {
   }
 
   class JumpIf implements OpCode {
+    public static final int SIZE = 3;
+    public static final BigInteger BIG_SIZE = BigInteger.valueOf(SIZE);
     private final BigInteger address;
     private final boolean zero;
     private final ReadParameter target;
@@ -236,7 +255,7 @@ public interface OpCode {
 
     @Override
     public int size() {
-      return 3;
+      return SIZE;
     }
 
     @Override
@@ -262,19 +281,24 @@ public interface OpCode {
     public OpCodeEval evaluate() {
       BigInteger value = test.getConstant();
       BigInteger targetValue = target.getConstant();
-      if (targetValue == null) {
-        throw new RuntimeException("Non-constant jump target at " + address);
-      }
+      BigInteger targetOffset = target.getOffset();
       BigInteger nextOp = address.add(BigInteger.valueOf(size()));
       if (value == null) {
-        return OpCodeEval.jumpTo(targetValue, nextOp);
+        if (targetValue == null) {
+          throw new RuntimeException("Non-constant jump target at " + address);
+        }
+        return new OpCodeEval(nextOp, targetValue, null, null, null, targetValue);
       } else {
         boolean isZero = value.equals(BigInteger.ZERO);
         boolean doJump = isZero == zero;
         if (doJump) {
-          return OpCodeEval.jumpTo(targetValue);
+          if (targetValue == null && targetOffset == null) {
+            throw new RuntimeException("Non-constant jump target at " + address);
+          }
+          return new OpCodeEval(null, targetValue, targetOffset, null, null, null);
         } else {
-          return OpCodeEval.jumpTo(nextOp);
+          // This is a no-op
+          return new OpCodeEval(nextOp, null, null, null, null, null);
         }
       }
     }
@@ -308,16 +332,18 @@ public interface OpCode {
     public void execute(IntCode vm, Consumer<String> debug)  {
       BigInteger value1 = param1.getValue(vm);
       BigInteger value2 = param2.getValue(vm);
-      int cmp = value1.compareTo(value2);
-      BigInteger targetValue;
-      if (cmp < 0) {
-        targetValue = BigInteger.ONE;
-      } else {
-        targetValue = BigInteger.ZERO;
-      }
+      BigInteger targetValue = compare(value1, value2);
       target.writeValue(vm, targetValue);
       debug.accept(String.format("LESS_THAN: %s = %s < %s",
               target.withValue(targetValue), param1.withValue(value1), param2.withValue(value2)));
+    }
+
+    private BigInteger compare(BigInteger value1, BigInteger value2) {
+      if (value1.compareTo(value2) < 0) {
+        return BigInteger.ONE;
+      } else {
+        return BigInteger.ZERO;
+      }
     }
 
     @Override
@@ -327,7 +353,13 @@ public interface OpCode {
 
     @Override
     public OpCodeEval evaluate() {
-      return evaluateWriteOperation(target);
+      BigInteger v1 = param1.getConstant();
+      BigInteger v2 = param2.getConstant();
+      BigInteger writeValue = null;
+      if (v1 != null && v2 != null) {
+        writeValue = compare(v1, v2);
+      }
+      return evaluateWriteOperation(target, writeValue);
     }
   }
 
@@ -359,16 +391,18 @@ public interface OpCode {
     public void execute(IntCode vm, Consumer<String> debug) {
       BigInteger value1 = param1.getValue(vm);
       BigInteger value2 = param2.getValue(vm);
-      int cmp = value1.compareTo(value2);
-      BigInteger targetValue;
-      if (cmp == 0) {
-        targetValue = BigInteger.ONE;
-      } else {
-        targetValue = BigInteger.ZERO;
-      }
+      BigInteger targetValue = compare(value1, value2);
       target.writeValue(vm, targetValue);
       debug.accept(String.format("EQUALS: %s = %s == %s",
               target.withValue(targetValue), param1.withValue(value1), param2.withValue(value2)));
+    }
+
+    private BigInteger compare(BigInteger value1, BigInteger value2) {
+      if (value1.compareTo(value2) == 0) {
+        return BigInteger.ONE;
+      } else {
+        return BigInteger.ZERO;
+      }
     }
 
     @Override
@@ -378,7 +412,13 @@ public interface OpCode {
 
     @Override
     public OpCodeEval evaluate() {
-      return evaluateWriteOperation(target);
+      BigInteger v1 = param1.getConstant();
+      BigInteger v2 = param2.getConstant();
+      BigInteger writeValue = null;
+      if (v1 != null && v2 != null) {
+        writeValue = compare(v1, v2);
+      }
+      return evaluateWriteOperation(target, writeValue);
     }
   }
 
@@ -449,7 +489,7 @@ public interface OpCode {
 
     @Override
     public OpCodeEval evaluate() {
-      return OpCodeEval.jumpTo(null);
+      return new OpCodeEval(null, null, null, null, null, null);
     }
   }
 

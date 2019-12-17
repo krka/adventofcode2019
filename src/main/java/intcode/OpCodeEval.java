@@ -3,21 +3,20 @@ package intcode;
 import java.math.BigInteger;
 
 public class OpCodeEval {
-  final BigInteger address1;
-  final BigInteger address2;
+  final BigInteger nextOperation;
+  final BigInteger jumpTarget;
+  final BigInteger relativeJumpTarget;
   final BigInteger writeAddress;
+  final BigInteger writeOffset;
+  final BigInteger writeValue;
 
-  public OpCodeEval(BigInteger address1, BigInteger nextAddress2, BigInteger writeAddress) {
-    this.address1 = address1;
-    this.address2 = nextAddress2;
+  public OpCodeEval(BigInteger nextOperation, BigInteger jumpTarget, BigInteger relativeJumpTarget, BigInteger writeAddress, BigInteger writeOffset, BigInteger writeValue) {
+    this.nextOperation = nextOperation;
+    this.jumpTarget = jumpTarget;
+    this.relativeJumpTarget = relativeJumpTarget;
     this.writeAddress = writeAddress;
+    this.writeOffset = writeOffset;
+    this.writeValue = writeValue;
   }
 
-  public static OpCodeEval jumpTo(BigInteger address1, BigInteger address2) {
-    return new OpCodeEval(address1, address2, null);
-  }
-
-  public static OpCodeEval jumpTo(BigInteger address) {
-    return new OpCodeEval(address, null, null);
-  }
 }

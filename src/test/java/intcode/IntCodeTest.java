@@ -17,32 +17,39 @@ public class IntCodeTest {
     assertEquals(input, output);
   }
 
-  @Test(expected = RuntimeException.class)
+  @Test
   public void testDecompilerDay5() {
-    Decompiler decompiler = new Decompiler(IntCode.readProgram("day5.in"));
-    decompiler.decompile();
-    decompiler.print();
+    testDecompile("day5.in");
   }
 
-  @Test(expected = RuntimeException.class)
+  @Test
   public void testDecompilerDay7() {
-    Decompiler decompiler = new Decompiler(IntCode.readProgram("day7.in"));
-    decompiler.decompile();
-    decompiler.print();
+    testDecompile("day7.in");
   }
 
-  @Test(expected = RuntimeException.class)
+  @Test
   public void testDecompilerDay9() {
-    Decompiler decompiler = new Decompiler(IntCode.readProgram("day9.in"));
-    decompiler.decompile();
-    decompiler.print();
+    testDecompile("day9.in");
   }
 
-  @Test(expected = RuntimeException.class)
+  @Test
   public void testDecompilerDay11() {
-    Decompiler decompiler = new Decompiler(IntCode.readProgram("day11.in"));
-    decompiler.decompile();
-    decompiler.print();
+    testDecompile("day11.in");
+  }
+
+  @Test
+  public void testDecompilerDay17() {
+    testDecompile("day17.in");
+  }
+
+  private void testDecompile(String resource) {
+    try {
+      Decompiler decompiler = new Decompiler(IntCode.readProgram(resource));
+      decompiler.decompile();
+      decompiler.print();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
 }

@@ -7,4 +7,6 @@ public interface ReadParameter {
   String withValue(BigInteger value);
 
   BigInteger getConstant();
+
+  BigInteger getOffset();
 }
