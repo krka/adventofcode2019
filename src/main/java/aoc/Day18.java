@@ -54,7 +54,10 @@ public class Day18 {
         }
       }
     }
+    return bfs(start, targetBitset);
+  }
 
+  private int bfs(State start, int targetBitset) {
     Queue<State> queue = new LinkedList<>();
     Set<State> visited = new HashSet<>();
     queue.add(start);
@@ -71,16 +74,69 @@ public class Day18 {
         return state.steps;
       }
 
-      tryVisit(visited, queue, state, -1, 0);
-      tryVisit(visited, queue, state, 1, 0);
-      tryVisit(visited, queue, state, 0, -1);
-      tryVisit(visited, queue, state, 0, 1);
+      tryVisit(visited, queue, state, -1, 0, targetBitset);
+      tryVisit(visited, queue, state, 1, 0, targetBitset);
+      tryVisit(visited, queue, state, 0, -1, targetBitset);
+      tryVisit(visited, queue, state, 0, 1, targetBitset);
     }
     throw new RuntimeException("Could not find a solution");
   }
 
   public int part2() {
-    return 0;
+    int centerRow = 0;
+    int centerCol = 0;
+    for (int row = 0; row < height; row++) {
+      for (int col = 0; col < width; col++) {
+        char c = getMap(row, col);
+        if (c == '@') {
+          centerCol = col;
+          centerRow = row;
+        }
+      }
+    }
+    setMap(map, centerRow, centerCol, '#');
+    setMap(map, centerRow - 1, centerCol, '#');
+    setMap(map, centerRow + 1, centerCol, '#');
+    setMap(map, centerRow, centerCol - 1, '#');
+    setMap(map, centerRow, centerCol + 1, '#');
+
+    int steps1 = bfs(
+            new State(centerRow - 1, centerCol - 1, 0, 0, null),
+            getTarget(0, 0, centerRow - 1, centerCol - 1));
+    int steps2 = bfs(
+            new State(centerRow + 1, centerCol - 1, 0, 0, null),
+            getTarget(centerRow + 1, 0, height, centerCol - 1));
+    int steps3 = bfs(
+            new State(centerRow - 1, centerCol + 1, 0, 0, null),
+            getTarget(0, centerCol + 1, centerRow - 1, width));
+    int steps4 = bfs(
+            new State(centerRow + 1, centerCol + 1, 0, 0, null),
+            getTarget(centerRow + 1, centerCol + 1, height, width));
+    return steps1 + steps2 + steps3 + steps4;
+  }
+
+  private int getTarget(int minRow, int minCol, int maxRow, int maxCol) {
+    int targetBitset = 0;
+    for (int row = minRow; row <= maxRow; row++) {
+      for (int col = minCol; col <= maxCol; col++) {
+        char c = getMap(row, col);
+        if (c >= 'a' && c <= 'z') {
+          targetBitset |= charToBit(c);
+        }
+
+      }
+    }
+    return targetBitset;
+  }
+
+  private void setMap(List<String> map, int row, int col, char c) {
+    map.set(row, setRow(map.get(row), col, c));
+  }
+
+  private String setRow(String s, int col, char c) {
+    StringBuilder sb = new StringBuilder(s);
+    sb.setCharAt(col, c);
+    return sb.toString();
   }
 
   private ArrayList<State> collectSteps(State state) {
@@ -92,14 +148,14 @@ public class Day18 {
     return res;
   }
 
-  private void tryVisit(Set<State> visited, Queue<State> queue, State from, int rowdir, int coldir) {
-    State newState = tryMove(from, rowdir, coldir);
+  private void tryVisit(Set<State> visited, Queue<State> queue, State from, int rowdir, int coldir, int targetBitset) {
+    State newState = tryMove(from, rowdir, coldir, targetBitset);
     if (newState != null && visited.add(newState)) {
       queue.add(newState);
     }
   }
 
-  private State tryMove(State state, int rowdir, int coldir) {
+  private State tryMove(State state, int rowdir, int coldir, int targetBitset) {
     int row = state.row + rowdir;
     int col = state.col + coldir;
 
@@ -110,7 +166,10 @@ public class Day18 {
     if (c >= 'A' && c <= 'Z') {
       char key = (char) (c + 32);
       int keybit = charToBit(key);
-      if ((state.keyBitset & keybit) != 0) {
+      if ((targetBitset & keybit) == 0) {
+        // This key is in a different part of the map
+        return new State(row, col, state.keyBitset, state.steps + 1, state);
+      } else if ((state.keyBitset & keybit) != 0) {
         return new State(row, col, state.keyBitset, state.steps + 1, state);
       } else {
         return null;

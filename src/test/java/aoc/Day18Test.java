@@ -33,6 +33,6 @@ public class Day18Test {
 
   @Test
   public void testPart2() {
-    assertEquals(0, new Day18("day18.in").part2());
+    assertEquals(2144, new Day18("day18.in").part2());
   }
 }
