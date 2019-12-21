@@ -1,8 +1,10 @@
 package aoc;
 
 import intcode.IntCode;
+import util.Util;
 
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.List;
 
 public class Day21 {
@@ -35,7 +37,24 @@ public class Day21 {
   }
 
   public int part2() {
-    return 0;
+    IntCode intCode = IntCode.fromResource(name);
+
+    List<String> program = Util.readResource("day21-springcode-part2.txt");
+    for (String line : program) {
+      if (!line.isEmpty() && !line.startsWith("#")) {
+        intCode.writeASCIILine(line);
+      }
+    }
+    intCode.writeASCIILine("RUN");
+
+    intCode.run();
+    intCode.readAllASCIILines().forEach(System.out::println);
+
+    List<BigInteger> output = intCode.drainStdout();
+    if (output.size() == 1) {
+      return output.get(0).intValue();
+    }
+    throw new RuntimeException(output.toString());
   }
 
 
