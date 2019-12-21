@@ -1,8 +1,4 @@
-OR F T
-
-OR I T
-
-AND E T
+OR E T
 OR H T
 
 AND D T
