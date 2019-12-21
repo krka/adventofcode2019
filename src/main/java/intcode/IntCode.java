@@ -173,14 +173,27 @@ public class IntCode implements Runnable {
     }
     StringBuilder sb = new StringBuilder();
     while (true) {
-      BigInteger value = stdout.poll();
+      BigInteger value = stdout.peek();
       if (value == null) {
         throw new RuntimeException("Unfinished ascii line: '" + sb.toString() + "'");
       }
-      if (value.intValueExact() == 10) {
-        return sb.toString();
-      } else {
-        sb.append((char) (value.intValueExact()));
+      try {
+        int intval = value.intValueExact();
+        if (intval > 127) {
+          throw new ArithmeticException();
+        }
+        stdout.poll();
+        if (intval == 10) {
+          return sb.toString();
+        } else {
+          sb.append((char) intval);
+        }
+      } catch (ArithmeticException e) {
+        if (sb.length() > 0) {
+          return sb.toString();
+        } else {
+          return null;
+        }
       }
     }
   }
