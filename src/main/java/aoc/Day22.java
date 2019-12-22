@@ -35,15 +35,10 @@ public class Day22 {
   }
 
   public long part2(long n, long iterations, long cardPosition) {
-    Operation inverted = readOperations(n).invert();
-
-    for (int i = 0; i < 64; i++) {
-      if (0 != (iterations & (1L << i))) {
-        cardPosition = inverted.apply(cardPosition);
-      }
-      inverted = inverted.merge(inverted);
-    }
-    return cardPosition;
+    return readOperations(n)
+            .power(iterations)
+            .invert()
+            .apply(cardPosition);
   }
 
   private static long multiply(long a, long b, long n) {
@@ -75,6 +70,18 @@ public class Day22 {
 
     public static Operation rotate(int number, long n) {
       return new Operation(n, 1, -number);
+    }
+
+    public Operation power(long exponent) {
+      Operation res = new Operation(n, 1, 0);
+      Operation doubled = this;
+      for (int i = 0; i < 64; i++) {
+        if (0 != (exponent & (1L << i))) {
+          res = res.merge(doubled);
+        }
+        doubled = doubled.merge(doubled);
+      }
+      return res;
     }
 
     public long apply(long card) {
