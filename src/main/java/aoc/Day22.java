@@ -3,58 +3,45 @@ package aoc;
 import util.Util;
 
 import java.math.BigInteger;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class Day22 {
   private final String name;
-  private final List<Operation> operations;
 
   public Day22(String name) {
     this.name = name;
-    operations = parse(Util.readResource(name));
   }
 
-  private List<Operation> parse(List<String> operations) {
-    return operations.stream().map(Day22::parse).collect(Collectors.toList());
-  }
-
-  private Operation merge(List<Operation> operations, long n) {
-    return operations.stream().reduce((operation, operation2) -> operation.merge(operation2, n)).get();
-  }
-
-  private static Operation parse(String operation) {
+  private static Operation parse(String operation, long n) {
     String[] words = operation.split(" ");
     if (words[1].equals("into")) {
-      return Operation.reverse();
+      return Operation.reverse(n);
     } else if (words[1].equals("with")) {
-      return Operation.incrMod(Integer.parseInt(words[3]));
+      return Operation.incrMod(Integer.parseInt(words[3]), n);
     } else if (words[0].equals("cut")) {
-      return Operation.rotate(Integer.parseInt(words[1]));
+      return Operation.rotate(Integer.parseInt(words[1]), n);
     }
     throw new RuntimeException(operation);
   }
 
-  private long apply(long card, long n) {
-    for (Operation operation : operations) {
-      card = operation.apply(card, n);
-    }
-    return card;
+  private Operation readOperations(long n) {
+    return Util.readResource(name).stream()
+            .map(operation -> parse(operation, n))
+            .reduce(Operation::merge)
+            .get();
   }
 
   long part1(long card, long n) {
-    return merge(operations, n).apply(card, n);
+    return readOperations(n).apply(card);
   }
 
   public long part2(long n, long iterations, long cardPosition) {
-    Operation operation = merge(operations, n);
-    Operation inverted = operation.invert(n);
+    Operation inverted = readOperations(n).invert();
 
     for (int i = 0; i < 64; i++) {
       if (0 != (iterations & (1L << i))) {
         cardPosition = positive(multiply(inverted.factor, cardPosition, n) - inverted.offset, n);
       }
-      inverted = inverted.merge(inverted, n);
+      inverted = inverted.merge(inverted);
     }
     return cardPosition;
   }
@@ -68,42 +55,47 @@ public class Day22 {
   }
 
   private static class Operation {
+    final long n;
     final long factor;
     final long offset;
 
-    public Operation(long factor, long offset) {
+    public Operation(long n, long factor, long offset) {
+      this.n = n;
       this.factor = factor;
       this.offset = offset;
     }
 
-    public static Operation reverse() {
-      return new Operation(-1, -1);
+    public static Operation reverse(long n) {
+      return new Operation(n, -1, -1);
     }
 
-    public static Operation incrMod(int incr) {
-      return new Operation(incr, 0);
+    public static Operation incrMod(int incr, long n) {
+      return new Operation(n, incr, 0);
     }
 
-    public static Operation rotate(int number) {
-      return new Operation(1, -number);
+    public static Operation rotate(int number, long n) {
+      return new Operation(n, 1, -number);
     }
 
-    public long apply(long card, long n) {
+    public long apply(long card) {
       return positive(multiply(card, factor, n) + offset, n);
     }
 
-    public Operation merge(Operation other, long n) {
+    public Operation merge(Operation other) {
+      if (n != other.n) {
+        throw new RuntimeException();
+      }
       long factor = multiply(this.factor, other.factor, n);
       long offset = positive(multiply(this.offset, other.factor, n) + other.offset, n);
-      return new Operation(factor, offset);
+      return new Operation(n, factor, offset);
     }
 
-    public Operation invert(long n) {
+    public Operation invert() {
       long[] gcds = gcd(factor, n);
       long inverseFactor = gcds[1];
 
       long inverseOffset = multiply(offset, inverseFactor, n);
-      return new Operation(inverseFactor, inverseOffset);
+      return new Operation(n, inverseFactor, inverseOffset);
     }
   }
 
