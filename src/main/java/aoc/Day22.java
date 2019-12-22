@@ -35,7 +35,7 @@ public class Day22 {
   }
 
   public long part2(long n, long iterations, long cardPosition) {
-    Operation inverted = readOperations(n).invert().negate();
+    Operation inverted = readOperations(n).invert();
 
     for (int i = 0; i < 64; i++) {
       if (0 != (iterations & (1L << i))) {
@@ -95,11 +95,7 @@ public class Day22 {
       long inverseFactor = gcds[1];
 
       long inverseOffset = multiply(offset, inverseFactor, n);
-      return new Operation(n, inverseFactor, inverseOffset);
-    }
-
-    public Operation negate() {
-      return new Operation(n, factor, positive(-offset, n));
+      return new Operation(n, inverseFactor, n - inverseOffset);
     }
   }
 
