@@ -39,7 +39,7 @@ public class Day22 {
 
     for (int i = 0; i < 64; i++) {
       if (0 != (iterations & (1L << i))) {
-        cardPosition = positive(multiply(inverted.factor, cardPosition, n) - inverted.offset, n);
+        cardPosition = inverted.negate().apply(cardPosition);
       }
       inverted = inverted.merge(inverted);
     }
@@ -96,6 +96,10 @@ public class Day22 {
 
       long inverseOffset = multiply(offset, inverseFactor, n);
       return new Operation(n, inverseFactor, inverseOffset);
+    }
+
+    public Operation negate() {
+      return new Operation(n, factor, positive(-offset, n));
     }
   }
 
