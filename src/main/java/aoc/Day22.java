@@ -45,10 +45,6 @@ public class Day22 {
     return BigInteger.valueOf(a).multiply(BigInteger.valueOf(b)).mod(BigInteger.valueOf(n)).longValueExact();
   }
 
-  private static long positive(long x, long n) {
-    return ((x % n) + n) % n;
-  }
-
   private static class Operation {
     final long n;
     final long factor;
@@ -88,12 +84,16 @@ public class Day22 {
       return positive(multiply(card, factor, n) + offset, n);
     }
 
+    private static long positive(long x, long n) {
+      return ((x % n) + n) % n;
+    }
+
     public Operation merge(Operation other) {
       if (n != other.n) {
         throw new RuntimeException();
       }
       long factor = multiply(this.factor, other.factor, n);
-      long offset = positive(multiply(this.offset, other.factor, n) + other.offset, n);
+      long offset = multiply(this.offset, other.factor, n) + other.offset;
       return new Operation(n, factor, offset);
     }
 
