@@ -35,11 +35,11 @@ public class Day22 {
   }
 
   public long part2(long n, long iterations, long cardPosition) {
-    Operation inverted = readOperations(n).invert();
+    Operation inverted = readOperations(n).invert().negate();
 
     for (int i = 0; i < 64; i++) {
       if (0 != (iterations & (1L << i))) {
-        cardPosition = inverted.negate().apply(cardPosition);
+        cardPosition = inverted.apply(cardPosition);
       }
       inverted = inverted.merge(inverted);
     }
