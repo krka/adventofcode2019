@@ -16,10 +16,14 @@ public class Day22 {
   }
 
   private List<Operation> parse(List<String> operations) {
-    return operations.stream().map(Day22::parse1).collect(Collectors.toList());
+    return operations.stream().map(Day22::parse).collect(Collectors.toList());
   }
 
-  private static Operation parse1(String operation) {
+  private Operation merge(List<Operation> operations, long n) {
+    return operations.stream().reduce((operation, operation2) -> operation.merge(operation2, n)).get();
+  }
+
+  private static Operation parse(String operation) {
     String[] words = operation.split(" ");
     if (words[1].equals("into")) {
       return Operation.reverse();
@@ -39,39 +43,24 @@ public class Day22 {
   }
 
   long part1(long card, long n) {
-    return apply(card, n);
+    return merge(operations, n).apply(card, n);
   }
 
   public long part2(long n, long iterations, long cardPosition) {
-    long c0 = apply(0, n);
-    long c1 = apply(1, n);
+    Operation operation = merge(operations, n);
+    Operation inverted = operation.invert(n);
 
-    long factor = positive(c1 - c0, n);
-
-    long[] gcds = gcd(factor, n);
-    long inverse = gcds[1];
-
-    long invC0 = multiply(c0, inverse, n);
-
-    // reverse application:
-    // next_card = inverse * card - invC0
-    // answer = apply(cardPosition, inverse) * iterations times
-
-    long[] factors = new long[64];
-    long[] offsets = new long[64];
-    factors[0] = inverse;
-    offsets[0] = invC0;
-    for (int i = 1; i < 64; i++) {
-      long k = factors[i - 1];
-      long c = offsets[i - 1];
-      factors[i] = multiply(k, k, n);
-      offsets[i] = multiply(positive(k + 1, n), c, n);
-    }
-
+    long curFactor = inverted.factor;
+    long curOffset = inverted.offset;
     for (int i = 0; i < 64; i++) {
       if (0 != (iterations & (1L << i))) {
-        cardPosition = positive(multiply(factors[i], cardPosition, n) - offsets[i], n);
+        cardPosition = positive(multiply(curFactor, cardPosition, n) - curOffset, n);
       }
+
+      long k = curFactor;
+      long c = curOffset;
+      curFactor = multiply(k, k, n);
+      curOffset = multiply(positive(k + 1, n), c, n);
     }
     return cardPosition;
   }
@@ -107,6 +96,20 @@ public class Day22 {
 
     public long apply(long card, long n) {
       return positive(multiply(card, factor, n) + offset, n);
+    }
+
+    public Operation merge(Operation other, long n) {
+      long factor = multiply(this.factor, other.factor, n);
+      long offset = positive(multiply(this.offset, other.factor, n) + other.offset, n);
+      return new Operation(factor, offset);
+    }
+
+    public Operation invert(long n) {
+      long[] gcds = gcd(factor, n);
+      long inverseFactor = gcds[1];
+
+      long inverseOffset = multiply(offset, inverseFactor, n);
+      return new Operation(inverseFactor, inverseOffset);
     }
   }
 
