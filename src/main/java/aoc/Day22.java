@@ -50,17 +50,11 @@ public class Day22 {
     Operation operation = merge(operations, n);
     Operation inverted = operation.invert(n);
 
-    long curFactor = inverted.factor;
-    long curOffset = inverted.offset;
     for (int i = 0; i < 64; i++) {
       if (0 != (iterations & (1L << i))) {
-        cardPosition = positive(multiply(curFactor, cardPosition, n) - curOffset, n);
+        cardPosition = positive(multiply(inverted.factor, cardPosition, n) - inverted.offset, n);
       }
-
-      long k = curFactor;
-      long c = curOffset;
-      curFactor = multiply(k, k, n);
-      curOffset = multiply(positive(k + 1, n), c, n);
+      inverted = inverted.merge(inverted, n);
     }
     return cardPosition;
   }
