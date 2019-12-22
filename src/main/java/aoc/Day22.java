@@ -76,46 +76,37 @@ public class Day22 {
     return cardPosition;
   }
 
-  private long multiply(long a, long b, long n) {
+  private static long multiply(long a, long b, long n) {
     return BigInteger.valueOf(a).multiply(BigInteger.valueOf(b)).mod(BigInteger.valueOf(n)).longValueExact();
   }
 
-  private long positive(long x, long n) {
+  private static long positive(long x, long n) {
     return ((x % n) + n) % n;
   }
 
   private static class Operation {
-    final int type;
-    final int number;
+    final long factor;
+    final long offset;
 
-    public Operation(int type, int number) {
-      this.type = type;
-      this.number = number;
+    public Operation(long factor, long offset) {
+      this.factor = factor;
+      this.offset = offset;
     }
 
     public static Operation reverse() {
-      return new Operation(0, 0);
+      return new Operation(-1, -1);
     }
 
     public static Operation incrMod(int incr) {
-      return new Operation(1, incr);
+      return new Operation(incr, 0);
     }
 
     public static Operation rotate(int number) {
-      return new Operation(2, number);
+      return new Operation(1, -number);
     }
 
     public long apply(long card, long n) {
-      if (type == 0) {
-        return n - card - 1;
-      }
-      if (type == 1) {
-        return (card * number) % n;
-      }
-      if (type == 2) {
-        return (card - number + n) % n;
-      }
-      throw new RuntimeException();
+      return positive(multiply(card, factor, n) + offset, n);
     }
   }
 
