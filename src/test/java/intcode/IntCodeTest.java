@@ -42,6 +42,11 @@ public class IntCodeTest {
     testDecompile("day17.in");
   }
 
+  @Test
+  public void testDecompilerDay25() {
+    testDecompile("day25.in");
+  }
+
   private void testDecompile(String resource) {
     try {
       Decompiler decompiler = new Decompiler(IntCode.readProgram(resource));

@@ -32,10 +32,30 @@ public class IntCode implements Runnable {
     this.memory = new Memory(program);
   }
 
+  private IntCode(Memory memory, BigInteger pc, RuntimeException exception, State state, BigInteger relativeBase) {
+    this.memory = memory;
+    this.pc = pc;
+    this.exception = exception;
+    this.state = state;
+    this.relativeBase = relativeBase;
+  }
+
   public static String asASCII(List<BigInteger> output) {
     return output.stream().mapToInt(BigInteger::intValueExact)
             .mapToObj(Character::toString)
             .collect(Collectors.joining());
+  }
+
+  public static IntCode fromSnapshot(Snapshot snapshot) {
+    return new IntCode(snapshot.memory.snapshot(), snapshot.pc, snapshot.exception, snapshot.state, snapshot.relativeBase);
+  }
+
+  public Snapshot snapshot() {
+    return new Snapshot(memory.snapshot(), pc, state, exception, relativeBase);
+  }
+
+  public IntCode fork() {
+    return new IntCode(memory.snapshot(), pc, exception, state, relativeBase);
   }
 
   public void setDebugger(boolean enabled) {
@@ -216,5 +236,22 @@ public class IntCode implements Runnable {
     WAITING_FOR_INPUT,
     HALTED,
     CRASHED
+  }
+
+  public static class Snapshot {
+
+    private final Memory memory;
+    private final BigInteger pc;
+    private final State state;
+    private final RuntimeException exception;
+    private final BigInteger relativeBase;
+
+    public Snapshot(Memory memory, BigInteger pc, State state, RuntimeException exception, BigInteger relativeBase) {
+      this.memory = memory;
+      this.pc = pc;
+      this.state = state;
+      this.exception = exception;
+      this.relativeBase = relativeBase;
+    }
   }
 }

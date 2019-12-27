@@ -17,6 +17,11 @@ public class Memory {
     }
   }
 
+  public Memory(Map<BigInteger, BigInteger> data, BigInteger end) {
+    this.data = data;
+    this.end = end;
+  }
+
   public BigInteger read(BigInteger address) {
     return data.getOrDefault(address,BigInteger.ZERO);
   }
@@ -30,5 +35,9 @@ public class Memory {
 
   public boolean contains(BigInteger address) {
     return data.containsKey(address);
+  }
+
+  public Memory snapshot() {
+    return new Memory(new HashMap<>(data), end);
   }
 }
