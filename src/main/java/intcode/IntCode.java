@@ -123,6 +123,10 @@ public class IntCode implements Runnable {
 
   @Override
   public void run() {
+    step(Integer.MAX_VALUE);
+  }
+
+  public void step(int steps) {
     if (state == State.HALTED) {
       return;
     }
@@ -130,13 +134,13 @@ public class IntCode implements Runnable {
       throw exception;
     }
 
-    if (state != State.WAITING_FOR_INPUT && state != State.NOT_STARTED) {
+    if (state != State.WAITING_FOR_INPUT && state != State.NOT_STARTED && state != State.PAUSED) {
       throw new RuntimeException("Unexpected state: " + state);
     }
     state = State.RUNNING;
 
     try {
-      while (true) {
+      for (int i = 0; i < steps; i++) {
         OpCode opcode = OpCode.decode(memory, pc);
         try {
           opcode.execute(this, debugger);
@@ -156,6 +160,7 @@ public class IntCode implements Runnable {
       exception = new RuntimeException(e);
       throw exception;
     }
+    state = State.PAUSED;
   }
 
   public BigInteger readValue(BigInteger address) {
@@ -233,6 +238,7 @@ public class IntCode implements Runnable {
   public enum State {
     NOT_STARTED,
     RUNNING,
+    PAUSED,
     WAITING_FOR_INPUT,
     HALTED,
     CRASHED
