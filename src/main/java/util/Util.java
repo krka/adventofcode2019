@@ -27,6 +27,10 @@ public class Util {
     return list.stream().map(BigInteger::valueOf).collect(Collectors.toList());
   }
 
+  public static List<BigInteger> toBigIntFromLong(List<Long> list) {
+    return list.stream().map(BigInteger::valueOf).collect(Collectors.toList());
+  }
+
   public static List<String> readResource(String name) {
     List<String> list = new ArrayList<>();
     try (BufferedReader reader = new BufferedReader(fromResource(name))) {

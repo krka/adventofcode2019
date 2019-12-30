@@ -27,17 +27,19 @@ public class IntCode implements Runnable {
   private RuntimeException exception;
   private BigInteger relativeBase = BigInteger.ZERO;
   private Consumer<String> debugger = s -> {};
+  private long instrCount;
 
   private IntCode(List<BigInteger> program) {
     this.memory = new Memory(program);
   }
 
-  private IntCode(Memory memory, BigInteger pc, RuntimeException exception, State state, BigInteger relativeBase) {
+  private IntCode(Memory memory, BigInteger pc, RuntimeException exception, State state, BigInteger relativeBase, long instrCount) {
     this.memory = memory;
     this.pc = pc;
     this.exception = exception;
     this.state = state;
     this.relativeBase = relativeBase;
+    this.instrCount = instrCount;
   }
 
   public static String asASCII(List<BigInteger> output) {
@@ -47,15 +49,15 @@ public class IntCode implements Runnable {
   }
 
   public static IntCode fromSnapshot(Snapshot snapshot) {
-    return new IntCode(snapshot.memory.snapshot(), snapshot.pc, snapshot.exception, snapshot.state, snapshot.relativeBase);
+    return new IntCode(snapshot.memory.snapshot(), snapshot.pc, snapshot.exception, snapshot.state, snapshot.relativeBase, snapshot.instrCount);
   }
 
   public Snapshot snapshot() {
-    return new Snapshot(memory.snapshot(), pc, state, exception, relativeBase);
+    return new Snapshot(memory.snapshot(), pc, state, exception, relativeBase, instrCount);
   }
 
   public IntCode fork() {
-    return new IntCode(memory.snapshot(), pc, exception, state, relativeBase);
+    return new IntCode(memory.snapshot(), pc, exception, state, relativeBase, instrCount);
   }
 
   public void setDebugger(boolean enabled) {
@@ -75,6 +77,10 @@ public class IntCode implements Runnable {
   }
 
   public void writeStdin(int value) {
+    writeStdin(BigInteger.valueOf(value));
+  }
+
+  public void writeStdin(long value) {
     writeStdin(BigInteger.valueOf(value));
   }
 
@@ -103,6 +109,10 @@ public class IntCode implements Runnable {
 
   public static IntCode fromResource(Reader input) {
     return new IntCode(readProgram(input));
+  }
+
+  public static IntCode fromResource(List<BigInteger> input) {
+    return new IntCode(input);
   }
 
   public static List<BigInteger> readProgram(String name) {
@@ -141,6 +151,7 @@ public class IntCode implements Runnable {
 
     try {
       for (int i = 0; i < steps; i++) {
+        instrCount++;
         OpCode opcode = OpCode.decode(memory, pc);
         try {
           opcode.execute(this, debugger);
@@ -235,6 +246,10 @@ public class IntCode implements Runnable {
     }
   }
 
+  public long getInstrCount() {
+    return instrCount;
+  }
+
   public enum State {
     NOT_STARTED,
     RUNNING,
@@ -251,13 +266,15 @@ public class IntCode implements Runnable {
     private final State state;
     private final RuntimeException exception;
     private final BigInteger relativeBase;
+    public final long instrCount;
 
-    public Snapshot(Memory memory, BigInteger pc, State state, RuntimeException exception, BigInteger relativeBase) {
+    public Snapshot(Memory memory, BigInteger pc, State state, RuntimeException exception, BigInteger relativeBase, long instrCount) {
       this.memory = memory;
       this.pc = pc;
       this.state = state;
       this.exception = exception;
       this.relativeBase = relativeBase;
+      this.instrCount = instrCount;
     }
   }
 }
