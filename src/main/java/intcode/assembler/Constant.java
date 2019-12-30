@@ -2,7 +2,7 @@ package intcode.assembler;
 
 import java.math.BigInteger;
 
-class Constant implements Parameter {
+class Constant implements ImmediateParameter {
 
   static final Constant ZERO = new Constant(BigInteger.ZERO);
 
@@ -24,5 +24,10 @@ class Constant implements Parameter {
   @Override
   public BigInteger value() {
     return constant;
+  }
+
+  @Override
+  public Constant derefence() {
+    throw new RuntimeException("Can't dereference a constant");
   }
 }

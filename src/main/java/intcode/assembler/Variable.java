@@ -2,7 +2,7 @@ package intcode.assembler;
 
 import java.math.BigInteger;
 
-class Variable implements Parameter {
+class Variable implements Parameter, HasAddress {
   private final int len;
   private int address = -1;
 
@@ -21,13 +21,23 @@ class Variable implements Parameter {
 
   @Override
   public BigInteger value() {
-    if (address == -1) {
-      throw new RuntimeException("Can't resolve it before it has been set");
-    }
-    return BigInteger.valueOf(address);
+    return BigInteger.valueOf(getAddress());
+  }
+
+  @Override
+  public ImmediateParameter derefence() {
+    return new DeferredConstant(this);
   }
 
   public void setAddress(int address) {
     this.address = address;
+  }
+
+  @Override
+  public int getAddress() {
+    if (address == -1) {
+      throw new RuntimeException("Can't resolve it before it has been set");
+    }
+    return address;
   }
 }

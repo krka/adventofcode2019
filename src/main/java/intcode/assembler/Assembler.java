@@ -226,10 +226,10 @@ public class Assembler {
       Parameter indexRef = resolveParameter(index);
       Parameter valueParam = resolveParameter(value);
 
-      AddOp rewriteParam = new AddOp(Address.of(array), indexRef, Address.position(BigInteger.ZERO));
-      AddOp addOp = new AddOp(valueParam, Constant.ZERO, Address.position(BigInteger.ZERO));
+      AddOp rewriteParam = new AddOp(array.derefence(), indexRef, Address.placeHolder());
+      AddOp addOp = new AddOp(valueParam, Constant.ZERO, Address.placeHolder());
 
-      rewriteParam.setTarget(Address.withOffset(rewriteParam, 7));
+      rewriteParam.setTarget(new AddressableMemory(rewriteParam, 7));
       operations.add(rewriteParam);
       operations.add(addOp);
     }
@@ -245,10 +245,10 @@ public class Assembler {
       Parameter indexRef = resolveParameter(index);
       Variable targetParam = resolveVariable(target);
 
-      AddOp rewriteParam = new AddOp(Address.of(array), indexRef, Address.position(BigInteger.ZERO));
-      AddOp addOp = new AddOp(Address.position(BigInteger.ZERO), Constant.ZERO, targetParam);
+      AddOp rewriteParam = new AddOp(array.derefence(), indexRef, Address.placeHolder());
+      AddOp addOp = new AddOp(Address.placeHolder(), Constant.ZERO, targetParam);
 
-      rewriteParam.setTarget(Address.withOffset(rewriteParam, 5));
+      rewriteParam.setTarget(new AddressableMemory(rewriteParam, 5));
       operations.add(rewriteParam);
       operations.add(addOp);
     }

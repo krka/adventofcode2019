@@ -3,14 +3,15 @@ package intcode.assembler;
 import java.math.BigInteger;
 import java.util.List;
 
-abstract class Op {
+abstract class Op implements HasAddress {
   private int address = -1;
 
   final void setAddress(int address) {
     this.address = address;
   }
 
-  final int getAddress() {
+  @Override
+  public final int getAddress() {
     if (address == -1) {
       throw new RuntimeException("Address not set");
     }

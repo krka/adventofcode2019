@@ -18,4 +18,9 @@ class StackVariable implements Parameter {
   public BigInteger value() {
     return BigInteger.valueOf(offset);
   }
+
+  @Override
+  public ImmediateParameter derefence() {
+    throw new RuntimeException("can't dereference a stack variable");
+  }
 }

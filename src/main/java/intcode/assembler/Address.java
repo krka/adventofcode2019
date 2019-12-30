@@ -3,46 +3,26 @@ package intcode.assembler;
 import java.math.BigInteger;
 
 public class Address {
-  public static Parameter of(Variable variable) {
-    return new Parameter() {
-      @Override
-      public ParameterMode mode() {
-        return ParameterMode.IMMEDIATE;
-      }
 
-      @Override
-      public BigInteger value() {
-        return variable.value();
-      }
-    };
+  public static Parameter placeHolder() {
+    return new PlaceHolderPositionParameter();
   }
 
-  public static Parameter position(BigInteger address) {
-    return new Parameter() {
+  private static class PlaceHolderPositionParameter implements Parameter {
 
-      @Override
-      public ParameterMode mode() {
-        return ParameterMode.POSITION;
-      }
+    @Override
+    public ParameterMode mode() {
+      return ParameterMode.POSITION;
+    }
 
-      @Override
-      public BigInteger value() {
-        return address;
-      }
-    };
-  }
+    @Override
+    public BigInteger value() {
+      return BigInteger.ZERO;
+    }
 
-  public static Parameter withOffset(Op op, int offset) {
-    return new Parameter() {
-      @Override
-      public ParameterMode mode() {
-        return ParameterMode.POSITION;
-      }
-
-      @Override
-      public BigInteger value() {
-        return BigInteger.valueOf(op.getAddress() + offset);
-      }
-    };
+    @Override
+    public ImmediateParameter derefence() {
+      throw new RuntimeException("Can't derefence a placeholder");
+    }
   }
 }
