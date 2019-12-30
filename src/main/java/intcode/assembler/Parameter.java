@@ -6,7 +6,7 @@ interface Parameter {
   ParameterMode mode();
   BigInteger value();
 
-  ImmediateParameter derefence();
+  ImmediateParameter dereference();
 
   default void assertNotImmediate() {
     if (mode() == ParameterMode.IMMEDIATE) {

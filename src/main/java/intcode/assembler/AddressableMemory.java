@@ -23,7 +23,7 @@ class AddressableMemory implements ImmediateParameter {
   }
 
   @Override
-  public AddressableMemory derefence() {
+  public AddressableMemory dereference() {
     throw new RuntimeException("Can't dereference already derefenced");
   }
 }

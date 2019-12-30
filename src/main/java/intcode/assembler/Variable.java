@@ -4,10 +4,17 @@ import java.math.BigInteger;
 
 class Variable implements Parameter, HasAddress {
   private final int len;
+  final int[] values;
   private int address = -1;
 
   public Variable(int len) {
     this.len = len;
+    this.values = new int[len];
+  }
+
+  public Variable(int[] values) {
+    this.len = values.length;
+    this.values = values;
   }
 
   public int getLen() {
@@ -25,7 +32,7 @@ class Variable implements Parameter, HasAddress {
   }
 
   @Override
-  public ImmediateParameter derefence() {
+  public ImmediateParameter dereference() {
     return new DeferredConstant(this);
   }
 

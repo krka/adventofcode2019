@@ -1,9 +1,9 @@
-var i
-var k
-var cmp
-var kd
-var kdneg
-var q
+var i 0
+var k 0
+var cmp 0
+var kd 0
+var kdneg 0
+var q 0
 array 64 powtwo
 
 add i 0 0

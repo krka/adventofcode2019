@@ -21,7 +21,7 @@ public class Address {
     }
 
     @Override
-    public ImmediateParameter derefence() {
+    public ImmediateParameter dereference() {
       throw new RuntimeException("Can't derefence a placeholder");
     }
   }

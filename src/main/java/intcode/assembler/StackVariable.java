@@ -2,10 +2,11 @@ package intcode.assembler;
 
 import java.math.BigInteger;
 
-class StackVariable implements Parameter {
+class StackVariable extends Variable {
   private final int offset;
 
   public StackVariable(int offset) {
+    super(1);
     this.offset  = offset;
   }
 
@@ -20,7 +21,7 @@ class StackVariable implements Parameter {
   }
 
   @Override
-  public ImmediateParameter derefence() {
+  public ImmediateParameter dereference() {
     throw new RuntimeException("can't dereference a stack variable");
   }
 }

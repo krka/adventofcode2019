@@ -10,7 +10,6 @@ import static org.junit.Assert.assertEquals;
 public class Day5 {
   public static List<BigInteger> part1() {
     IntCode vm = IntCode.fromResource("day5.in");
-    vm.setDebugger(true);
     vm.writeStdin(1);
     vm.run();
     assertEquals(IntCode.State.HALTED, vm.getState());

@@ -34,6 +34,8 @@ public class Assembler {
       return;
     }
 
+    int lineNumber = 0;
+
     String prevNamespace = namespace;
     namespace = resource;
     try {
@@ -41,15 +43,18 @@ public class Assembler {
 
       List<String> lines = Util.readResource(resource);
       for (String line : lines) {
+        lineNumber++;
         if (!line.isEmpty()) {
           String[] tokens = line.split(" ");
           String first = tokens[0];
           if (first.equals("include")) {
             includeResource(tokens[1]);
           } else if (first.equals("array")) {
-            function.defineVariable(Integer.parseInt(tokens[1]), tokens[2]);
+            function.defineVariable(Integer.parseInt(tokens[1]), tokens[2], 0);
           } else if (first.equals("var")) {
-            function.defineVariable(1, tokens[1]);
+            function.defineVariable(1, tokens[1], tokens.length >= 3 ? Integer.parseInt(tokens[2]) : 0);
+          } else if (first.equals("string")) {
+            function.defineString(tokens[1], tokens[2]);
           } else if (first.equals("label")) {
             function.addLabel(tokens[1]);
           } else if (first.equals("add")) {
@@ -71,7 +76,9 @@ public class Assembler {
           } else if (first.equals("setarray")) {
             function.setArray(tokens[1], tokens[2], tokens[3]);
           } else if (first.equals("getarray")) {
-            function.getArray(tokens[1], tokens[2], tokens[3]);
+            function.getArray(false, tokens[1], tokens[2], tokens[3]);
+          } else if (first.equals("getarrayptr")) {
+            function.getArray(true, tokens[1], tokens[2], tokens[3]);
           } else if (first.equals("call")) {
             function.addFunctionCall(tokens);
 
@@ -107,6 +114,8 @@ public class Assembler {
           }
         }
       }
+    } catch (RuntimeException e) {
+      throw new RuntimeException(resource + ":" + lineNumber + "  " + e.getMessage(), e);
     } finally {
       namespace = prevNamespace;
     }
@@ -145,7 +154,7 @@ public class Assembler {
     for (Variable variable : variableOrdering) {
       int len = variable.getLen();
       for (int i = 0; i < len; i++) {
-        res.add(BigInteger.ZERO);
+        res.add(BigInteger.valueOf(variable.values[i]));
       }
     }
     for (Variable variable : tempSpace) {
@@ -181,14 +190,28 @@ public class Assembler {
       }
     }
 
-    private void defineVariable(int len, String varName) {
+    private Variable defineVariable(int len, String varName, int defaultValue) {
       String key = namespace + ":" + varName;
-      Variable variable = new Variable(len);
+      int[] values = new int[len];
+      for (int i = 0; i < len; i++) {
+        values[i] = defaultValue;
+      }
+      Variable variable = new Variable(values);
       Variable prev = variables.put(key, variable);
       if (prev != null) {
         throw new RuntimeException("Variable " + key + " already defined");
       }
       variableOrdering.add(variable);
+      return variable;
+    }
+
+    private void defineString(String varName, String value) {
+      int len = value.length();
+      Variable variable = defineVariable(len + 1, varName, 0);
+      for (int i = 0; i < len; i++) {
+        variable.values[i] = value.charAt(i);
+      }
+      variable.values[len] = 0;
     }
 
     public void add(String target, String a, String b) {
@@ -226,7 +249,7 @@ public class Assembler {
       Parameter indexRef = resolveParameter(index);
       Parameter valueParam = resolveParameter(value);
 
-      AddOp rewriteParam = new AddOp(array.derefence(), indexRef, Address.placeHolder());
+      AddOp rewriteParam = new AddOp(array.dereference(), indexRef, Address.placeHolder());
       AddOp addOp = new AddOp(valueParam, Constant.ZERO, Address.placeHolder());
 
       rewriteParam.setTarget(new AddressableMemory(rewriteParam, 7));
@@ -234,18 +257,24 @@ public class Assembler {
       operations.add(addOp);
     }
 
-    public void getArray(String arrayName, String index, String target) {
+    public void getArray(boolean isPtr, String arrayName, String index, String target) {
 
       // getarray <arrayName> <index> <target>
       // is expressed as:
       // 1 - rewrite: add p1:<arrayName addr> p2:<index> target:<next op param 1>
       // 2 - add:     add p1:(will be overwritten) p2:0 target:<target>
 
-      Variable array = resolveVariable(arrayName);
+      Parameter array = resolveParameter(arrayName);
       Parameter indexRef = resolveParameter(index);
       Variable targetParam = resolveVariable(target);
 
-      AddOp rewriteParam = new AddOp(array.derefence(), indexRef, Address.placeHolder());
+      Parameter address;
+      if (isPtr) {
+        address = array;
+      } else {
+        address = array.dereference();
+      }
+      AddOp rewriteParam = new AddOp(address, indexRef, Address.placeHolder());
       AddOp addOp = new AddOp(Address.placeHolder(), Constant.ZERO, targetParam);
 
       rewriteParam.setTarget(new AddressableMemory(rewriteParam, 5));
@@ -254,6 +283,14 @@ public class Assembler {
     }
 
     private Variable resolveVariable(String variableName) {
+      int i = 0;
+      for (String stackVariable : stackVariables) {
+        if (stackVariable.equals(variableName)) {
+          return new StackVariable(i - stackVariables.size());
+        }
+        i++;
+      }
+
       String key = namespace + ":" + variableName;
       Variable variable = variables.get(key);
       if (variable == null) {
@@ -263,17 +300,12 @@ public class Assembler {
     }
 
     private Parameter resolveParameter(String expression) {
+      if (expression.startsWith("&")) {
+        return resolveVariable(expression.substring(1)).dereference();
+      }
       try {
         return new Constant(new BigInteger(expression));
       } catch (NumberFormatException e) {
-        int i = 0;
-        for (String stackVariable : stackVariables) {
-          if (stackVariable.equals(expression)) {
-            return new StackVariable(i - stackVariables.size());
-          }
-          i++;
-        }
-
         return resolveVariable(expression);
       }
     }

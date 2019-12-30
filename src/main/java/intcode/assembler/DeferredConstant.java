@@ -21,7 +21,7 @@ class DeferredConstant implements ImmediateParameter {
   }
 
   @Override
-  public DeferredConstant derefence() {
+  public DeferredConstant dereference() {
     throw new RuntimeException("Can't dereference a constant");
   }
 }
