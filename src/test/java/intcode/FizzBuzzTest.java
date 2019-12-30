@@ -15,16 +15,23 @@ import static org.junit.Assert.assertEquals;
 
 public class FizzBuzzTest {
 
-  private IntCode intCode;
-
-  @Before
-  public void setUp() {
-    intCode = IntCode.fromResource(Assembler.compile("fizzbuzz.asm"));
+  @Test
+  public void testPart1() {
+    IntCode intCode = IntCode.fromResource(Assembler.compile("fizzbuzz.asm"));
     intCode.run();
+
+    intCode.writeStdin(20);
+    intCode.run();
+    List<String> lines = intCode.readAllASCIILines();
+    lines.forEach(System.out::println);
   }
 
   @Test
-  public void testSimple() {
+  public void testPart2() {
+    IntCode intCode = IntCode.fromResource(Assembler.compile("fizzbuzz2.asm"));
+    intCode.run();
+
+    intCode.writeStdin(200000);
     intCode.writeStdin(20);
     intCode.run();
     List<String> lines = intCode.readAllASCIILines();
