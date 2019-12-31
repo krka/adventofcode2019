@@ -55,7 +55,7 @@ public class AssemblerTest {
     intCode.run();
     assertEquals(IntCode.State.HALTED, intCode.getState());
     List<String> lines = intCode.readAllASCIILines();
-    assertEquals(Arrays.asList("HelloWorld"), lines);
+    assertEquals(Arrays.asList("Hello World!"), lines);
   }
 
   @Test

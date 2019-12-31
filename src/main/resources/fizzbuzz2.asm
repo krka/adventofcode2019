@@ -1,24 +1,24 @@
-include division.asm
-include outputs.asm
+#include division.asm
+#include outputs.asm
 
-var i
-var offset
-var n
-var N
-var Q
-var R
-var cmp
-string fizz Fizz
-string buzz Buzz
-string fizzbuzz FizzBuzz
+int i = 0
+int offset = 0
+int n = 0
+int N = 0
+int Q = 0
+int R = 0
+int cmp = 0
+string fizz = "Fizz"
+string buzz = "Buzz"
+string fizzbuzz = "FizzBuzz"
 
 input offset
 input N
 
-add i 0 0
+i = 0 + 0
 label loop
-add i i 1
-add n i offset
+i = i + 1
+n = i + offset
 
 call div n 15 : Q R
 jumpfalse R print15

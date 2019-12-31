@@ -1,9 +1,9 @@
-include division.asm
+#include division.asm
 
-var N
-var D
-var Q
-var R
+int N = 0
+int D = 0
+int Q = 0
+int R = 0
 
 label loop
 input N

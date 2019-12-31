@@ -1,11 +1,11 @@
-var x
+int x = 0
 
-array 1 arr
-var a
-var b
+array[1] arr
+int a = 0
+int b = 0
 
-add a 1 0
-add b 2 0
+a = 1 + 0
+b = 2 + 0
 
 getarray arr 1 x
 output x

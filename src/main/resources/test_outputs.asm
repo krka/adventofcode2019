@@ -1,6 +1,6 @@
-include outputstring.asm
+#include outputstring.asm
 
-string helloworld HelloWorld
+string helloworld = "Hello World!"
 call outputString &helloworld
 output 10
 

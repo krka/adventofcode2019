@@ -28,7 +28,7 @@ public class Assembler {
     return assembler.compile();
   }
 
-  private void includeResource(String resource) {
+  void includeResource(String resource) {
     if (!resources.add(resource)) {
       // TODO: check for cycles
       return;
@@ -44,23 +44,15 @@ public class Assembler {
       List<String> lines = Util.readResource(resource);
       for (String line : lines) {
         lineNumber++;
+        line = line.trim();
         if (!line.isEmpty()) {
+          if (Parser.parse(line, this, function)) {
+            continue;
+          }
           String[] tokens = line.split(" ");
           String first = tokens[0];
-          if (first.equals("include")) {
-            includeResource(tokens[1]);
-          } else if (first.equals("array")) {
-            function.defineVariable(Integer.parseInt(tokens[1]), tokens[2], 0);
-          } else if (first.equals("var")) {
-            function.defineVariable(1, tokens[1], tokens.length >= 3 ? Integer.parseInt(tokens[2]) : 0);
-          } else if (first.equals("string")) {
-            function.defineString(tokens[1], tokens[2]);
-          } else if (first.equals("label")) {
+          if (first.equals("label")) {
             function.addLabel(tokens[1]);
-          } else if (first.equals("add")) {
-            function.add(tokens[1], tokens[2], tokens[3]);
-          } else if (first.equals("mul")) {
-            function.mul(tokens[1], tokens[2], tokens[3]);
           } else if (first.equals("eq")) {
             function.eq(tokens[1], tokens[2], tokens[3]);
           } else if (first.equals("lessthan")) {
@@ -154,7 +146,7 @@ public class Assembler {
     for (Variable variable : variableOrdering) {
       int len = variable.getLen();
       for (int i = 0; i < len; i++) {
-        res.add(BigInteger.valueOf(variable.values[i]));
+        res.add(variable.values[i]);
       }
     }
     for (Variable variable : tempSpace) {
@@ -172,6 +164,41 @@ public class Assembler {
     return res;
   }
 
+  private Variable declareVariable(int len, String varName, BigInteger defaultValue) {
+    String key = namespace + ":" + varName;
+    BigInteger[] values = new BigInteger[len];
+    for (int i = 0; i < len; i++) {
+      values[i] = defaultValue;
+    }
+    Variable variable = new Variable(values);
+    Variable prev = variables.put(key, variable);
+    if (prev != null) {
+      throw new RuntimeException("Variable " + key + " already defined");
+    }
+    variableOrdering.add(variable);
+    return variable;
+  }
+
+  public void declareString(String varName, String value) {
+    int len = value.length();
+    Variable variable = declareVariable(len + 1, varName, BigInteger.ZERO);
+    for (int i = 0; i < len; i++) {
+      variable.values[i] = BigInteger.valueOf(value.charAt(i));
+    }
+    variable.values[len] = BigInteger.ZERO;
+  }
+
+  public void declareArray(String varName, int len) {
+    Variable variable = declareVariable(len, varName, BigInteger.ZERO);
+    for (int i = 0; i < len; i++) {
+      variable.values[i] = BigInteger.ZERO;
+    }
+  }
+
+
+  public void declareInt(String name, String value) {
+    declareVariable(1, name, new BigInteger(value));
+  }
 
   class Function {
     private final List<String> stackVariables = new ArrayList<>();
@@ -188,30 +215,6 @@ public class Assembler {
       if (isStack) {
         operations.add(setRelBase);
       }
-    }
-
-    private Variable defineVariable(int len, String varName, int defaultValue) {
-      String key = namespace + ":" + varName;
-      int[] values = new int[len];
-      for (int i = 0; i < len; i++) {
-        values[i] = defaultValue;
-      }
-      Variable variable = new Variable(values);
-      Variable prev = variables.put(key, variable);
-      if (prev != null) {
-        throw new RuntimeException("Variable " + key + " already defined");
-      }
-      variableOrdering.add(variable);
-      return variable;
-    }
-
-    private void defineString(String varName, String value) {
-      int len = value.length();
-      Variable variable = defineVariable(len + 1, varName, 0);
-      for (int i = 0; i < len; i++) {
-        variable.values[i] = value.charAt(i);
-      }
-      variable.values[len] = 0;
     }
 
     public void add(String target, String a, String b) {
@@ -242,8 +245,8 @@ public class Assembler {
 
       // setarray <arrayName> <index> <value>
       // is expressed as:
-      // 1 - rewrite: add p1:<arrayName addr> p2:<index> target:<next op param 3>
-      // 2 - add:     add p1:<value> p2:0 target:(will be overwritten)
+      // 1 - rewrite: p1:<arrayName = addr> + p2:<index> target:<next op param 3>
+      // 2 - add:     p1:<value> = p2:0 + target:(will be overwritten)
 
       Variable array = resolveVariable(arrayName);
       Parameter indexRef = resolveParameter(index);
@@ -261,8 +264,8 @@ public class Assembler {
 
       // getarray <arrayName> <index> <target>
       // is expressed as:
-      // 1 - rewrite: add p1:<arrayName addr> p2:<index> target:<next op param 1>
-      // 2 - add:     add p1:(will be overwritten) p2:0 target:<target>
+      // 1 - rewrite: p1:<arrayName = addr> + p2:<index> target:<next op param 1>
+      // 2 - add:     p1:(will = be + overwritten) p2:0 target:<target>
 
       Parameter array = resolveParameter(arrayName);
       Parameter indexRef = resolveParameter(index);
@@ -390,6 +393,7 @@ public class Assembler {
     public void addHalt() {
       operations.add(new Halt());
     }
+
   }
 
 }

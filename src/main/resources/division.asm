@@ -1,42 +1,39 @@
-var i 0
-var k 0
-var cmp 0
-var kd 0
-var kdneg 0
-var q 0
-array 64 powtwo
-
-add i 0 0
-add k 1 0
+int i = 0
+int k = 1
+int cmp = 0
+int kd = 0
+int kdneg = 0
+int q = 0
+array[64] powtwo
 
 label setup_powtwo
 setarray powtwo i k
-mul k k 2
-add i i 1
+k = k * 2
+i = i + 1
 eq cmp i 64
 jumpfalse cmp setup_powtwo
 
 func div N D
 
-add i 0 0
-add kd D 0
+i = 0
+kd = D
 label find_range
-add i i 1
-mul kd kd 2
+i = i + 1
+kd = kd * 2
 lessthan cmp N kd
 jumpfalse cmp find_range
 
 
-add q 0 0
+q = 0
 label loop_start
-add i i -1
+i = i + -1
 getarray powtwo i k
-mul kd k D
+kd = k * D
 lessthan cmp N kd
 jumptrue cmp next_iter
-add q q k
-mul kdneg kd -1
-add N N kdneg
+q = q + k
+kdneg = kd * -1
+N = N + kdneg
 label next_iter
 jumptrue i loop_start
 return q N

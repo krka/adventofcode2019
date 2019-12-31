@@ -40,20 +40,20 @@ public class Day10Test {
   @Test
   public void testPart2Sample() {
     List<Day10.Point> points = new Day10("day10-part2-sample.in").getOrdering(8, 3);
-    printPoints(points);
+    //printPoints(points);
   }
 
   @Test
   public void testPart2Sample2() {
     List<Day10.Point> points = new Day10("day10-sample5.in").getOrdering(11, 13);
-    printPoints(points);
+    //printPoints(points);
   }
 
   @Test
   public void testPart2() {
     // Row and col from part 1
     List<Day10.Point> points = new Day10("day10.in").getOrdering(31, 20);
-    printPoints(points);
+    //printPoints(points);
 
     Day10.Point point = points.get(199);
     int answer = point.col * 100 + point.row;

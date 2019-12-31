@@ -1,9 +1,10 @@
-var a
-var b
-var c
-add a 10 20
-add b 1 2
-add c a b
-add c c 90
+int a = 0
+int b = 0
+int c = 0
+
+a = 10 + 20
+b = 1 + 2
+c = a + b
+c = c + 90
 output c
 halt

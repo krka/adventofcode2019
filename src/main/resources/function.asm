@@ -1,16 +1,16 @@
-var tmp
+int tmp = 0
 
 func foo a b
-add tmp a b
+tmp = a + b
 return tmp
 endfunc
 
-var x
-var y
-var z
+int x = 0
+int y = 0
+int z = 0
 
-add x 100 0
-add y 23 0
+x = 100 + 0
+y = 23 + 0
 
 call foo x y : z
 output z
