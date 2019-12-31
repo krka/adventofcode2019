@@ -10,8 +10,8 @@ label setup_powtwo
 setarray powtwo i k
 k = k * 2
 i = i + 1
-eq cmp i 64
-jumpfalse cmp setup_powtwo
+cmp = i == 64
+if not cmp jump setup_powtwo
 
 func div N D
 
@@ -20,8 +20,8 @@ kd = D
 label find_range
 i = i + 1
 kd = kd * 2
-lessthan cmp N kd
-jumpfalse cmp find_range
+cmp = N < kd
+if not cmp jump find_range
 
 
 q = 0
@@ -29,12 +29,12 @@ label loop_start
 i = i + -1
 getarray powtwo i k
 kd = k * D
-lessthan cmp N kd
-jumptrue cmp next_iter
+cmp = N < kd
+if cmp jump next_iter
 q = q + k
 kdneg = kd * -1
 N = N + kdneg
 label next_iter
-jumptrue i loop_start
+if i jump loop_start
 return q N
 endfunc

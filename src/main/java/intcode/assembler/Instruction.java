@@ -4,7 +4,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public abstract class Instruction {
-  private final Pattern pattern;
+  final Pattern pattern;
 
   protected Instruction(Pattern pattern) {
     this.pattern = pattern;

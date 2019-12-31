@@ -14,6 +14,12 @@ public class Parser {
     INSTRUCTIONS.add(new AddInstruction());
     INSTRUCTIONS.add(new MulInstruction());
     INSTRUCTIONS.add(new SetInstruction());
+    INSTRUCTIONS.add(new EqualsInstruction());
+    INSTRUCTIONS.add(new LessThanInstruction());
+    INSTRUCTIONS.add(new GreaterThanInstruction());
+    INSTRUCTIONS.add(new JumpFalseInstruction());
+    INSTRUCTIONS.add(new JumpTrueInstruction());
+    INSTRUCTIONS.add(new JumpAlwaysInstruction());
   }
 
   public static boolean parse(String line, Assembler assembler, Assembler.Function function) {

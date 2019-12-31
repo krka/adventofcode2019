@@ -3,14 +3,13 @@ int i = 0
 int ch = 0
 
 func outputString sptr
-s = sptr + 0
-i = 0 + 0
+i = 0
 label loop
-getarrayptr s i ch
-jumpfalse ch finish
+getarrayptr sptr i ch
+if not ch jump finish
 output ch
 i = i + 1
-jumpfalse 0 loop
+jump loop
 label finish
 return
 endfunc

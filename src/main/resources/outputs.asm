@@ -15,15 +15,15 @@ call div tempn 10 : tempn remainder
 remainder = remainder + 48
 setarray tempnumber i remainder
 i = i + 1
-jumptrue tempn populate
+if tempn jump populate
 
 label output
 i = i + -1
 
 getarray tempnumber i tempn
 output tempn
-jumpfalse i finish
-jumpfalse 0 output
+if not i jump finish
+jump output
 
 label finish
 return

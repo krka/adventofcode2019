@@ -57,10 +57,6 @@ public class Assembler {
             function.eq(tokens[1], tokens[2], tokens[3]);
           } else if (first.equals("lessthan")) {
             function.lessThan(tokens[1], tokens[2], tokens[3]);
-          } else if (first.equals("jumptrue")) {
-            function.jump(true, tokens[1], tokens[2]);
-          } else if (first.equals("jumpfalse")) {
-            function.jump(false, tokens[1], tokens[2]);
           } else if (first.equals("input")) {
             function.addInput(tokens[1]);
           } else if (first.equals("output")) {
