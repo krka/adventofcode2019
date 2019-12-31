@@ -23,12 +23,16 @@ public abstract class Instruction {
   }
 
   public boolean apply(String line, Assembler assembler, Assembler.Function function) {
-    Matcher matcher = pattern.matcher(line);
+    Matcher matcher = applyMatch(line);
     if (matcher.matches()) {
       apply(matcher, assembler, function);
       return true;
     }
     return false;
+  }
+
+  Matcher applyMatch(String line) {
+    return pattern.matcher(line);
   }
 
   protected abstract void apply(Matcher matcher, Assembler assembler, Assembler.Function function);

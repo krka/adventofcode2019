@@ -2,13 +2,13 @@ package intcode.assembler;
 
 import java.util.regex.Matcher;
 
-public class Comment extends Instruction {
-  protected Comment() {
-    super(Instruction.pattern(Token.fixed("#"), Token.anything()));
+public class HaltInstruction extends Instruction {
+  public HaltInstruction() {
+    super(Token.fixed("halt"));
   }
 
   @Override
   protected void apply(Matcher matcher, Assembler assembler, Assembler.Function function) {
-
+    function.addHalt();
   }
 }

@@ -6,5 +6,5 @@ a = 10 + 20
 b = 1 + 2
 c = a + b
 c = c + 90
-output c
+output(c)
 halt

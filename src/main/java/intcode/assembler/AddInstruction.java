@@ -4,9 +4,9 @@ import java.util.regex.Matcher;
 
 public class AddInstruction extends Instruction {
   public AddInstruction() {
-    super(Token.variable("name"), Token.maybeSpace(), Token.kw("="), Token.maybeSpace(),
+    super(Token.variable("name"), Token.maybeSpace(), Token.fixed("="), Token.maybeSpace(),
             Token.variable("a"), Token.maybeSpace(),
-            Token.kw("+"), Token.maybeSpace(),
+            Token.fixed("+"), Token.maybeSpace(),
             Token.variable("b"));
   }
 

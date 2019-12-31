@@ -9,7 +9,7 @@ public class Token {
     this.regexp = regexp;
   }
 
-  static Token kw(String s) {
+  static Token fixed(String s) {
     return new Token(Pattern.quote(s));
   }
 
@@ -37,4 +37,7 @@ public class Token {
     return new Token(".*");
   }
 
+  public static Token commaList(String groupName) {
+    return new Token("(?<" + groupName + ">[^\\s,]+(,\\s*[^\\s,]+)*)");
+  }
 }

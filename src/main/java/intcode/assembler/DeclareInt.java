@@ -4,7 +4,7 @@ import java.util.regex.Matcher;
 
 public class DeclareInt extends Instruction {
   protected DeclareInt() {
-    super(Instruction.pattern(Token.kw("int"), Token.space(), Token.variable("name"), Token.maybeSpace(), Token.kw("="), Token.maybeSpace(), Token.integer("value")));
+    super(Instruction.pattern(Token.fixed("int"), Token.space(), Token.variable("name"), Token.maybeSpace(), Token.fixed("="), Token.maybeSpace(), Token.integer("value")));
   }
 
   @Override

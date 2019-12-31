@@ -51,25 +51,12 @@ public class Assembler {
           }
           String[] tokens = line.split(" ");
           String first = tokens[0];
-          if (first.equals("label")) {
-            function.addLabel(tokens[1]);
-          } else if (first.equals("eq")) {
-            function.eq(tokens[1], tokens[2], tokens[3]);
-          } else if (first.equals("lessthan")) {
-            function.lessThan(tokens[1], tokens[2], tokens[3]);
-          } else if (first.equals("input")) {
-            function.addInput(tokens[1]);
-          } else if (first.equals("output")) {
-            function.addOutput(tokens[1]);
-          } else if (first.equals("setarray")) {
+          if (first.equals("setarray")) {
             function.setArray(tokens[1], tokens[2], tokens[3]);
           } else if (first.equals("getarray")) {
             function.getArray(false, tokens[1], tokens[2], tokens[3]);
           } else if (first.equals("getarrayptr")) {
             function.getArray(true, tokens[1], tokens[2], tokens[3]);
-          } else if (first.equals("call")) {
-            function.addFunctionCall(tokens);
-
           } else if (first.equals("func")) {
             String funcName = tokens[1];
             int numVariables = tokens.length - 2;
@@ -95,10 +82,8 @@ public class Assembler {
               throw new RuntimeException("Can not return from main");
             }
             function.addReturn(tokens);
-          } else if (first.equals("halt")) {
-            function.addHalt();
           } else {
-            throw new RuntimeException("Unexpected instruction: " + first);
+            throw new RuntimeException("Unexpected line: " + line);
           }
         }
       }
@@ -198,7 +183,7 @@ public class Assembler {
 
   class Function {
     private final List<String> stackVariables = new ArrayList<>();
-    private final List<Op> operations = new ArrayList<>();
+    final List<Op> operations = new ArrayList<>();
     private final Map<String, Label> labels = new HashMap<>();
     private final boolean isStack;
     private final SetRelBase setRelBase = new SetRelBase();
@@ -281,7 +266,7 @@ public class Assembler {
       operations.add(addOp);
     }
 
-    private Variable resolveVariable(String variableName) {
+    Variable resolveVariable(String variableName) {
       int i = 0;
       for (String stackVariable : stackVariables) {
         if (stackVariable.equals(variableName)) {
@@ -298,7 +283,7 @@ public class Assembler {
       return variable;
     }
 
-    private Parameter resolveParameter(String expression) {
+    Parameter resolveParameter(String expression) {
       if (expression.startsWith("&")) {
         return resolveVariable(expression.substring(1)).dereference();
       }
@@ -325,9 +310,7 @@ public class Assembler {
       for (int i = 1; i < tokens.length; i++) {
         returnValues.add(resolveParameter(tokens[i]));
       }
-      while (tempSpace.size() < returnValues.size()) {
-        tempSpace.add(new Variable(1));
-      }
+      ensureTempSpaceSize(returnValues.size());
       operations.add(new Return(this, returnValues, tempSpace));
     }
 
@@ -337,26 +320,6 @@ public class Assembler {
 
     public void addOutput(String token) {
       operations.add(new Output(resolveParameter(token)));
-    }
-
-    public void addFunctionCall(String[] tokens) {
-      String funcName = tokens[1];
-
-      boolean outputMode = false;
-      List<Parameter> parameters = new ArrayList<>();
-      List<Variable> outputs = new ArrayList<>();
-      for (int i = 2; i < tokens.length; i++) {
-        if (tokens[i].equals(":")) {
-          outputMode = true;
-        } else {
-          if (outputMode) {
-            outputs.add(resolveVariable(tokens[i]));
-          } else {
-            parameters.add(resolveParameter(tokens[i]));
-          }
-        }
-      }
-      operations.add(new FunctionCall(Assembler.this, funcName, parameters, outputs));
     }
 
     public int finalize(int pc) {
@@ -390,6 +353,12 @@ public class Assembler {
       operations.add(new Halt());
     }
 
+  }
+
+  private void ensureTempSpaceSize(int size) {
+    while (tempSpace.size() < size) {
+      tempSpace.add(new Variable(1));
+    }
   }
 
 }

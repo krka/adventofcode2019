@@ -5,8 +5,8 @@ import java.util.regex.Matcher;
 public class DeclareArray extends Instruction {
   protected DeclareArray() {
     super(Instruction.pattern(
-            Token.kw("array"), Token.maybeSpace(),
-            Token.kw("["), Token.maybeSpace(), Token.integer("size"), Token.maybeSpace(), Token.kw("]"), Token.maybeSpace(),
+            Token.fixed("array"), Token.maybeSpace(),
+            Token.fixed("["), Token.maybeSpace(), Token.integer("size"), Token.maybeSpace(), Token.fixed("]"), Token.maybeSpace(),
             Token.variable("name")));
   }
 

@@ -8,6 +8,9 @@ public class Parser {
   static {
     INSTRUCTIONS.add(new IncludeResource());
     INSTRUCTIONS.add(new Comment());
+    INSTRUCTIONS.add(new LabelInstruction());
+    INSTRUCTIONS.add(new InputInstruction());
+    INSTRUCTIONS.add(new OutputInstruction());
     INSTRUCTIONS.add(new DeclareInt());
     INSTRUCTIONS.add(new DeclareString());
     INSTRUCTIONS.add(new DeclareArray());
@@ -20,6 +23,9 @@ public class Parser {
     INSTRUCTIONS.add(new JumpFalseInstruction());
     INSTRUCTIONS.add(new JumpTrueInstruction());
     INSTRUCTIONS.add(new JumpAlwaysInstruction());
+    INSTRUCTIONS.add(new HaltInstruction());
+    INSTRUCTIONS.add(new FunctionCallInstruction());
+    INSTRUCTIONS.add(new NoReturnFunctionCallInstruction());
   }
 
   public static boolean parse(String line, Assembler assembler, Assembler.Function function) {

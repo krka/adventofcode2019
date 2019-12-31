@@ -10,22 +10,22 @@ func outputNumber n
 i = 0
 tempn = n
 
-label populate
-call div tempn 10 : tempn remainder
+populate:
+tempn, remainder = div(tempn, 10)
 remainder = remainder + 48
 setarray tempnumber i remainder
 i = i + 1
 if tempn jump populate
 
-label output
+output:
 i = i + -1
 
-getarray tempnumber i tempn
-output tempn
+getarrayptr &tempnumber i tempn
+output(tempn)
 if not i jump finish
 jump output
 
-label finish
+finish:
 return
 
 endfunc

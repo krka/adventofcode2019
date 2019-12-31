@@ -12,6 +12,6 @@ int z = 0
 x = 100 + 0
 y = 23 + 0
 
-call foo x y : z
-output z
+z = foo(x, y)
+output(z)
 halt

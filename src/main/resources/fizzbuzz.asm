@@ -10,38 +10,37 @@ string fizz = "Fizz"
 string buzz = "Buzz"
 string fizzbuzz = "FizzBuzz"
 
-input N
+N = input()
 
-i = 0 + 0
-label loop
+loop:
 i = i + 1
 
-call div i 15 : Q R
+Q, R = div(i, 15)
 if not R jump print15
-call div i 5 : Q R
+Q, R = div(i, 5)
 if not R jump print5
-call div i 3 : Q R
+Q, R = div(i, 3)
 if not R jump print3
 
-call outputNumber i
-output 10
+outputNumber(i)
+output(10)
 jump endloop
 
-label print15
-call outputString &fizzbuzz
-output 10
+print15:
+outputString(&fizzbuzz)
+output(10)
 jump endloop
 
-label print5
-call outputString &buzz
-output 10
+print5:
+outputString(&buzz)
+output(10)
 jump endloop
 
-label print3
-call outputString &fizz
-output 10
+print3:
+outputString(&fizz)
+output(10)
 
-label endloop
+endloop:
 cmp = i == N
 if not cmp jump loop
 

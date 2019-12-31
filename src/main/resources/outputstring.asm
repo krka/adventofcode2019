@@ -4,12 +4,12 @@ int ch = 0
 
 func outputString sptr
 i = 0
-label loop
+loop:
 getarrayptr sptr i ch
 if not ch jump finish
-output ch
+output(ch)
 i = i + 1
 jump loop
-label finish
+finish:
 return
 endfunc

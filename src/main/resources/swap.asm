@@ -12,8 +12,8 @@ int w = 0
 x = 100 + 0
 y = 23 + 0
 
-call swap x y : z w
-output z
-output w
+z, w = swap(x, y)
+output(z)
+output(w)
 
 halt
