@@ -4,10 +4,10 @@ import java.util.regex.Matcher;
 
 public class AddInstruction extends Instruction {
   public AddInstruction() {
-    super(Token.variable("name"), Token.maybeSpace(), Token.fixed("="), Token.maybeSpace(),
-            Token.variable("a"), Token.maybeSpace(),
+    super(Token.parameter("name"), Token.maybeSpace(), Token.fixed("="), Token.maybeSpace(),
+            Token.parameter("a"), Token.maybeSpace(),
             Token.fixed("+"), Token.maybeSpace(),
-            Token.variable("b"));
+            Token.parameter("b"));
   }
 
   @Override

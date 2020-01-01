@@ -14,7 +14,7 @@ public class Assembler {
   private final Set<String> resources = new HashSet<>();
   private final Map<String, Variable> variables = new HashMap<>();
   private final List<Variable> variableOrdering = new ArrayList<>();
-  private final List<Variable> tempSpace = new ArrayList<>();
+  final List<Variable> tempSpace = new ArrayList<>();
 
   final Map<String, Function> functions = new HashMap<>();
   private final Function main = new Function(false, "__main__");
@@ -207,15 +207,27 @@ public class Assembler {
     }
 
     public void eq(String target, String a, String b) {
-      operations.add(new EqOp(resolveParameter(a), resolveParameter(b), resolveParameter(target)));
+      eq(resolveParameter(target), a, b);
+    }
+
+    public void eq(Parameter target, String a, String b) {
+      operations.add(new EqOp(resolveParameter(a), resolveParameter(b), target));
     }
 
     public void lessThan(String target, String a, String b) {
-      operations.add(new LessThanOp(resolveParameter(a), resolveParameter(b), resolveParameter(target)));
+      lessThan(resolveParameter(target), a, b);
+    }
+
+    public void lessThan(Parameter target, String a, String b) {
+      operations.add(new LessThanOp(resolveParameter(a), resolveParameter(b), target));
     }
 
     public void jump(boolean isTrue, String cmpRef, String destination) {
-      operations.add(new Jump(isTrue, resolveParameter(cmpRef), null, resolveLabel(destination)));
+      jump(isTrue, resolveParameter(cmpRef), destination);
+    }
+
+    public void jump(boolean isTrue, Parameter parameter, String destination) {
+      operations.add(new Jump(isTrue, parameter, null, resolveLabel(destination)));
     }
 
     private Label resolveLabel(String label) {
@@ -355,7 +367,7 @@ public class Assembler {
 
   }
 
-  private void ensureTempSpaceSize(int size) {
+  void ensureTempSpaceSize(int size) {
     while (tempSpace.size() < size) {
       tempSpace.add(new Variable(1));
     }

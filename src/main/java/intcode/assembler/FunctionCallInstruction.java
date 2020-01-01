@@ -6,7 +6,7 @@ import java.util.regex.Matcher;
 
 public class FunctionCallInstruction extends Instruction {
   public FunctionCallInstruction() {
-    super(Token.commaList("returnvalues"), Token.maybeSpace(), Token.fixed("="), Token.maybeSpace(), Token.variable("functionname"), Token.maybeSpace(), Token.fixed("("),
+    super(Token.commaList("returnvalues"), Token.maybeSpace(), Token.fixed("="), Token.maybeSpace(), Token.parameter("functionname"), Token.maybeSpace(), Token.fixed("("),
             Token.maybeSpace(), Token.commaList("parameters"), Token.maybeSpace(), Token.fixed(")"));
   }
 
@@ -18,7 +18,10 @@ public class FunctionCallInstruction extends Instruction {
 
     List<Parameter> parameters2 = new ArrayList<>();
     for (String parameter : parameters) {
-      parameters2.add(function.resolveParameter(parameter.trim()));
+      String param = parameter.trim();
+      if (!param.isEmpty()) {
+        parameters2.add(function.resolveParameter(param));
+      }
     }
 
     List<Variable> returnValues2 = new ArrayList<>();

@@ -7,7 +7,7 @@ public class DeclareArray extends Instruction {
     super(Instruction.pattern(
             Token.fixed("array"), Token.maybeSpace(),
             Token.fixed("["), Token.maybeSpace(), Token.integer("size"), Token.maybeSpace(), Token.fixed("]"), Token.maybeSpace(),
-            Token.variable("name")));
+            Token.parameter("name")));
   }
 
   @Override

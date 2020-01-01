@@ -28,7 +28,16 @@ public class AssemblerTest {
 
     intCode.run();
     assertEquals(IntCode.State.HALTED, intCode.getState());
-    assertEquals(Arrays.asList(BigInteger.valueOf(123)), intCode.drainStdout());
+    assertEquals(Arrays.asList(BigInteger.valueOf(123), BigInteger.valueOf(1234)), intCode.drainStdout());
+  }
+
+  @Test
+  public void testJumps() {
+    IntCode intCode = IntCode.fromResource(Assembler.compile("test_jumps.asm"));
+
+    intCode.run();
+    assertEquals(IntCode.State.HALTED, intCode.getState());
+    assertEquals(Arrays.asList(BigInteger.valueOf(1)), intCode.drainStdout());
   }
 
   @Test

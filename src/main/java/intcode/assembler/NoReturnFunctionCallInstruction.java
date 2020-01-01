@@ -6,7 +6,7 @@ import java.util.regex.Matcher;
 
 public class NoReturnFunctionCallInstruction extends Instruction {
   public NoReturnFunctionCallInstruction() {
-    super(Token.variable("functionname"), Token.maybeSpace(), Token.fixed("("),
+    super(Token.parameter("functionname"), Token.maybeSpace(), Token.fixed("("),
             Token.maybeSpace(), Token.commaList("parameters"), Token.maybeSpace(), Token.fixed(")"));
   }
 

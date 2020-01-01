@@ -13,8 +13,8 @@ public class Token {
     return new Token(Pattern.quote(s));
   }
 
-  public static Token variable(String groupName) {
-    return new Token("(?<" + groupName + ">[^\\s,]+)");
+  public static Token parameter(String groupName) {
+    return new Token("(?<" + groupName + ">[^\\s,()<>=!]+)");
   }
 
   public static Token space() {
@@ -38,6 +38,6 @@ public class Token {
   }
 
   public static Token commaList(String groupName) {
-    return new Token("(?<" + groupName + ">[^\\s,]+(,\\s*[^\\s,]+)*)");
+    return new Token("(?<" + groupName + ">[^()]*)");
   }
 }

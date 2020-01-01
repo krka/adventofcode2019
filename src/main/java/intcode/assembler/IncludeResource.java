@@ -4,7 +4,7 @@ import java.util.regex.Matcher;
 
 public class IncludeResource extends Instruction {
   protected IncludeResource() {
-    super(Instruction.pattern(Token.fixed("#include"), Token.space(), Token.variable("name")));
+    super(Instruction.pattern(Token.fixed("#include"), Token.space(), Token.parameter("name")));
   }
 
   @Override

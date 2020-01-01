@@ -4,7 +4,7 @@ import java.util.regex.Matcher;
 
 public class JumpFalseInstruction extends Instruction {
   public JumpFalseInstruction() {
-    super(Token.fixed("if"), Token.space(), Token.fixed("not"), Token.space(), Token.variable("cmp"), Token.space(), Token.fixed("jump"), Token.space(), Token.variable("label"));
+    super(Token.fixed("if"), Token.space(), Token.fixed("not"), Token.space(), Token.parameter("cmp"), Token.space(), Token.fixed("jump"), Token.space(), Token.parameter("label"));
   }
 
   @Override

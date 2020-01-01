@@ -5,7 +5,7 @@ import java.util.regex.Matcher;
 public class OutputInstruction extends Instruction {
   public OutputInstruction() {
     super(Token.fixed("output"), Token.maybeSpace(), Token.fixed("("), Token.maybeSpace(),
-            Token.variable("name"), Token.maybeSpace(), Token.fixed(")"));
+            Token.parameter("name"), Token.maybeSpace(), Token.fixed(")"));
   }
 
   @Override

@@ -4,7 +4,7 @@ import java.util.regex.Matcher;
 
 public class DeclareString extends Instruction {
   protected DeclareString() {
-    super(Instruction.pattern(Token.fixed("string"), Token.space(), Token.variable("name"), Token.maybeSpace(), Token.fixed("="), Token.maybeSpace(), Token.stringConstant("value")));
+    super(Instruction.pattern(Token.fixed("string"), Token.space(), Token.parameter("name"), Token.maybeSpace(), Token.fixed("="), Token.maybeSpace(), Token.stringConstant("value")));
   }
 
   @Override

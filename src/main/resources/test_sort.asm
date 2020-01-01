@@ -10,8 +10,7 @@ read_input:
 tmp = input()
 setarray numbers i tmp
 i = i + 1
-tmp = i == 100
-if not tmp jump read_input
+if i != 100 jump read_input
 
 i = 0
 outer_loop:
@@ -20,8 +19,7 @@ getarray numbers i outer
 
 inner_loop:
 getarray numbers j inner
-tmp = inner < outer
-if not tmp jump skipswap
+if inner >= outer jump skipswap
 setarray numbers i inner
 setarray numbers j outer
 outer = inner + 0
@@ -29,19 +27,16 @@ outer = inner + 0
 skipswap:
 j = j + 1
 
-tmp = j < 100
-if tmp jump inner_loop
+if j < 100 jump inner_loop
 
 i = i + 1
-tmp = i < 99
-if tmp jump outer_loop
+if i < 99 jump outer_loop
 
 i = 0 + 0
 emit:
 getarray numbers i tmp
 output(tmp)
 i = i + 1
-tmp = i < 100
-if tmp jump emit
+if i < 100 jump emit
 
 halt
