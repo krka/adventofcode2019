@@ -6,7 +6,7 @@ class StackVariable extends Variable {
   private final int offset;
 
   public StackVariable(int offset) {
-    super(1);
+    super(1, new BigInteger[]{BigInteger.ZERO}, null);
     this.offset  = offset;
   }
 

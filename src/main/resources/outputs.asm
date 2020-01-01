@@ -13,14 +13,14 @@ func outputNumber(n)
 populate:
   tempn, remainder = div(tempn, 10)
   remainder = remainder + 48
-  setarray tempnumber i remainder
+  tempnumber[i] = remainder
   i = i + 1
   if tempn jump populate
 
 output:
   i = i + -1
 
-  getarrayptr &tempnumber i tempn
+  tempn = tempnumber[i]
   output(tempn)
   if not i jump finish
   jump output

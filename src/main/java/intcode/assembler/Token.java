@@ -14,7 +14,7 @@ public class Token {
   }
 
   public static Token parameter(String groupName) {
-    return new Token("(?<" + groupName + ">[^\\s,()<>=!]+)");
+    return new Token("(?<" + groupName + ">[^\\s,()<>=!\\[\\]]+)");
   }
 
   public static Token space() {

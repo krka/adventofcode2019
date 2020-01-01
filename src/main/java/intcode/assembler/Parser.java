@@ -41,6 +41,9 @@ public class Parser {
     INSTRUCTIONS.add(new EndFuncInstruction());
     INSTRUCTIONS.add(new ReturnInstruction());
 
+    INSTRUCTIONS.add(new GetArrayInstruction());
+    INSTRUCTIONS.add(new SetArrayInstruction());
+
   }
 
   public static boolean parse(String line, Assembler assembler, Assembler.Function function) {

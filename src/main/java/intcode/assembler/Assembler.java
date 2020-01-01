@@ -45,18 +45,7 @@ public class Assembler {
         lineNumber++;
         line = line.trim();
         if (!line.isEmpty()) {
-          if (Parser.parse(line, this, function)) {
-            continue;
-          }
-          String[] tokens = line.split(" ");
-          String first = tokens[0];
-          if (first.equals("setarray")) {
-            function.setArray(tokens[1], tokens[2], tokens[3]);
-          } else if (first.equals("getarray")) {
-            function.getArray(false, tokens[1], tokens[2], tokens[3]);
-          } else if (first.equals("getarrayptr")) {
-            function.getArray(true, tokens[1], tokens[2], tokens[3]);
-          } else {
+          if (!Parser.parse(line, this, function)) {
             throw new RuntimeException("Unexpected line: " + line);
           }
         }
@@ -100,8 +89,15 @@ public class Assembler {
 
     for (Variable variable : variableOrdering) {
       int len = variable.getLen();
-      for (int i = 0; i < len; i++) {
-        res.add(variable.values[i]);
+      if (variable.reference != null) {
+        if (len != 1) {
+          throw new RuntimeException();
+        }
+        res.add(BigInteger.valueOf(variable.reference.getAddress()));
+      } else {
+        for (int i = 0; i < len; i++) {
+          res.add(variable.values[i]);
+        }
       }
     }
     for (Variable variable : tempSpace) {
@@ -119,13 +115,24 @@ public class Assembler {
     return res;
   }
 
-  private Variable declareVariable(int len, String varName, BigInteger defaultValue) {
-    String key = namespace + ":" + varName;
-    BigInteger[] values = new BigInteger[len];
-    for (int i = 0; i < len; i++) {
-      values[i] = defaultValue;
-    }
-    Variable variable = new Variable(values);
+  public void declareInt(String name, String value) {
+    addVariable(name, Variable.intVar(new BigInteger(value)));
+  }
+
+  public void declareString(String varName, String value) {
+    Variable string = Variable.string(value);
+    addVariable(varName + "__data__", string);
+    addVariable(varName, Variable.pointer(string));
+  }
+
+  public void declareArray(String varName, int len) {
+    Variable string = Variable.array(len);
+    addVariable(varName + "__data__", string);
+    addVariable(varName, Variable.pointer(string));
+  }
+
+  private Variable addVariable(String name, Variable variable) {
+    String key = namespace + ":" + name;
     Variable prev = variables.put(key, variable);
     if (prev != null) {
       throw new RuntimeException("Variable " + key + " already defined");
@@ -134,26 +141,6 @@ public class Assembler {
     return variable;
   }
 
-  public void declareString(String varName, String value) {
-    int len = value.length();
-    Variable variable = declareVariable(len + 1, varName, BigInteger.ZERO);
-    for (int i = 0; i < len; i++) {
-      variable.values[i] = BigInteger.valueOf(value.charAt(i));
-    }
-    variable.values[len] = BigInteger.ZERO;
-  }
-
-  public void declareArray(String varName, int len) {
-    Variable variable = declareVariable(len, varName, BigInteger.ZERO);
-    for (int i = 0; i < len; i++) {
-      variable.values[i] = BigInteger.ZERO;
-    }
-  }
-
-
-  public void declareInt(String name, String value) {
-    declareVariable(1, name, new BigInteger(value));
-  }
 
   public void setFunction(Function function) {
     this.function = function;
@@ -223,7 +210,7 @@ public class Assembler {
       Parameter indexRef = resolveParameter(index);
       Parameter valueParam = resolveParameter(value);
 
-      AddOp rewriteParam = new AddOp(array.dereference(), indexRef, Address.placeHolder());
+      AddOp rewriteParam = new AddOp(array, indexRef, Address.placeHolder());
       AddOp addOp = new AddOp(valueParam, Constant.ZERO, Address.placeHolder());
 
       rewriteParam.setTarget(new AddressableMemory(rewriteParam, 7));
@@ -231,7 +218,7 @@ public class Assembler {
       operations.add(addOp);
     }
 
-    public void getArray(boolean isPtr, String arrayName, String index, String target) {
+    public void getArray(String arrayName, String index, String target) {
 
       // getarray <arrayName> <index> <target>
       // is expressed as:
@@ -242,13 +229,7 @@ public class Assembler {
       Parameter indexRef = resolveParameter(index);
       Variable targetParam = resolveVariable(target);
 
-      Parameter address;
-      if (isPtr) {
-        address = array;
-      } else {
-        address = array.dereference();
-      }
-      AddOp rewriteParam = new AddOp(address, indexRef, Address.placeHolder());
+      AddOp rewriteParam = new AddOp(array, indexRef, Address.placeHolder());
       AddOp addOp = new AddOp(Address.placeHolder(), Constant.ZERO, targetParam);
 
       rewriteParam.setTarget(new AddressableMemory(rewriteParam, 5));
@@ -274,9 +255,6 @@ public class Assembler {
     }
 
     Parameter resolveParameter(String expression) {
-      if (expression.startsWith("&")) {
-        return resolveVariable(expression.substring(1)).dereference();
-      }
       try {
         return new Constant(new BigInteger(expression));
       } catch (NumberFormatException e) {
@@ -338,8 +316,7 @@ public class Assembler {
 
   void ensureTempSpaceSize(int size) {
     while (tempSpace.size() < size) {
-      tempSpace.add(new Variable(1));
+      tempSpace.add(Variable.intVar(BigInteger.ZERO));
     }
   }
-
 }

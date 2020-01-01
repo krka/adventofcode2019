@@ -8,20 +8,20 @@ int inner = 0
 
 read_input:
 tmp = input()
-setarray numbers i tmp
+numbers[i] = tmp
 i = i + 1
 if i != 100 jump read_input
 
 i = 0
 outer_loop:
 j = i + 1
-getarray numbers i outer
+outer = numbers[i]
 
 inner_loop:
-getarray numbers j inner
+inner = numbers[j]
 if inner >= outer jump skipswap
-setarray numbers i inner
-setarray numbers j outer
+numbers[i] = inner
+numbers[j] = outer
 outer = inner + 0
 
 skipswap:
@@ -34,7 +34,7 @@ if i < 99 jump outer_loop
 
 i = 0 + 0
 emit:
-getarray numbers i tmp
+tmp = numbers[i]
 output(tmp)
 i = i + 1
 if i < 100 jump emit

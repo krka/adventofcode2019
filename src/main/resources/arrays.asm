@@ -4,17 +4,22 @@ array[1] arr
 int a = 0
 int b = 0
 
+# arr[0] references the first element of the array
+# arr[1] references the array pointer
+# arr[2] references the next variable - a
+# arr[2] references the next next variable - b
+
 a = 1 + 0
 b = 2 + 0
 
-getarray arr 1 x
+x = arr[2]
 output(x)
 
-getarray arr 2 x
+x = arr[3]
 output(x)
 
-setarray arr 1 20
-setarray arr 2 30
+arr[2] = 20
+arr[3] = 30
 
 output(a)
 output(b)

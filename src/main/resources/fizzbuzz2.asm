@@ -31,17 +31,17 @@ output(10)
 jump endloop
 
 print15:
-outputString(&fizzbuzz)
+outputString(fizzbuzz)
 output(10)
 jump endloop
 
 print5:
-outputString(&buzz)
+outputString(buzz)
 output(10)
 jump endloop
 
 print3:
-outputString(&fizz)
+outputString(fizz)
 output(10)
 
 endloop:

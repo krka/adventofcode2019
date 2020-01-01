@@ -6,7 +6,7 @@ int q = 0
 array[64] powtwo
 
 setup_powtwo:
-setarray powtwo i k
+powtwo[i] = k
 k = k * 2
 i = i + 1
 if i != 64 jump setup_powtwo
@@ -22,7 +22,7 @@ find_range:
   q = 0
 loop_start:
   i = i + -1
-  getarray powtwo i k
+  k = powtwo[i]
   kd = k * D
   if N < kd jump next_iter
   q = q + k
