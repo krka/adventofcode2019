@@ -17,9 +17,10 @@ public class Assembler {
   final List<Variable> tempSpace = new ArrayList<>();
 
   final Map<String, Function> functions = new HashMap<>();
-  private final Function main = new Function(false, "__main__");
+  final Function main = new Function(false, "__main__");
 
   private String namespace = "<namespace>";
+  private Function function = main;
 
   public static List<BigInteger> compile(String name) {
     Assembler assembler = new Assembler();
@@ -39,8 +40,6 @@ public class Assembler {
     String prevNamespace = namespace;
     namespace = resource;
     try {
-      Function function = main;
-
       List<String> lines = Util.readResource(resource);
       for (String line : lines) {
         lineNumber++;
@@ -57,31 +56,6 @@ public class Assembler {
             function.getArray(false, tokens[1], tokens[2], tokens[3]);
           } else if (first.equals("getarrayptr")) {
             function.getArray(true, tokens[1], tokens[2], tokens[3]);
-          } else if (first.equals("func")) {
-            String funcName = tokens[1];
-            int numVariables = tokens.length - 2;
-            if (function != main) {
-              throw new RuntimeException("Can't define function inside other function: " + funcName);
-            }
-
-            function = new Function(true, funcName);
-            if (functions.put(funcName, function) != null) {
-              throw new RuntimeException("Function already defined: " + funcName);
-            }
-
-            for (int i = 0; i < numVariables; i++) {
-              function.addStackVariable(tokens[2 + i]);
-            }
-          } else if (first.equals("endfunc")) {
-            if (function == main) {
-              throw new RuntimeException("Can not return from main");
-            }
-            function = main;
-          } else if (first.equals("return")) {
-            if (function == main) {
-              throw new RuntimeException("Can not return from main");
-            }
-            function.addReturn(tokens);
           } else {
             throw new RuntimeException("Unexpected line: " + line);
           }
@@ -181,7 +155,11 @@ public class Assembler {
     declareVariable(1, name, new BigInteger(value));
   }
 
-  class Function {
+  public void setFunction(Function function) {
+    this.function = function;
+  }
+
+  public class Function {
     private final List<String> stackVariables = new ArrayList<>();
     final List<Op> operations = new ArrayList<>();
     private final Map<String, Label> labels = new HashMap<>();
@@ -190,7 +168,7 @@ public class Assembler {
     public final String name;
     private int address = -1;
 
-    private Function(boolean isStack, String name) {
+    public Function(boolean isStack, String name) {
       this.isStack = isStack;
       this.name = name;
       if (isStack) {
@@ -315,15 +293,6 @@ public class Assembler {
         throw new RuntimeException("Stack variable already defined: " + variableName);
       }
       stackVariables.add(variableName);
-    }
-
-    public void addReturn(String[] tokens) {
-      List<Parameter> returnValues = new ArrayList<>();
-      for (int i = 1; i < tokens.length; i++) {
-        returnValues.add(resolveParameter(tokens[i]));
-      }
-      ensureTempSpaceSize(returnValues.size());
-      operations.add(new Return(this, returnValues, tempSpace));
     }
 
     public void addInput(String token) {

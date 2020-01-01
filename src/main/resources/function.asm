@@ -1,12 +1,12 @@
 int tmp = 0
 
-func foo a b
-tmp = a + b
-return tmp
+func foo(a, b)
+  tmp = a + b
+  return tmp
 endfunc
 
-func bar
-return 1234
+func bar()
+  return 1234
 endfunc
 
 int x = 0

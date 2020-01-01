@@ -6,27 +6,27 @@ int i = 0
 int tempn = 0
 int remainder = 0
 
-func outputNumber n
-i = 0
-tempn = n
+func outputNumber(n)
+  i = 0
+  tempn = n
 
 populate:
-tempn, remainder = div(tempn, 10)
-remainder = remainder + 48
-setarray tempnumber i remainder
-i = i + 1
-if tempn jump populate
+  tempn, remainder = div(tempn, 10)
+  remainder = remainder + 48
+  setarray tempnumber i remainder
+  i = i + 1
+  if tempn jump populate
 
 output:
-i = i + -1
+  i = i + -1
 
-getarrayptr &tempnumber i tempn
-output(tempn)
-if not i jump finish
-jump output
+  getarrayptr &tempnumber i tempn
+  output(tempn)
+  if not i jump finish
+  jump output
 
 finish:
-return
+  return
 
 endfunc
 

@@ -1,7 +1,5 @@
-int tmp = 0
-
-func swap a b
-return b a
+func swap(a, b)
+  return b, a
 endfunc
 
 int x = 0

@@ -17,15 +17,13 @@ public class Parser {
     INSTRUCTIONS.add(new AddInstruction());
     INSTRUCTIONS.add(new MulInstruction());
     INSTRUCTIONS.add(new SetInstruction());
+
     INSTRUCTIONS.add(new EqualsInstruction());
     INSTRUCTIONS.add(new LessThanInstruction());
     INSTRUCTIONS.add(new GreaterThanInstruction());
     INSTRUCTIONS.add(new JumpFalseInstruction());
     INSTRUCTIONS.add(new JumpTrueInstruction());
     INSTRUCTIONS.add(new JumpAlwaysInstruction());
-    INSTRUCTIONS.add(new HaltInstruction());
-    INSTRUCTIONS.add(new FunctionCallInstruction());
-    INSTRUCTIONS.add(new NoReturnFunctionCallInstruction());
 
     INSTRUCTIONS.add(new JumpEqInstruction());
     INSTRUCTIONS.add(new JumpNotEqInstruction());
@@ -33,6 +31,16 @@ public class Parser {
     INSTRUCTIONS.add(new JumpLessThanEqInstruction());
     INSTRUCTIONS.add(new JumpGreaterThanInstruction());
     INSTRUCTIONS.add(new JumpGreaterThanEqInstruction());
+
+    INSTRUCTIONS.add(new HaltInstruction());
+
+    INSTRUCTIONS.add(new FunctionCallInstruction());
+    INSTRUCTIONS.add(new NoReturnFunctionCallInstruction());
+
+    INSTRUCTIONS.add(new FunctionDefinitionInstruction());
+    INSTRUCTIONS.add(new EndFuncInstruction());
+    INSTRUCTIONS.add(new ReturnInstruction());
+
   }
 
   public static boolean parse(String line, Assembler assembler, Assembler.Function function) {

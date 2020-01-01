@@ -11,26 +11,24 @@ k = k * 2
 i = i + 1
 if i != 64 jump setup_powtwo
 
-func div N D
-
-i = 0
-kd = D
+func div(N, D)
+  i = 0
+  kd = D
 find_range:
-i = i + 1
-kd = kd * 2
-if N >= kd jump find_range
+  i = i + 1
+  kd = kd * 2
+  if N >= kd jump find_range
 
-
-q = 0
+  q = 0
 loop_start:
-i = i + -1
-getarray powtwo i k
-kd = k * D
-if N < kd jump next_iter
-q = q + k
-kdneg = kd * -1
-N = N + kdneg
+  i = i + -1
+  getarray powtwo i k
+  kd = k * D
+  if N < kd jump next_iter
+  q = q + k
+  kdneg = kd * -1
+  N = N + kdneg
 next_iter:
-if i jump loop_start
-return q N
+  if i jump loop_start
+  return q, N
 endfunc
