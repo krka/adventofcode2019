@@ -11,10 +11,10 @@ public class LessThanInstruction extends Instruction {
   }
 
   @Override
-  protected void apply(Matcher matcher, Assembler assembler, Assembler.Function function) {
+  protected void apply(Matcher matcher, Assembler assembler, Assembler.Function function, String context) {
     String target = matcher.group("name");
     String a = matcher.group("a");
     String b = matcher.group("b");
-    function.lessThan(target, a, b);
+    function.lessThan(target, a, b, context);
   }
 }

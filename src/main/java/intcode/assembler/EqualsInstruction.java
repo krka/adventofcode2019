@@ -11,10 +11,10 @@ public class EqualsInstruction extends Instruction {
   }
 
   @Override
-  protected void apply(Matcher matcher, Assembler assembler, Assembler.Function function) {
+  protected void apply(Matcher matcher, Assembler assembler, Assembler.Function function, String context) {
     String target = matcher.group("name");
     String a = matcher.group("a");
     String b = matcher.group("b");
-    function.eq(target, a, b);
+    function.eq(target, a, b, context);
   }
 }

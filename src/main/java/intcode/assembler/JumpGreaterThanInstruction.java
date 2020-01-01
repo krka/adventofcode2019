@@ -9,14 +9,14 @@ public class JumpGreaterThanInstruction extends Instruction {
   }
 
   @Override
-  protected void apply(Matcher matcher, Assembler assembler, Assembler.Function function) {
+  protected void apply(Matcher matcher, Assembler assembler, Assembler.Function function, String context) {
     String label = matcher.group("label");
     String a = matcher.group("a");
     String b = matcher.group("b");
 
     assembler.ensureTempSpaceSize(1);
     Variable tmpVariable = assembler.tempSpace.get(0);
-    function.lessThan(tmpVariable, b, a);
-    function.jump(true, tmpVariable, label);
+    function.lessThan(tmpVariable, b, a, context);
+    function.jump(true, tmpVariable, label, "# jump if true");
   }
 }

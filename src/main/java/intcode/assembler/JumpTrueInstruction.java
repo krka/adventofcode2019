@@ -8,9 +8,9 @@ public class JumpTrueInstruction extends Instruction {
   }
 
   @Override
-  protected void apply(Matcher matcher, Assembler assembler, Assembler.Function function) {
+  protected void apply(Matcher matcher, Assembler assembler, Assembler.Function function, String context) {
     String label = matcher.group("label");
     String cmp = matcher.group("cmp");
-    function.jump(true, cmp, label);
+    function.jump(true, cmp, label, context);
   }
 }

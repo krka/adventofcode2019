@@ -9,9 +9,9 @@ public class SetInstruction extends Instruction {
   }
 
   @Override
-  protected void apply(Matcher matcher, Assembler assembler, Assembler.Function function) {
+  protected void apply(Matcher matcher, Assembler assembler, Assembler.Function function, String context) {
     String target = matcher.group("name");
     String a = matcher.group("a");
-    function.add(target, a, "0");
+    function.add(target, a, "0", context);
   }
 }

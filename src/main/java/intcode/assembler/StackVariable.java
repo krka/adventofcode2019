@@ -6,7 +6,7 @@ class StackVariable extends Variable {
   private final int offset;
 
   public StackVariable(int offset) {
-    super(1, new BigInteger[]{BigInteger.ZERO}, null);
+    super("int", "stack_" + offset, 1, new BigInteger[]{BigInteger.ZERO}, null, "# stack " + offset);
     this.offset  = offset;
   }
 
@@ -20,8 +20,4 @@ class StackVariable extends Variable {
     return BigInteger.valueOf(offset);
   }
 
-  @Override
-  public ImmediateParameter dereference() {
-    throw new RuntimeException("can't dereference a stack variable");
-  }
 }

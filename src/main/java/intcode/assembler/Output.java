@@ -5,9 +5,11 @@ import java.util.List;
 
 public class Output extends Op {
   private final Parameter parameter;
+  private final String context;
 
-  public Output(Parameter parameter) {
+  public Output(Parameter parameter, String context) {
     this.parameter = parameter;
+    this.context = context;
   }
 
   @Override
@@ -16,10 +18,9 @@ public class Output extends Op {
   }
 
   @Override
-  public void writeTo(List<BigInteger> res) {
+  public void writeTo(AnnotatedIntCode res) {
     int opcode = 4 + 100 * parameter.mode().ordinal();
-    res.add(BigInteger.valueOf(opcode));
-    res.add(parameter.value());
+    res.addOperation(new AnnotatedOperation(context, BigInteger.valueOf(opcode), parameter.value()));
   }
 
 }

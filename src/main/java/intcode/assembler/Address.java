@@ -20,9 +20,5 @@ public class Address {
       return BigInteger.ZERO;
     }
 
-    @Override
-    public ImmediateParameter dereference() {
-      throw new RuntimeException("Can't derefence a placeholder");
-    }
   }
 }

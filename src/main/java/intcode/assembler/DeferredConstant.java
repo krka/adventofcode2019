@@ -20,8 +20,4 @@ class DeferredConstant implements ImmediateParameter {
     return BigInteger.valueOf(hasAddress.getAddress());
   }
 
-  @Override
-  public DeferredConstant dereference() {
-    throw new RuntimeException("Can't dereference a constant");
-  }
 }

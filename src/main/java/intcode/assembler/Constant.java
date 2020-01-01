@@ -26,8 +26,4 @@ class Constant implements ImmediateParameter {
     return constant;
   }
 
-  @Override
-  public Constant dereference() {
-    throw new RuntimeException("Can't dereference a constant");
-  }
 }

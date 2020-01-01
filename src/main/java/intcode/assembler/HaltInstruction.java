@@ -8,7 +8,7 @@ public class HaltInstruction extends Instruction {
   }
 
   @Override
-  protected void apply(Matcher matcher, Assembler assembler, Assembler.Function function) {
-    function.addHalt();
+  protected void apply(Matcher matcher, Assembler assembler, Assembler.Function function, String context) {
+    function.addHalt(context);
   }
 }

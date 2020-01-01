@@ -11,7 +11,9 @@ public class DeclareArray extends Instruction {
   }
 
   @Override
-  protected void apply(Matcher matcher, Assembler assembler, Assembler.Function function) {
-    assembler.declareArray(matcher.group("name"), Integer.parseInt(matcher.group("size")));
+  protected void apply(Matcher matcher, Assembler assembler, Assembler.Function function, String context) {
+    String name = matcher.group("name");
+    String size = matcher.group("size");
+    assembler.declareArray(name, Integer.parseInt(size), context);
   }
 }

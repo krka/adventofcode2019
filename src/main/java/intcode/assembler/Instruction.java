@@ -22,10 +22,10 @@ public abstract class Instruction {
     return Pattern.compile(sb.toString());
   }
 
-  public boolean apply(String line, Assembler assembler, Assembler.Function function) {
+  public boolean apply(String line, Assembler assembler, Assembler.Function function, String context) {
     Matcher matcher = applyMatch(line);
     if (matcher.matches()) {
-      apply(matcher, assembler, function);
+      apply(matcher, assembler, function, context);
       return true;
     }
     return false;
@@ -35,5 +35,5 @@ public abstract class Instruction {
     return pattern.matcher(line);
   }
 
-  protected abstract void apply(Matcher matcher, Assembler assembler, Assembler.Function function);
+  protected abstract void apply(Matcher matcher, Assembler assembler, Assembler.Function function, String context);
 }

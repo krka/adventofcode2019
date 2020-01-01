@@ -46,9 +46,10 @@ public class Parser {
 
   }
 
-  public static boolean parse(String line, Assembler assembler, Assembler.Function function) {
+  public static boolean parse(String line, Assembler assembler, Assembler.Function function, String file, int lineNumber) {
+    String context = file + ":" + lineNumber + "    " + line;
     for (Instruction instruction : INSTRUCTIONS) {
-      if (instruction.apply(line, assembler, function)) {
+      if (instruction.apply(line, assembler, function, context)) {
         return true;
       }
     }

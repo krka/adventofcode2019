@@ -20,16 +20,16 @@ abstract class Op implements HasAddress {
 
   abstract int size();
 
-  void safeWrite(List<BigInteger> res) {
+  void safeWrite(AnnotatedIntCode res) {
     assertAddress(res, getAddress());
     writeTo(res);
     assertAddress(res, getAddress() + size());
   }
 
-  abstract protected void writeTo(List<BigInteger> res);
+  abstract protected void writeTo(AnnotatedIntCode res);
 
-  private void assertAddress(List<BigInteger> res, int address) {
-    if (res.size() != address) {
+  private void assertAddress(AnnotatedIntCode res, int address) {
+    if (res.pc() != address) {
       throw new RuntimeException("Address not aligned with result");
     }
   }

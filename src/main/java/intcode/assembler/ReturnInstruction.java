@@ -10,7 +10,7 @@ public class ReturnInstruction extends Instruction {
   }
 
   @Override
-  protected void apply(Matcher matcher, Assembler assembler, Assembler.Function function) {
+  protected void apply(Matcher matcher, Assembler assembler, Assembler.Function function, String context) {
     if (function == assembler.main) {
       throw new RuntimeException("Can not return from main");
     }
@@ -26,6 +26,6 @@ public class ReturnInstruction extends Instruction {
     }
 
     assembler.ensureTempSpaceSize(returnValues.size());
-    function.operations.add(new Return(function, returnValues, assembler.tempSpace));
+    function.operations.add(new Return(function, returnValues, assembler.tempSpace, context));
   }
 }

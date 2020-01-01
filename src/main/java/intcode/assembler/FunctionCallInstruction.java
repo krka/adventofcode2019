@@ -11,7 +11,7 @@ public class FunctionCallInstruction extends Instruction {
   }
 
   @Override
-  protected void apply(Matcher matcher, Assembler assembler, Assembler.Function function) {
+  protected void apply(Matcher matcher, Assembler assembler, Assembler.Function function, String context) {
     String funcName = matcher.group("functionname");
     String[] parameters = matcher.group("parameters").split(",");
     String[] returnValues = matcher.group("returnvalues").split(",");
@@ -29,7 +29,6 @@ public class FunctionCallInstruction extends Instruction {
       returnValues2.add(function.resolveVariable(returnvalue.trim()));
     }
 
-    function.operations.add(new FunctionCall(assembler, funcName, parameters2, returnValues2));
-
+    function.operations.add(new FunctionCall(assembler, funcName, parameters2, returnValues2, context));
   }
 }

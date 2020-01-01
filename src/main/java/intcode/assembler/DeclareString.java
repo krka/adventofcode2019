@@ -8,7 +8,9 @@ public class DeclareString extends Instruction {
   }
 
   @Override
-  protected void apply(Matcher matcher, Assembler assembler, Assembler.Function function) {
-    assembler.declareString(matcher.group("name"), matcher.group("value"));
+  protected void apply(Matcher matcher, Assembler assembler, Assembler.Function function, String context) {
+    String name = matcher.group("name");
+    String value = matcher.group("value");
+    assembler.declareString(name, value, context);
   }
 }

@@ -22,8 +22,4 @@ class AddressableMemory implements ImmediateParameter {
     return BigInteger.valueOf(hasAddress.getAddress() + offset);
   }
 
-  @Override
-  public AddressableMemory dereference() {
-    throw new RuntimeException("Can't dereference already derefenced");
-  }
 }

@@ -1,5 +1,6 @@
 package intcode;
 
+import intcode.assembler.AnnotatedIntCode;
 import intcode.assembler.Assembler;
 import org.junit.After;
 import org.junit.Before;
@@ -22,7 +23,9 @@ public class DivisionTest {
 
   @Before
   public void setUp() {
-    intCode = IntCode.fromResource(Assembler.compile("test_div.asm"));
+    AnnotatedIntCode annotatedIntCode = Assembler.compileAnnotated("test_div.asm");
+    System.out.println(annotatedIntCode.toString());
+    intCode = IntCode.fromResource(annotatedIntCode.getIntCode());
     intCode.run();
   }
 

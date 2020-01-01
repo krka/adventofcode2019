@@ -3,41 +3,47 @@ package intcode.assembler;
 import java.math.BigInteger;
 
 class Variable implements Parameter, HasAddress {
+  final String type;
+  private final String name;
   private final int len;
   final BigInteger[] values;
   final HasAddress reference;
+  final String context;
   private int address = -1;
 
-  public Variable(int len, BigInteger[] values, HasAddress reference) {
+  public Variable(String type, String name, int len, BigInteger[] values, HasAddress reference, String context) {
+    this.type = type;
+    this.name = name;
     this.len = len;
     this.values = values;
     this.reference = reference;
+    this.context = context;
   }
 
-  public static Variable intVar(BigInteger value) {
-    return new Variable(1, new BigInteger[]{value}, null);
+  public static Variable intVar(String name, BigInteger value, String context) {
+    return new Variable("int", name, 1, new BigInteger[]{value}, null, context);
   }
 
-  public static Variable pointer(HasAddress reference) {
-    return new Variable(1, null, reference);
+  public static Variable pointer(String name, HasAddress reference, String context) {
+    return new Variable("pointer", name, 1, null, reference, context);
   }
 
-  public static Variable string(String s) {
+  public static Variable string(String name, String s, String context) {
     int len = s.length();
     BigInteger[] values = new BigInteger[len + 1];
     for (int i = 0; i < len; i++) {
       values[i] = BigInteger.valueOf(s.charAt(i));
     }
     values[len] = BigInteger.ZERO;
-    return new Variable(len + 1, values, null);
+    return new Variable("string", name,len + 1, values, null, context);
   }
 
-  public static Variable array(int len) {
+  public static Variable array(String name, int len, String context) {
     BigInteger[] values = new BigInteger[len];
     for (int i = 0; i < len; i++) {
       values[i] = BigInteger.ZERO;
     }
-    return new Variable(len, values, null);
+    return new Variable("array", name, len, values, null, context);
   }
 
   public int getLen() {
@@ -54,11 +60,6 @@ class Variable implements Parameter, HasAddress {
     return BigInteger.valueOf(getAddress());
   }
 
-  @Override
-  public ImmediateParameter dereference() {
-    return new DeferredConstant(this);
-  }
-
   public void setAddress(int address) {
     this.address = address;
   }
@@ -69,5 +70,9 @@ class Variable implements Parameter, HasAddress {
       throw new RuntimeException("Can't resolve it before it has been set");
     }
     return address;
+  }
+
+  public String getName() {
+    return name;
   }
 }

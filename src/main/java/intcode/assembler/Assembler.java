@@ -17,16 +17,19 @@ public class Assembler {
   final List<Variable> tempSpace = new ArrayList<>();
 
   final Map<String, Function> functions = new HashMap<>();
-  final Function main = new Function(false, "__main__");
+  final Function main = new Function(false, "__main__", "# main function");
 
   private String namespace = "<namespace>";
   private Function function = main;
 
-  public static List<BigInteger> compile(String name) {
+  public static AnnotatedIntCode compileAnnotated(String name) {
     Assembler assembler = new Assembler();
     assembler.includeResource(name);
-
     return assembler.compile();
+  }
+
+  public static List<BigInteger> compile(String name) {
+    return compileAnnotated(name).getIntCode();
   }
 
   void includeResource(String resource) {
@@ -45,7 +48,7 @@ public class Assembler {
         lineNumber++;
         line = line.trim();
         if (!line.isEmpty()) {
-          if (!Parser.parse(line, this, function)) {
+          if (!Parser.parse(line, this, function, resource, lineNumber)) {
             throw new RuntimeException("Unexpected line: " + line);
           }
         }
@@ -57,8 +60,9 @@ public class Assembler {
     }
   }
 
-  private List<BigInteger> compile() {
-    ArrayList<BigInteger> res = new ArrayList<>();
+  private AnnotatedIntCode compile() {
+    AnnotatedIntCode res = new AnnotatedIntCode();
+
     // 1: set stackpointer -    size: 2
     // 2: jump to main entry    size: 3
     // 3: define variables
@@ -66,7 +70,7 @@ public class Assembler {
     // 5: define functions
     // 6: define main
 
-    SetRelBase setRelBase = new SetRelBase();
+    SetRelBase setRelBase = new SetRelBase("# Initial stack offset");
 
     int pc = setRelBase.size() + Jump.SIZE;
     for (Variable variable : variableOrdering) {
@@ -85,7 +89,7 @@ public class Assembler {
     pc = main.finalize(pc);
 
     setRelBase.setParameter(pc).writeTo(res);
-    new Jump(false, Constant.ZERO, new Constant(main.getAddress()), null).writeTo(res);
+    new Jump("Jump to main start", false, Constant.ZERO, new Constant(main.getAddress()), null).writeTo(res);
 
     for (Variable variable : variableOrdering) {
       int len = variable.getLen();
@@ -93,17 +97,19 @@ public class Assembler {
         if (len != 1) {
           throw new RuntimeException();
         }
-        res.add(BigInteger.valueOf(variable.reference.getAddress()));
+        res.addOperation(AnnotatedOperation.variable("Pointer: " + variable.getName(), BigInteger.valueOf(variable.reference.getAddress())));
       } else {
         for (int i = 0; i < len; i++) {
-          res.add(variable.values[i]);
+          String description = i == 0 ? variable.context : "";
+          res.addOperation(AnnotatedOperation.variable(description, variable.values[i]));
         }
       }
     }
     for (Variable variable : tempSpace) {
       int len = variable.getLen();
       for (int i = 0; i < len; i++) {
-        res.add(BigInteger.ZERO);
+        String description = variable.context;
+        res.addOperation(AnnotatedOperation.variable(description, variable.values[i]));
       }
     }
 
@@ -115,24 +121,24 @@ public class Assembler {
     return res;
   }
 
-  public void declareInt(String name, String value) {
-    addVariable(name, Variable.intVar(new BigInteger(value)));
+  public void declareInt(String name, String value, String context) {
+    addVariable(Variable.intVar(name, new BigInteger(value), context));
   }
 
-  public void declareString(String varName, String value) {
-    Variable string = Variable.string(value);
-    addVariable(varName + "__data__", string);
-    addVariable(varName, Variable.pointer(string));
+  public void declareString(String name, String value, String context) {
+    Variable string = Variable.string(name + "__data__", value, context);
+    addVariable(string);
+    addVariable(Variable.pointer(name, string, ""));
   }
 
-  public void declareArray(String varName, int len) {
-    Variable string = Variable.array(len);
-    addVariable(varName + "__data__", string);
-    addVariable(varName, Variable.pointer(string));
+  public void declareArray(String name, int len, String context) {
+    Variable array = Variable.array(name + "__data__", len, context);
+    addVariable(array);
+    addVariable(Variable.pointer(name, array, ""));
   }
 
-  private Variable addVariable(String name, Variable variable) {
-    String key = namespace + ":" + name;
+  private Variable addVariable(Variable variable) {
+    String key = namespace + ":" + variable.getName();
     Variable prev = variables.put(key, variable);
     if (prev != null) {
       throw new RuntimeException("Variable " + key + " already defined");
@@ -151,55 +157,56 @@ public class Assembler {
     final List<Op> operations = new ArrayList<>();
     private final Map<String, Label> labels = new HashMap<>();
     private final boolean isStack;
-    private final SetRelBase setRelBase = new SetRelBase();
+    private final SetRelBase setRelBase;
     public final String name;
     private int address = -1;
 
-    public Function(boolean isStack, String name) {
+    public Function(boolean isStack, String name, String context) {
       this.isStack = isStack;
       this.name = name;
+      this.setRelBase = new SetRelBase(context);
       if (isStack) {
         operations.add(setRelBase);
       }
     }
 
-    public void add(String target, String a, String b) {
-      operations.add(new AddOp(resolveParameter(a), resolveParameter(b), resolveParameter(target)));
+    public void add(String target, String a, String b, String context) {
+      operations.add(new AddOp(context, resolveParameter(a), resolveParameter(b), resolveParameter(target)));
     }
 
-    public void mul(String target, String a, String b) {
-      operations.add(new MulOp(resolveParameter(a), resolveParameter(b), resolveParameter(target)));
+    public void mul(String target, String a, String b, String context) {
+      operations.add(new MulOp(context, resolveParameter(a), resolveParameter(b), resolveParameter(target)));
     }
 
-    public void eq(String target, String a, String b) {
-      eq(resolveParameter(target), a, b);
+    public void eq(String target, String a, String b, String context) {
+      eq(resolveParameter(target), a, b, context);
     }
 
-    public void eq(Parameter target, String a, String b) {
-      operations.add(new EqOp(resolveParameter(a), resolveParameter(b), target));
+    public void eq(Parameter target, String a, String b, String context) {
+      operations.add(new EqOp(context, resolveParameter(a), resolveParameter(b), target));
     }
 
-    public void lessThan(String target, String a, String b) {
-      lessThan(resolveParameter(target), a, b);
+    public void lessThan(String target, String a, String b, String context) {
+      lessThan(resolveParameter(target), a, b, context);
     }
 
-    public void lessThan(Parameter target, String a, String b) {
-      operations.add(new LessThanOp(resolveParameter(a), resolveParameter(b), target));
+    public void lessThan(Parameter target, String a, String b, String context) {
+      operations.add(new LessThanOp(context, resolveParameter(a), resolveParameter(b), target));
     }
 
-    public void jump(boolean isTrue, String cmpRef, String destination) {
-      jump(isTrue, resolveParameter(cmpRef), destination);
+    public void jump(boolean isTrue, String cmpRef, String destination, String description) {
+      jump(isTrue, resolveParameter(cmpRef), destination, description);
     }
 
-    public void jump(boolean isTrue, Parameter parameter, String destination) {
-      operations.add(new Jump(isTrue, parameter, null, resolveLabel(destination)));
+    public void jump(boolean isTrue, Parameter parameter, String destination, String context) {
+      operations.add(new Jump(context, isTrue, parameter, null, resolveLabel(destination)));
     }
 
     private Label resolveLabel(String label) {
       return labels.computeIfAbsent(namespace + ":" + label, ignore -> new Label(label));
     }
 
-    public void setArray(String arrayName, String index, String value) {
+    public void setArray(String arrayName, String index, String value, String context) {
 
       // setarray <arrayName> <index> <value>
       // is expressed as:
@@ -210,15 +217,15 @@ public class Assembler {
       Parameter indexRef = resolveParameter(index);
       Parameter valueParam = resolveParameter(value);
 
-      AddOp rewriteParam = new AddOp(array, indexRef, Address.placeHolder());
-      AddOp addOp = new AddOp(valueParam, Constant.ZERO, Address.placeHolder());
+      AddOp rewriteParam = new AddOp(context, array, indexRef, Address.placeHolder());
+      AddOp addOp = new AddOp("# write to array from value", valueParam, Constant.ZERO, Address.placeHolder());
 
       rewriteParam.setTarget(new AddressableMemory(rewriteParam, 7));
       operations.add(rewriteParam);
       operations.add(addOp);
     }
 
-    public void getArray(String arrayName, String index, String target) {
+    public void getArray(String arrayName, String index, String target, String context) {
 
       // getarray <arrayName> <index> <target>
       // is expressed as:
@@ -229,8 +236,8 @@ public class Assembler {
       Parameter indexRef = resolveParameter(index);
       Variable targetParam = resolveVariable(target);
 
-      AddOp rewriteParam = new AddOp(array, indexRef, Address.placeHolder());
-      AddOp addOp = new AddOp(Address.placeHolder(), Constant.ZERO, targetParam);
+      AddOp rewriteParam = new AddOp(context, array, indexRef, Address.placeHolder());
+      AddOp addOp = new AddOp("# write to variable", Address.placeHolder(), Constant.ZERO, targetParam);
 
       rewriteParam.setTarget(new AddressableMemory(rewriteParam, 5));
       operations.add(rewriteParam);
@@ -273,12 +280,12 @@ public class Assembler {
       stackVariables.add(variableName);
     }
 
-    public void addInput(String token) {
-      operations.add(new Input(resolveVariable(token)));
+    public void addInput(String token, String context) {
+      operations.add(new Input(resolveVariable(token), context));
     }
 
-    public void addOutput(String token) {
-      operations.add(new Output(resolveParameter(token)));
+    public void addOutput(String token, String context) {
+      operations.add(new Output(resolveParameter(token), context));
     }
 
     public int finalize(int pc) {
@@ -302,21 +309,21 @@ public class Assembler {
       return address;
     }
 
-    public void writeTo(List<BigInteger> res) {
+    public void writeTo(AnnotatedIntCode res) {
       for (Op operation : operations) {
         operation.safeWrite(res);
       }
     }
 
-    public void addHalt() {
-      operations.add(new Halt());
+    public void addHalt(String context) {
+      operations.add(new Halt(context));
     }
 
   }
 
   void ensureTempSpaceSize(int size) {
     while (tempSpace.size() < size) {
-      tempSpace.add(Variable.intVar(BigInteger.ZERO));
+      tempSpace.add(Variable.intVar("temp_" + size, BigInteger.ZERO, "(temp_" + size + ")"));
     }
   }
 }

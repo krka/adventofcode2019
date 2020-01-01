@@ -1,5 +1,6 @@
 package intcode;
 
+import intcode.assembler.AnnotatedIntCode;
 import intcode.assembler.Assembler;
 import org.junit.Test;
 import util.Util;
@@ -15,7 +16,11 @@ import static org.junit.Assert.assertEquals;
 public class AssemblerTest {
   @Test
   public void testSimple() {
-    IntCode intCode = IntCode.fromResource(Assembler.compile("simple.asm"));
+    AnnotatedIntCode annotatedIntCode = Assembler.compileAnnotated("simple.asm");
+    System.out.println(annotatedIntCode.toString());
+
+    List<BigInteger> compile = annotatedIntCode.getIntCode();
+    IntCode intCode = IntCode.fromResource(compile);
 
     intCode.run();
     assertEquals(IntCode.State.HALTED, intCode.getState());

@@ -17,7 +17,8 @@ public class Label extends Op {
   }
 
   @Override
-  public void writeTo(List<BigInteger> res) {
+  public void writeTo(AnnotatedIntCode res) {
+    res.nextHasLabel(label);
   }
 
   public Label setDefined() {
