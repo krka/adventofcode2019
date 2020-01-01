@@ -13,8 +13,8 @@ int x = 0
 int y = 0
 int z = 0
 
-x = 100 + 0
-y = 23 + 0
+x = 100
+y = 23
 
 z = foo(x, y)
 output(z)

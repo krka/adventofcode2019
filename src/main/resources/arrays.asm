@@ -9,8 +9,8 @@ int b = 0
 # arr[2] references the next variable - a
 # arr[2] references the next next variable - b
 
-a = 1 + 0
-b = 2 + 0
+a = 1
+b = 2
 
 x = arr[2]
 output(x)

@@ -22,7 +22,7 @@ inner = numbers[j]
 if inner >= outer jump skipswap
 numbers[i] = inner
 numbers[j] = outer
-outer = inner + 0
+outer = inner
 
 skipswap:
 j = j + 1
@@ -32,7 +32,7 @@ if j < 100 jump inner_loop
 i = i + 1
 if i < 99 jump outer_loop
 
-i = 0 + 0
+i = 0
 emit:
 tmp = numbers[i]
 output(tmp)

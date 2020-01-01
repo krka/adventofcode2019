@@ -14,7 +14,7 @@ string fizzbuzz = "FizzBuzz"
 offset = input()
 N = input()
 
-i = 0 + 0
+i = 0
 loop:
 i = i + 1
 n = i + offset
