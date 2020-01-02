@@ -205,19 +205,28 @@ public class Assembler {
 
   public class Function {
     private final Map<String, StackVariable> stackVariables = new HashMap<>();
+    private final StackVariable extraRelBase;
+
     final List<Op> operations = new ArrayList<>();
     private final Map<String, Label> labels = new HashMap<>();
     private final boolean isStack;
-    private final SetRelBase setRelBase;
+
     public final String name;
     private int address = -1;
+
+    private final SettableConstant baseAdd = new SettableConstant();
 
     public Function(boolean isStack, String name, String context) {
       this.isStack = isStack;
       this.name = name;
-      this.setRelBase = new SetRelBase(context);
       if (isStack) {
-        operations.add(setRelBase);
+        extraRelBase = addStackVariable("__extra_rel_base");
+
+        operations.add(new SetRelBase("# set relative base").setParameter(baseAdd));
+        operations.add(new AddOp("# set function relative base", baseAdd, Constant.ZERO, extraRelBase));
+        operations.add(new AddOp("# add global relative base", globalRelBase, extraRelBase, globalRelBase));
+      } else {
+        extraRelBase = null;
       }
     }
 
@@ -340,16 +349,11 @@ public class Assembler {
 
     public int finalize(int pc) {
       this.address = pc;
-      setRelBase.setParameter(Constant.of(getRelBase()));
       for (Op operation : operations) {
         operation.setAddress(pc);
         pc += operation.size();
       }
       return pc;
-    }
-
-    int getRelBase() {
-      return stackVariables.size() + 1;
     }
 
     public int getAddress() {
@@ -370,9 +374,29 @@ public class Assembler {
     }
 
     public void finish() {
-      for (StackVariable value : stackVariables.values()) {
-        value.withOffset(stackVariables.size());
+      if (isStack) {
+        int numVariables = stackVariables.size();
+
+        for (StackVariable value : stackVariables.values()) {
+          value.setOffset(numVariables);
+        }
+
+        baseAdd.setValue(numVariables + 1);
+
       }
+    }
+
+    public void addReturn(List<Parameter> returnValues, String context) {
+
+      // Copy return values to temp param space
+      for (int i = 0; i < returnValues.size(); i++) {
+        operations.add(new AddOp(context, returnValues.get(i), Constant.ZERO, getParam(i)));
+      }
+
+      operations.add(new MulOp("# invert function relative base", extraRelBase, Constant.MINUS_ONE, extraRelBase));
+      operations.add(new AddOp("# revert global relative base", globalRelBase, extraRelBase, globalRelBase));
+      operations.add(new SetRelBase(context).setParameter(extraRelBase));
+      operations.add(new Jump("# jump to caller", false, Constant.ZERO, new StackVariable(0).setOffset(0), null));
     }
   }
 

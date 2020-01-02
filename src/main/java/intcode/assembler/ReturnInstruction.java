@@ -25,7 +25,6 @@ public class ReturnInstruction extends Instruction {
       }
     }
 
-    assembler.getTemp(returnValues.size());
-    function.operations.add(new Return(function, returnValues, assembler, context));
+    function.addReturn(returnValues, context);
   }
 }

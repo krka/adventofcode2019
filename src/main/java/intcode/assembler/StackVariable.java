@@ -11,7 +11,7 @@ class StackVariable extends Variable {
     this.index = index;
   }
 
-  public StackVariable withOffset(int offset) {
+  public StackVariable setOffset(int offset) {
     this.offset = offset;
     return this;
   }

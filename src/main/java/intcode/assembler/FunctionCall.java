@@ -40,7 +40,7 @@ public class FunctionCall extends Op {
     }
 
     Jump jump = new Jump("# jump to function", false, Constant.ZERO, new Constant(function.getAddress()), null);
-    AddOp returnAddress = new AddOp(context, new Constant(getAddress() + preCallSize()), Constant.ZERO, new StackVariable(0).withOffset(0));
+    AddOp returnAddress = new AddOp(context, new Constant(getAddress() + preCallSize()), Constant.ZERO, new StackVariable(0).setOffset(0));
 
     int i = 0;
     for (Parameter parameter : parameters) {
