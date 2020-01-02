@@ -17,7 +17,7 @@ public class Return extends Op {
 
   @Override
   public int size() {
-    return SetRelBase.SIZE + Jump.SIZE + AddOp.SIZE * (2 * returnValues.size());
+    return SetRelBase.SIZE + Jump.SIZE + AddOp.SIZE * returnValues.size();
   }
 
   @Override
@@ -26,9 +26,6 @@ public class Return extends Op {
 
     for (int i = 0; i < returnValues.size(); i++) {
       new AddOp(context, returnValues.get(i), Constant.ZERO, tempSpace.get(i)).writeTo(res);
-    }
-    for (int i = 0; i < returnValues.size(); i++) {
-      new AddOp(context, tempSpace.get(i), Constant.ZERO, new StackVariable(1 + i - relBase)).writeTo(res);
     }
 
     new SetRelBase(context).setParameter(-relBase).writeTo(res);

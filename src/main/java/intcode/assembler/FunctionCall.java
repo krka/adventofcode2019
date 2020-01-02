@@ -45,8 +45,9 @@ public class FunctionCall extends Op {
     jump.writeTo(res);
     i = 0;
     for (Variable output : outputs) {
+      Variable returnValue = assembler.tempSpace.get(i);
       i++;
-      new AddOp("# copy return value " + i, new StackVariable(i), Constant.ZERO, output).writeTo(res);
+      new AddOp("# copy return value " + i, returnValue, Constant.ZERO, output).writeTo(res);
     }
   }
 }
