@@ -64,19 +64,16 @@ public class Assembler {
     AnnotatedIntCode res = new AnnotatedIntCode();
 
     // 1: set stackpointer -    size: 2
-    // 2: jump to main entry    size: 3
-    // 3: define variables
-    // 4: define temp space
-    // 5: define functions
-    // 6: define main
+    // 2: define main
+    // 3: define temp space
+    // 4: define functions
+    // 5: define variables
 
     SetRelBase setRelBase = new SetRelBase("# Initial stack offset");
 
-    int pc = setRelBase.size() + Jump.SIZE;
-    for (Variable variable : variableOrdering) {
-      variable.setAddress(pc);
-      pc += variable.getLen();
-    }
+    int pc = setRelBase.size();
+
+    pc = main.finalize(pc);
 
     for (Variable variable : tempSpace) {
       variable.setAddress(pc);
@@ -86,10 +83,27 @@ public class Assembler {
     for (Function func : functions.values()) {
       pc = func.finalize(pc);
     }
-    pc = main.finalize(pc);
+
+    for (Variable variable : variableOrdering) {
+      variable.setAddress(pc);
+      pc += variable.getLen();
+    }
 
     setRelBase.setParameter(pc).writeTo(res);
-    new Jump("Jump to main start", false, Constant.ZERO, new Constant(main.getAddress()), null).writeTo(res);
+
+    main.writeTo(res);
+
+    for (Variable variable : tempSpace) {
+      int len = variable.getLen();
+      for (int i = 0; i < len; i++) {
+        String description = variable.context;
+        res.addOperation(AnnotatedOperation.variable(description, variable.values[i]));
+      }
+    }
+
+    for (Function func : functions.values()) {
+      func.writeTo(res);
+    }
 
     for (Variable variable : variableOrdering) {
       int len = variable.getLen();
@@ -105,18 +119,6 @@ public class Assembler {
         }
       }
     }
-    for (Variable variable : tempSpace) {
-      int len = variable.getLen();
-      for (int i = 0; i < len; i++) {
-        String description = variable.context;
-        res.addOperation(AnnotatedOperation.variable(description, variable.values[i]));
-      }
-    }
-
-    for (Function func : functions.values()) {
-      func.writeTo(res);
-    }
-    main.writeTo(res);
 
     return res;
   }

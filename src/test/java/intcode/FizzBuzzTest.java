@@ -1,15 +1,11 @@
 package intcode;
 
+import intcode.assembler.AnnotatedIntCode;
 import intcode.assembler.Assembler;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
-import util.Util;
 
 import java.math.BigInteger;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
 
@@ -17,7 +13,9 @@ public class FizzBuzzTest {
 
   @Test
   public void testPart1() {
-    IntCode intCode = IntCode.fromResource(Assembler.compile("fizzbuzz.asm"));
+    AnnotatedIntCode annotatedIntCode = Assembler.compileAnnotated("fizzbuzz.asm");
+    System.out.println(annotatedIntCode.toString());
+    IntCode intCode = IntCode.fromResource(annotatedIntCode.getIntCode());
     intCode.run();
 
     intCode.writeStdin(20);
