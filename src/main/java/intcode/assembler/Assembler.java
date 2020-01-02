@@ -20,9 +20,17 @@ public class Assembler {
 
   final Map<String, Function> functions = new HashMap<>();
   final Function main = new Function(false, "__main__", "# main function");
+  private final AddressableMemory globalRelBase;
 
   private String namespace = "<namespace>";
   private Function function = main;
+  private final SetRelBase setRelBase;
+
+  public Assembler() {
+    setRelBase = new SetRelBase("# Initial stack offset");
+    setRelBase.setAddress(0);
+    globalRelBase = new AddressableMemory(setRelBase, 1);
+  }
 
   public static AnnotatedIntCode compileAnnotated(String name) {
     Assembler assembler = new Assembler();
@@ -72,10 +80,8 @@ public class Assembler {
     // 5: define variables
     // 6: define array space
 
-    SetRelBase setRelBase = new SetRelBase("# Initial stack offset");
-
-    setRelBase.setAddress(0);
     int pc = setRelBase.size();
+
 
     pc = main.finalize(pc);
 
@@ -103,7 +109,7 @@ public class Assembler {
       pc += variable.getLen();
     }
 
-    setRelBase.setParameter(pc).writeTo(res);
+    setRelBase.setParameter(Constant.of(pc)).writeTo(res);
 
     main.finish();
     main.writeTo(res);
@@ -334,7 +340,7 @@ public class Assembler {
 
     public int finalize(int pc) {
       this.address = pc;
-      setRelBase.setParameter(getRelBase());
+      setRelBase.setParameter(Constant.of(getRelBase()));
       for (Op operation : operations) {
         operation.setAddress(pc);
         pc += operation.size();

@@ -1,8 +1,5 @@
 package intcode.assembler;
 
-import java.math.BigInteger;
-import java.util.List;
-
 abstract class Op implements HasAddress {
   private int address = -1;
 

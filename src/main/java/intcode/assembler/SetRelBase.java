@@ -1,18 +1,17 @@
 package intcode.assembler;
 
 import java.math.BigInteger;
-import java.util.List;
 
 public class SetRelBase extends Op {
   static final int SIZE = 2;
-  private int parameter;
+  private Parameter parameter;
   private final String context;
 
   public SetRelBase(String context) {
     this.context = context;
   }
 
-  public SetRelBase setParameter(int parameter) {
+  public SetRelBase setParameter(Parameter parameter) {
     this.parameter = parameter;
     return this;
   }
@@ -24,8 +23,7 @@ public class SetRelBase extends Op {
 
   @Override
   public void writeTo(AnnotatedIntCode res) {
-    int ordinal = ParameterMode.IMMEDIATE.ordinal();
-    int val = 9 + 100 * ordinal;
-    res.addOperation(new AnnotatedOperation(context, val, parameter));
+    int op = 9 + 100 * parameter.mode().ordinal();
+    res.addOperation(new AnnotatedOperation(context, BigInteger.valueOf(op), parameter.value()));
   }
 }

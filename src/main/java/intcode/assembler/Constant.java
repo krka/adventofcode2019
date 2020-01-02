@@ -17,6 +17,10 @@ class Constant implements ImmediateParameter {
     this(BigInteger.valueOf(value));
   }
 
+  public static Constant of(int value) {
+    return new Constant(value);
+  }
+
   @Override
   public ParameterMode mode() {
     return ParameterMode.IMMEDIATE;

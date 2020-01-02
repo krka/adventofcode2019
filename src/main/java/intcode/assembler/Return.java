@@ -31,7 +31,7 @@ public class Return extends Op {
       new AddOp(context, returnValues.get(i), Constant.ZERO, assembler.getParam(i)).writeTo(res);
     }
 
-    new SetRelBase(context).setParameter(-relBase).writeTo(res);
+    new SetRelBase(context).setParameter(Constant.of(-relBase)).writeTo(res);
     new Jump("# jump to caller", false, Constant.ZERO, new StackVariable(0).withOffset(0), null).writeTo(res);
   }
 }
