@@ -131,19 +131,40 @@ public class Assembler {
   }
 
   public void declareInt(String name, String value, String context) {
-    addVariable(Variable.intVar(name, new BigInteger(value), context));
+    if (function == main) {
+      addVariable(Variable.intVar(name, new BigInteger(value), context));
+    } else {
+      function.addStackVariable(name);
+      function.add(name, value, "0", context);
+    }
   }
 
   public void declareString(String name, String value, String context) {
-    Variable string = Variable.string(name + "__data__", value, context);
-    addVariable(string);
-    addVariable(Variable.pointer(name, string, ""));
+    if (function == main) {
+      Variable string = Variable.string(name + "__data__", value, context);
+      addVariable(string);
+      addVariable(Variable.pointer(name, string, ""));
+    } else {
+      // TODO: add support for strings in functions
+      throw new RuntimeException();
+    }
   }
 
-  public void declareArray(String name, int len, String context) {
-    Variable array = Variable.array(name + "__data__", len, context);
-    arraySpace.add(array);
-    addVariable(Variable.pointer(name, array, ""));
+  public void declareArray(String name, String len, String context) {
+    Parameter lenParam = function.resolveParameter(len);
+    if (lenParam instanceof Constant) {
+      if (function == main) {
+        Variable array = Variable.array(name + "__data__", lenParam.value().intValueExact(), context);
+        arraySpace.add(array);
+        addVariable(Variable.pointer(name, array, ""));
+      } else {
+        // TODO: add support for static arrays in functions
+        throw new RuntimeException();
+      }
+    } else {
+      // TODO: Implement dynamic arrays
+      throw new RuntimeException();
+    }
   }
 
   private Variable addVariable(Variable variable) {
