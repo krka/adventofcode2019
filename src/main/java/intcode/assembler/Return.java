@@ -5,14 +5,17 @@ import java.util.List;
 public class Return extends Op {
   private final Assembler.Function function;
   private final List<Parameter> returnValues;
-  private final List<Variable> tempSpace;
+  private final Assembler assembler;
   private final String context;
 
-  public Return(Assembler.Function function, List<Parameter> returnValues, List<Variable> tempSpace, String context) {
+  public Return(Assembler.Function function, List<Parameter> returnValues, Assembler assembler, String context) {
     this.function = function;
     this.returnValues = returnValues;
-    this.tempSpace = tempSpace;
+    this.assembler = assembler;
     this.context = context;
+    if (returnValues.size() > 0) {
+      assembler.getParam(returnValues.size() - 1);
+    }
   }
 
   @Override
@@ -25,7 +28,7 @@ public class Return extends Op {
     int relBase = function.getRelBase();
 
     for (int i = 0; i < returnValues.size(); i++) {
-      new AddOp(context, returnValues.get(i), Constant.ZERO, tempSpace.get(i)).writeTo(res);
+      new AddOp(context, returnValues.get(i), Constant.ZERO, assembler.getParam(i)).writeTo(res);
     }
 
     new SetRelBase(context).setParameter(-relBase).writeTo(res);

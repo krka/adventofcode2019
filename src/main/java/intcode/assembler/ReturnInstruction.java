@@ -25,7 +25,7 @@ public class ReturnInstruction extends Instruction {
       }
     }
 
-    assembler.ensureTempSpaceSize(returnValues.size());
-    function.operations.add(new Return(function, returnValues, assembler.tempSpace, context));
+    assembler.getTemp(returnValues.size());
+    function.operations.add(new Return(function, returnValues, assembler, context));
   }
 }

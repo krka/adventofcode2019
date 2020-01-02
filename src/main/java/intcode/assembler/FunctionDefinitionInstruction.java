@@ -22,10 +22,14 @@ public class FunctionDefinitionInstruction extends Instruction {
       throw new RuntimeException("Function already defined: " + funcName);
     }
 
+    int i = 0;
     for (String parameter : parameters) {
       String param = parameter.trim();
       if (!param.isEmpty()) {
-        function.addStackVariable(param);
+        StackVariable variable = function.addStackVariable(param);
+        Variable inParam = assembler.getParam(i);
+        function.operations.add(new AddOp("# copy param " + i, inParam, Constant.ZERO, variable));
+        i++;
       }
     }
 

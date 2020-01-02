@@ -15,7 +15,8 @@ public class Assembler {
   private final Map<String, Variable> variables = new HashMap<>();
   private final List<Variable> variableOrdering = new ArrayList<>();
   private final List<Variable> arraySpace = new ArrayList<>();
-  final List<Variable> tempSpace = new ArrayList<>();
+  private final List<Variable> tempSpace = new ArrayList<>();
+  private final List<Variable> paramSpace = new ArrayList<>();
 
   final Map<String, Function> functions = new HashMap<>();
   final Function main = new Function(false, "__main__", "# main function");
@@ -73,11 +74,17 @@ public class Assembler {
 
     SetRelBase setRelBase = new SetRelBase("# Initial stack offset");
 
+    setRelBase.setAddress(0);
     int pc = setRelBase.size();
 
     pc = main.finalize(pc);
 
     for (Variable variable : tempSpace) {
+      variable.setAddress(pc);
+      pc += variable.getLen();
+    }
+
+    for (Variable variable : paramSpace) {
       variable.setAddress(pc);
       pc += variable.getLen();
     }
@@ -102,6 +109,14 @@ public class Assembler {
     main.writeTo(res);
 
     for (Variable variable : tempSpace) {
+      int len = variable.getLen();
+      for (int i = 0; i < len; i++) {
+        String description = variable.context;
+        res.addOperation(AnnotatedOperation.variable(description, variable.values[i]));
+      }
+    }
+
+    for (Variable variable : paramSpace) {
       int len = variable.getLen();
       for (int i = 0; i < len; i++) {
         String description = variable.context;
@@ -300,11 +315,13 @@ public class Assembler {
       operations.add(resolveLabel(label).setDefined());
     }
 
-    public void addStackVariable(String variableName) {
+    public StackVariable addStackVariable(String variableName) {
       if (stackVariables.containsKey(variableName)) {
         throw new RuntimeException("Stack variable already defined: " + variableName);
       }
-      stackVariables.put(variableName, new StackVariable(stackVariables.size()));
+      StackVariable variable = new StackVariable(stackVariables.size());
+      stackVariables.put(variableName, variable);
+      return variable;
     }
 
     public void addInput(String token, String context) {
@@ -353,9 +370,17 @@ public class Assembler {
     }
   }
 
-  void ensureTempSpaceSize(int size) {
-    while (tempSpace.size() < size) {
-      tempSpace.add(Variable.intVar("temp_" + size, BigInteger.ZERO, "(temp_" + size + ")"));
+  Variable getTemp(int index) {
+    while (tempSpace.size() <= index) {
+      tempSpace.add(Variable.intVar("temp_" + index, BigInteger.ZERO, "(temp_" + index + ")"));
     }
+    return tempSpace.get(index);
+  }
+
+  Variable getParam(int index) {
+    while (tempSpace.size() <= index) {
+      tempSpace.add(Variable.intVar("param_" + index, BigInteger.ZERO, "(param_" + index + ")"));
+    }
+    return tempSpace.get(index);
   }
 }
