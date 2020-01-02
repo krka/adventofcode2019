@@ -14,6 +14,7 @@ public class Assembler {
   private final Set<String> resources = new HashSet<>();
   private final Map<String, Variable> variables = new HashMap<>();
   private final List<Variable> variableOrdering = new ArrayList<>();
+  private final List<Variable> arraySpace = new ArrayList<>();
   final List<Variable> tempSpace = new ArrayList<>();
 
   final Map<String, Function> functions = new HashMap<>();
@@ -68,6 +69,7 @@ public class Assembler {
     // 3: define temp space
     // 4: define functions
     // 5: define variables
+    // 6: define array space
 
     SetRelBase setRelBase = new SetRelBase("# Initial stack offset");
 
@@ -85,6 +87,11 @@ public class Assembler {
     }
 
     for (Variable variable : variableOrdering) {
+      variable.setAddress(pc);
+      pc += variable.getLen();
+    }
+
+    for (Variable variable : arraySpace) {
       variable.setAddress(pc);
       pc += variable.getLen();
     }
@@ -135,7 +142,7 @@ public class Assembler {
 
   public void declareArray(String name, int len, String context) {
     Variable array = Variable.array(name + "__data__", len, context);
-    addVariable(array);
+    arraySpace.add(array);
     addVariable(Variable.pointer(name, array, ""));
   }
 
@@ -148,7 +155,6 @@ public class Assembler {
     variableOrdering.add(variable);
     return variable;
   }
-
 
   public void setFunction(Function function) {
     this.function = function;

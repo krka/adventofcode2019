@@ -4,10 +4,7 @@ import intcode.assembler.AnnotatedIntCode;
 import intcode.assembler.Assembler;
 import org.junit.Test;
 
-import java.math.BigInteger;
 import java.util.List;
-
-import static org.junit.Assert.assertEquals;
 
 public class FizzBuzzTest {
 

@@ -60,7 +60,7 @@ public class AssemblerTest {
 
     intCode.run();
     assertEquals(IntCode.State.HALTED, intCode.getState());
-    assertEquals(Util.toBigInt(Arrays.asList(1, 2, 20, 30)), intCode.drainStdout());
+    assertEquals(Util.toBigInt(Arrays.asList(30, 40)), intCode.drainStdout());
   }
 
   @Test
