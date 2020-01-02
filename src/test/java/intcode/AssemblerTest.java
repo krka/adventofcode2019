@@ -91,4 +91,33 @@ public class AssemblerTest {
     assertEquals(input, output);
 
   }
+
+  @Test
+  public void testMergeSort() {
+    IntCode intCode = IntCode.fromResource(Assembler.compile("test_mergesort.asm"));
+    Random random = new Random(1234L);
+
+    int N = 100;
+
+    intCode.writeStdin(N);
+    ArrayList<BigInteger> input = new ArrayList<>();
+
+    intCode.run();
+
+    for (int i = 0; i < N; i++) {
+      BigInteger value = BigInteger.valueOf(random.nextLong());
+      input.add(value);
+      intCode.writeStdin(value);
+    }
+    //intCode.setDebugger(true);
+
+    System.out.println("input: " + input);
+    input.sort(BigInteger::compareTo);
+    System.out.println("expected: " + input);
+    intCode.run();
+    assertEquals(IntCode.State.HALTED, intCode.getState());
+    List<BigInteger> output = intCode.drainStdout();
+    assertEquals(input, output);
+
+  }
 }

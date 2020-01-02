@@ -12,6 +12,7 @@ public class EndFuncInstruction extends Instruction {
     if (function == assembler.main) {
       throw new RuntimeException("Can not return from main");
     }
+    function.finish();
     assembler.setFunction(assembler.main);
   }
 }

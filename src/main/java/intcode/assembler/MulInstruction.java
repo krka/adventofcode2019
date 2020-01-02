@@ -15,6 +15,6 @@ public class MulInstruction extends Instruction {
     String target = matcher.group("name");
     String a = matcher.group("a");
     String b = matcher.group("b");
-    function.mul(target, a, b, context);
+    function.mul(function.resolveParameter(target), function.resolveParameter(a), function.resolveParameter(b), context);
   }
 }

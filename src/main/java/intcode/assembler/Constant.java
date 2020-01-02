@@ -4,6 +4,7 @@ import java.math.BigInteger;
 
 class Constant implements ImmediateParameter {
 
+  static final Constant MINUS_ONE = new Constant(BigInteger.valueOf(-1));
   static final Constant ZERO = new Constant(BigInteger.ZERO);
 
   private final BigInteger constant;

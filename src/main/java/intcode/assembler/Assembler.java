@@ -98,6 +98,7 @@ public class Assembler {
 
     setRelBase.setParameter(pc).writeTo(res);
 
+    main.finish();
     main.writeTo(res);
 
     for (Variable variable : tempSpace) {
@@ -135,7 +136,7 @@ public class Assembler {
       addVariable(Variable.intVar(name, new BigInteger(value), context));
     } else {
       function.addStackVariable(name);
-      function.add(name, value, "0", context);
+      function.add(context, function.resolveParameter(name), function.resolveParameter(value), Constant.ZERO);
     }
   }
 
@@ -182,7 +183,7 @@ public class Assembler {
   }
 
   public class Function {
-    private final List<String> stackVariables = new ArrayList<>();
+    private final Map<String, StackVariable> stackVariables = new HashMap<>();
     final List<Op> operations = new ArrayList<>();
     private final Map<String, Label> labels = new HashMap<>();
     private final boolean isStack;
@@ -199,12 +200,12 @@ public class Assembler {
       }
     }
 
-    public void add(String target, String a, String b, String context) {
-      operations.add(new AddOp(context, resolveParameter(a), resolveParameter(b), resolveParameter(target)));
+    public void add(String context, Parameter target, Parameter a, Parameter b) {
+      operations.add(new AddOp(context, a, b, target));
     }
 
-    public void mul(String target, String a, String b, String context) {
-      operations.add(new MulOp(context, resolveParameter(a), resolveParameter(b), resolveParameter(target)));
+    public void mul(Parameter target, Parameter a, Parameter b, String context) {
+      operations.add(new MulOp(context, a, b, target));
     }
 
     public void eq(String target, String a, String b, String context) {
@@ -274,12 +275,9 @@ public class Assembler {
     }
 
     Variable resolveVariable(String variableName) {
-      int i = 0;
-      for (String stackVariable : stackVariables) {
-        if (stackVariable.equals(variableName)) {
-          return new StackVariable(i - stackVariables.size());
-        }
-        i++;
+      StackVariable stackVariable = stackVariables.get(variableName);
+      if (stackVariable != null) {
+        return stackVariable;
       }
 
       String key = namespace + ":" + variableName;
@@ -303,10 +301,10 @@ public class Assembler {
     }
 
     public void addStackVariable(String variableName) {
-      if (stackVariables.contains(variableName)) {
+      if (stackVariables.containsKey(variableName)) {
         throw new RuntimeException("Stack variable already defined: " + variableName);
       }
-      stackVariables.add(variableName);
+      stackVariables.put(variableName, new StackVariable(stackVariables.size()));
     }
 
     public void addInput(String token, String context) {
@@ -348,6 +346,11 @@ public class Assembler {
       operations.add(new Halt(context));
     }
 
+    public void finish() {
+      for (StackVariable value : stackVariables.values()) {
+        value.withOffset(stackVariables.size());
+      }
+    }
   }
 
   void ensureTempSpaceSize(int size) {

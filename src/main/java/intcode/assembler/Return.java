@@ -29,6 +29,6 @@ public class Return extends Op {
     }
 
     new SetRelBase(context).setParameter(-relBase).writeTo(res);
-    new Jump("# jump to caller", false, Constant.ZERO, new StackVariable(0), null).writeTo(res);
+    new Jump("# jump to caller", false, Constant.ZERO, new StackVariable(0).withOffset(0), null).writeTo(res);
   }
 }

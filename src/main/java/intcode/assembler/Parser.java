@@ -14,7 +14,9 @@ public class Parser {
     INSTRUCTIONS.add(new DeclareInt());
     INSTRUCTIONS.add(new DeclareString());
     INSTRUCTIONS.add(new DeclareArray());
+
     INSTRUCTIONS.add(new AddInstruction());
+    INSTRUCTIONS.add(new SubInstruction());
     INSTRUCTIONS.add(new MulInstruction());
     INSTRUCTIONS.add(new SetInstruction());
 
