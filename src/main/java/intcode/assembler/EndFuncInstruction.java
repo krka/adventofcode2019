@@ -4,7 +4,7 @@ import java.util.regex.Matcher;
 
 public class EndFuncInstruction extends Instruction {
   public EndFuncInstruction() {
-    super(Token.fixed("endfunc"));
+    super(fixed("endfunc"));
   }
 
   @Override

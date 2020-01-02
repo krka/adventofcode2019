@@ -4,10 +4,7 @@ import java.util.regex.Matcher;
 
 public class EqualsInstruction extends Instruction {
   public EqualsInstruction() {
-    super(Token.parameter("name"), Token.maybeSpace(), Token.fixed("="), Token.maybeSpace(),
-            Token.parameter("a"), Token.maybeSpace(),
-            Token.fixed("=="), Token.maybeSpace(),
-            Token.parameter("b"));
+    super(parameter("name"), fixed("="), parameter("a"), fixed("=="), parameter("b"));
   }
 
   @Override

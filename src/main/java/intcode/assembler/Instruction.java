@@ -3,21 +3,17 @@ package intcode.assembler;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public abstract class Instruction {
+public abstract class Instruction extends ParserRegexps {
   final Pattern pattern;
 
-  protected Instruction(Pattern pattern) {
-    this.pattern = pattern;
-  }
-
-  protected Instruction(Token... tokens) {
+  protected Instruction(String... tokens) {
     this.pattern = pattern(tokens);
   }
 
-  static Pattern pattern(Token... tokens) {
+  static Pattern pattern(String... tokens) {
     StringBuilder sb = new StringBuilder();
-    for (Token token : tokens) {
-      sb.append(token.regexp);
+    for (String token : tokens) {
+      sb.append(token);
     }
     return Pattern.compile(sb.toString());
   }

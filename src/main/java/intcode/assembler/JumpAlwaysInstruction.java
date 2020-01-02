@@ -4,7 +4,7 @@ import java.util.regex.Matcher;
 
 public class JumpAlwaysInstruction extends Instruction {
   public JumpAlwaysInstruction() {
-    super(Token.fixed("jump"), Token.space(), Token.parameter("label"));
+    super(fixed("jump"), space(), parameter("label"));
   }
 
   @Override

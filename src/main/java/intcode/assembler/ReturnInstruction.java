@@ -6,7 +6,7 @@ import java.util.regex.Matcher;
 
 public class ReturnInstruction extends Instruction {
   public ReturnInstruction() {
-    super(Token.fixed("return"), Token.maybeSpace(), Token.commaList("returnvalues"));
+    super(fixed("return"), commaList("returnvalues"));
   }
 
   @Override

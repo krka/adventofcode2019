@@ -4,7 +4,7 @@ import java.util.regex.Matcher;
 
 public class Comment extends Instruction {
   protected Comment() {
-    super(Instruction.pattern(Token.fixed("#"), Token.anything()));
+    super(fixed("#"), anything());
   }
 
   @Override

@@ -4,8 +4,8 @@ import java.util.regex.Matcher;
 
 public class SetArrayInstruction extends Instruction {
   public SetArrayInstruction() {
-    super(Token.parameter("array"), Token.maybeSpace(), Token.fixed("["), Token.maybeSpace(), Token.parameter("index"), Token.maybeSpace(), Token.fixed("]"),
-            Token.maybeSpace(), Token.fixed("="), Token.maybeSpace(), Token.parameter("value"));
+    super(parameter("array"), fixed("["), parameter("index"), fixed("]"),
+            fixed("="), parameter("value"));
   }
 
   @Override

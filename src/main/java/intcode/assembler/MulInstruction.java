@@ -4,10 +4,10 @@ import java.util.regex.Matcher;
 
 public class MulInstruction extends Instruction {
   public MulInstruction() {
-    super(Token.parameter("name"), Token.maybeSpace(), Token.fixed("="), Token.maybeSpace(),
-            Token.parameter("a"), Token.maybeSpace(),
-            Token.fixed("*"), Token.maybeSpace(),
-            Token.parameter("b"));
+    super(parameter("name"), maybeSpace(), fixed("="), maybeSpace(),
+            parameter("a"), maybeSpace(),
+            fixed("*"), maybeSpace(),
+            parameter("b"));
   }
 
   @Override

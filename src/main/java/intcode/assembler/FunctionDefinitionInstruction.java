@@ -4,8 +4,8 @@ import java.util.regex.Matcher;
 
 public class FunctionDefinitionInstruction extends Instruction {
   public FunctionDefinitionInstruction() {
-    super(Token.fixed("func"), Token.space(), Token.parameter("functionname"), Token.maybeSpace(),
-            Token.fixed("("), Token.maybeSpace(), Token.commaList("parameters"), Token.maybeSpace(), Token.fixed(")"));
+    super(fixed("func"), space(), parameter("functionname"), maybeSpace(),
+            fixed("("), maybeSpace(), commaList("parameters"), maybeSpace(), fixed(")"));
   }
 
   @Override

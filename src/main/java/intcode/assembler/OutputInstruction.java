@@ -4,8 +4,8 @@ import java.util.regex.Matcher;
 
 public class OutputInstruction extends Instruction {
   public OutputInstruction() {
-    super(Token.fixed("output"), Token.maybeSpace(), Token.fixed("("), Token.maybeSpace(),
-            Token.parameter("name"), Token.maybeSpace(), Token.fixed(")"));
+    super(fixed("output"), fixed("("),
+            parameter("name"), fixed(")"));
   }
 
   @Override

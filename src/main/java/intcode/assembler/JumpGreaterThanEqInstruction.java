@@ -4,8 +4,7 @@ import java.util.regex.Matcher;
 
 public class JumpGreaterThanEqInstruction extends Instruction {
   public JumpGreaterThanEqInstruction() {
-    super(Token.fixed("if"), Token.space(), Token.parameter("a"), Token.maybeSpace(), Token.fixed(">="), Token.maybeSpace(),
-            Token.parameter("b"), Token.maybeSpace(), Token.fixed("jump"), Token.space(), Token.parameter("label"));
+    super(fixed("if"), space(), parameter("a"), fixed(">="), parameter("b"), fixed("jump"), space(), parameter("label"));
   }
 
   @Override

@@ -4,7 +4,7 @@ import java.util.regex.Matcher;
 
 public class InputInstruction extends Instruction {
   public InputInstruction() {
-    super(Token.parameter("name"), Token.maybeSpace(), Token.fixed("="), Token.maybeSpace(), Token.fixed("input"), Token.maybeSpace(), Token.fixed("("), Token.maybeSpace(), Token.fixed(")"));
+    super(parameter("name"), maybeSpace(), fixed("="), maybeSpace(), fixed("input"), maybeSpace(), fixed("("), maybeSpace(), fixed(")"));
   }
 
   @Override

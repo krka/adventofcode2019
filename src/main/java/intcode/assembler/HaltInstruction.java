@@ -4,7 +4,7 @@ import java.util.regex.Matcher;
 
 public class HaltInstruction extends Instruction {
   public HaltInstruction() {
-    super(Token.fixed("halt"));
+    super(fixed("halt"));
   }
 
   @Override

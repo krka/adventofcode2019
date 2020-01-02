@@ -4,8 +4,7 @@ import java.util.regex.Matcher;
 
 public class SetInstruction extends Instruction {
   public SetInstruction() {
-    super(Token.parameter("name"), Token.maybeSpace(), Token.fixed("="), Token.maybeSpace(),
-            Token.parameter("a"));
+    super(parameter("name"), fixed("="), parameter("a"));
   }
 
   @Override

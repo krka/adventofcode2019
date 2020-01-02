@@ -4,10 +4,7 @@ import java.util.regex.Matcher;
 
 public class DeclareArray extends Instruction {
   protected DeclareArray() {
-    super(Instruction.pattern(
-            Token.fixed("array"), Token.maybeSpace(),
-            Token.fixed("["), Token.maybeSpace(), Token.integer("size"), Token.maybeSpace(), Token.fixed("]"), Token.maybeSpace(),
-            Token.parameter("name")));
+    super(fixed("array"), fixed("["), integer("size"), fixed("]"), parameter("name"));
   }
 
   @Override

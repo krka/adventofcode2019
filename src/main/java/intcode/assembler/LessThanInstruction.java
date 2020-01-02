@@ -4,10 +4,10 @@ import java.util.regex.Matcher;
 
 public class LessThanInstruction extends Instruction {
   public LessThanInstruction() {
-    super(Token.parameter("name"), Token.maybeSpace(), Token.fixed("="), Token.maybeSpace(),
-            Token.parameter("a"), Token.maybeSpace(),
-            Token.fixed("<"), Token.maybeSpace(),
-            Token.parameter("b"));
+    super(parameter("name"), maybeSpace(), fixed("="), maybeSpace(),
+            parameter("a"), maybeSpace(),
+            fixed("<"), maybeSpace(),
+            parameter("b"));
   }
 
   @Override

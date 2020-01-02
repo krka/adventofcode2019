@@ -6,8 +6,8 @@ import java.util.regex.Matcher;
 
 public class FunctionCallInstruction extends Instruction {
   public FunctionCallInstruction() {
-    super(Token.commaList("returnvalues"), Token.maybeSpace(), Token.fixed("="), Token.maybeSpace(), Token.parameter("functionname"), Token.maybeSpace(), Token.fixed("("),
-            Token.maybeSpace(), Token.commaList("parameters"), Token.maybeSpace(), Token.fixed(")"));
+    super(commaList("returnvalues"), maybeSpace(), fixed("="), maybeSpace(), parameter("functionname"), maybeSpace(), fixed("("),
+            maybeSpace(), commaList("parameters"), maybeSpace(), fixed(")"));
   }
 
   @Override
