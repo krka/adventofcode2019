@@ -29,11 +29,15 @@ public class AssemblerTest {
 
   @Test
   public void testFunction() {
-    IntCode intCode = IntCode.fromResource(Assembler.compile("function.asm"));
+    AnnotatedIntCode annotatedIntCode = Assembler.compileAnnotated("function.asm");
+    System.out.println(annotatedIntCode.toString());
+    List<BigInteger> compile = annotatedIntCode.getIntCode();
+    IntCode intCode = IntCode.fromResource(compile);
+    //intCode.setDebugger(true);
 
-    intCode.run();
+    intCode.step(1000);
     assertEquals(IntCode.State.HALTED, intCode.getState());
-    assertEquals(Arrays.asList(BigInteger.valueOf(123), BigInteger.valueOf(1234)), intCode.drainStdout());
+    assertEquals(Util.toBigInt(Arrays.asList(123, 1234, 120, 720)), intCode.drainStdout());
   }
 
   @Test
@@ -94,13 +98,18 @@ public class AssemblerTest {
 
   @Test
   public void testMergeSort() {
-    IntCode intCode = IntCode.fromResource(Assembler.compile("test_mergesort.asm"));
+    AnnotatedIntCode annotatedIntCode = Assembler.compileAnnotated("test_mergesort.asm");
+    System.out.println(annotatedIntCode.toString());
+    List<BigInteger> compile = annotatedIntCode.getIntCode();
+    IntCode intCode = IntCode.fromResource(compile);
     Random random = new Random(1234L);
 
     int N = 100;
 
     intCode.writeStdin(N);
     ArrayList<BigInteger> input = new ArrayList<>();
+
+    //intCode.setDebugger(true);
 
     intCode.run();
 
@@ -109,7 +118,6 @@ public class AssemblerTest {
       input.add(value);
       intCode.writeStdin(value);
     }
-    //intCode.setDebugger(true);
 
     System.out.println("input: " + input);
     input.sort(BigInteger::compareTo);

@@ -1,5 +1,7 @@
 package intcode.assembler;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 
 public class FunctionDefinitionInstruction extends Instruction {
@@ -17,20 +19,18 @@ public class FunctionDefinitionInstruction extends Instruction {
       throw new RuntimeException("Can't define function inside other function: " + funcName);
     }
 
-    function = assembler.new Function(true, funcName, context);
-    if (assembler.functions.put(funcName, function) != null) {
-      throw new RuntimeException("Function already defined: " + funcName);
-    }
-
+    List<String> params = new ArrayList<>();
     int i = 0;
     for (String parameter : parameters) {
       String param = parameter.trim();
       if (!param.isEmpty()) {
-        StackVariable variable = function.addStackVariable(param);
-        Variable inParam = assembler.getParam(i);
-        function.operations.add(new AddOp("# copy param " + i, inParam, Constant.ZERO, variable));
-        i++;
+        params.add(param);
       }
+    }
+
+    function = assembler.new Function(true, funcName, context, params);
+    if (assembler.functions.put(funcName, function) != null) {
+      throw new RuntimeException("Function already defined: " + funcName);
     }
 
     assembler.setFunction(function);

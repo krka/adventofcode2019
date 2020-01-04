@@ -1,6 +1,7 @@
 package intcode.assembler;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 
@@ -20,9 +21,6 @@ public class NoReturnFunctionCallInstruction extends Instruction {
       parameters2.add(function.resolveParameter(parameter.trim()));
     }
 
-    List<Variable> returnValues2 = new ArrayList<>();
-
-    function.operations.add(new FunctionCall(assembler, funcName, parameters2, returnValues2, context));
-
+    function.addFunctionCall(funcName, parameters2, Collections.emptyList(), context);
   }
 }

@@ -29,6 +29,6 @@ public class FunctionCallInstruction extends Instruction {
       returnValues2.add(function.resolveVariable(returnvalue.trim()));
     }
 
-    function.operations.add(new FunctionCall(assembler, funcName, parameters2, returnValues2, context));
+    function.addFunctionCall(funcName, parameters2, returnValues2, context);
   }
 }

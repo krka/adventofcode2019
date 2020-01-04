@@ -10,6 +10,7 @@ import util.Util;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
@@ -32,8 +33,14 @@ public class DivisionTest {
   @After
   public void tearDown() {
     System.out.println("Number of divisions: " + numRuns);
-    System.out.printf("Average number of instructions: %.3f%n", totalInstructions / (double) numRuns);
-    System.out.printf("Max number of instructions: %d%n", maxInstructions);
+    System.out.printf(Locale.ROOT, "Average number of instructions: %.3f%n", totalInstructions / (double) numRuns);
+    System.out.printf(Locale.ROOT, "Max number of instructions: %d%n", maxInstructions);
+  }
+
+  @Test
+  public void testSimple() {
+    intCode.setDebugger(true);
+    assertDivision(intCode, 9, 2);
   }
 
   @Test

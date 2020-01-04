@@ -22,4 +22,22 @@ output(z)
 z = bar()
 output(z)
 
+func rec(n)
+  if n == 0 jump finish1
+  int n2 = -1
+  int r = 0
+  n2 = n + n2
+  r = rec(n2)
+  r = r * n
+  return r
+finish1:
+  return 1
+endfunc
+
+z = rec(5)
+output(z)
+
+z = rec(6)
+output(z)
+
 halt

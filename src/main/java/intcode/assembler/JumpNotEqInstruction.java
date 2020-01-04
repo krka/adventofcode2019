@@ -14,9 +14,9 @@ public class JumpNotEqInstruction extends Instruction {
     String a = matcher.group("a");
     String b = matcher.group("b");
 
-    assembler.getTemp(1);
-    Variable tmpVariable = assembler.getTemp(0);
+    Variable tmpVariable = assembler.tempSpace.getAny();
     function.eq(tmpVariable, a, b, context);
     function.jump(false, tmpVariable, label, "# jump if false");
+    assembler.tempSpace.release(tmpVariable);
   }
 }

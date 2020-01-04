@@ -13,9 +13,9 @@ public class JumpGreaterThanInstruction extends Instruction {
     String a = matcher.group("a");
     String b = matcher.group("b");
 
-    assembler.getTemp(1);
-    Variable tmpVariable = assembler.getTemp(0);
+    Variable tmpVariable = assembler.tempSpace.getAny();
     function.lessThan(tmpVariable, b, a, context);
     function.jump(true, tmpVariable, label, "# jump if true");
+    assembler.tempSpace.release(tmpVariable);
   }
 }

@@ -4,6 +4,7 @@ import util.Util;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -14,22 +15,24 @@ public class Assembler {
   private final Set<String> resources = new HashSet<>();
   private final Map<String, Variable> variables = new HashMap<>();
   private final List<Variable> variableOrdering = new ArrayList<>();
-  private final List<Variable> arraySpace = new ArrayList<>();
-  private final List<Variable> tempSpace = new ArrayList<>();
-  private final List<Variable> paramSpace = new ArrayList<>();
+
+  final TempSpace tempSpace = new TempSpace("temp_");
+  final ParamSpace paramSpace = new ParamSpace("param_");
 
   final Map<String, Function> functions = new HashMap<>();
-  final Function main = new Function(false, "__main__", "# main function");
+  final Function main;
   private final AddressableMemory globalRelBase;
 
   private String namespace = "<namespace>";
-  private Function function = main;
+  private Function function;
   private final SetRelBase setRelBase;
 
   public Assembler() {
     setRelBase = new SetRelBase("# Initial stack offset");
     setRelBase.setAddress(0);
     globalRelBase = new AddressableMemory(setRelBase, 1);
+    main = new Function(false, "__main__", "# main function", Collections.emptyList());
+    function = main;
   }
 
   public static AnnotatedIntCode compileAnnotated(String name) {
@@ -85,12 +88,12 @@ public class Assembler {
 
     pc = main.finalize(pc);
 
-    for (Variable variable : tempSpace) {
+    for (Variable variable : tempSpace.getAll()) {
       variable.setAddress(pc);
       pc += variable.getLen();
     }
 
-    for (Variable variable : paramSpace) {
+    for (Variable variable : paramSpace.getAll()) {
       variable.setAddress(pc);
       pc += variable.getLen();
     }
@@ -104,17 +107,12 @@ public class Assembler {
       pc += variable.getLen();
     }
 
-    for (Variable variable : arraySpace) {
-      variable.setAddress(pc);
-      pc += variable.getLen();
-    }
-
     setRelBase.setParameter(Constant.of(pc)).writeTo(res);
 
     main.finish();
     main.writeTo(res);
 
-    for (Variable variable : tempSpace) {
+    for (Variable variable : tempSpace.getAll()) {
       int len = variable.getLen();
       for (int i = 0; i < len; i++) {
         String description = variable.context;
@@ -122,7 +120,7 @@ public class Assembler {
       }
     }
 
-    for (Variable variable : paramSpace) {
+    for (Variable variable : paramSpace.getAll()) {
       int len = variable.getLen();
       for (int i = 0; i < len; i++) {
         String description = variable.context;
@@ -144,7 +142,8 @@ public class Assembler {
       } else {
         for (int i = 0; i < len; i++) {
           String description = i == 0 ? variable.context : "";
-          res.addOperation(AnnotatedOperation.variable(description, variable.values[i]));
+          BigInteger value = variable.values != null ? variable.values[i] : BigInteger.ZERO;
+          res.addOperation(AnnotatedOperation.variable(description, value));
         }
       }
     }
@@ -172,23 +171,6 @@ public class Assembler {
     }
   }
 
-  public void declareArray(String name, String len, String context) {
-    Parameter lenParam = function.resolveParameter(len);
-    if (lenParam instanceof Constant) {
-      if (function == main) {
-        Variable array = Variable.array(name + "__data__", lenParam.value().intValueExact(), context);
-        arraySpace.add(array);
-        addVariable(Variable.pointer(name, array, ""));
-      } else {
-        // TODO: add support for static arrays in functions
-        throw new RuntimeException();
-      }
-    } else {
-      // TODO: Implement dynamic arrays
-      throw new RuntimeException();
-    }
-  }
-
   private Variable addVariable(Variable variable) {
     String key = namespace + ":" + variable.getName();
     Variable prev = variables.put(key, variable);
@@ -203,9 +185,11 @@ public class Assembler {
     this.function = function;
   }
 
-  public class Function {
+  public class Function implements HasAddress {
     private final Map<String, StackVariable> stackVariables = new HashMap<>();
-    private final StackVariable extraRelBase;
+    private final StackVariable returnAddress;
+    private final StackVariable stackSize;
+    private final StackVariable parentStackSize;
 
     final List<Op> operations = new ArrayList<>();
     private final Map<String, Label> labels = new HashMap<>();
@@ -214,19 +198,27 @@ public class Assembler {
     public final String name;
     private int address = -1;
 
-    private final SettableConstant baseAdd = new SettableConstant();
+    private final SettableConstant initialStackSize = new SettableConstant();
 
-    public Function(boolean isStack, String name, String context) {
+    public Function(boolean isStack, String name, String context, List<String> parameters) {
       this.isStack = isStack;
       this.name = name;
-      if (isStack) {
-        extraRelBase = addStackVariable("__extra_rel_base");
 
-        operations.add(new SetRelBase("# set relative base").setParameter(baseAdd));
-        operations.add(new AddOp("# set function relative base", baseAdd, Constant.ZERO, extraRelBase));
-        operations.add(new AddOp("# add global relative base", globalRelBase, extraRelBase, globalRelBase));
-      } else {
-        extraRelBase = null;
+      returnAddress = addStackVariable("__return_address");
+      stackSize = addStackVariable("__size");
+      parentStackSize = addStackVariable("__parent_size");
+
+      operations.add(new AddOp(context, initialStackSize, Constant.ZERO, stackSize));
+      operations.add(new AddOp("# add global relative base", globalRelBase, stackSize, globalRelBase));
+
+      List<Variable> paramVars = paramSpace.get(parameters.size());
+
+      int i = 0;
+      for (String parameter : parameters) {
+        Variable inParam = paramVars.get(i);
+        StackVariable to = addStackVariable(parameter);
+        operations.add(new AddOp("# copy param " + i, inParam, Constant.ZERO, to));
+        i++;
       }
     }
 
@@ -374,43 +366,74 @@ public class Assembler {
     }
 
     public void finish() {
-      if (isStack) {
-        int numVariables = stackVariables.size();
-
-        for (StackVariable value : stackVariables.values()) {
-          value.setOffset(numVariables);
-        }
-
-        baseAdd.setValue(numVariables + 1);
-
-      }
+      initialStackSize.setValue(stackVariables.size());
     }
 
     public void addReturn(List<Parameter> returnValues, String context) {
 
       // Copy return values to temp param space
+      List<Variable> params = paramSpace.get(returnValues.size());
       for (int i = 0; i < returnValues.size(); i++) {
-        operations.add(new AddOp(context, returnValues.get(i), Constant.ZERO, getParam(i)));
+        operations.add(new AddOp("# copy return value " + i + " to param space", returnValues.get(i), Constant.ZERO, params.get(i)));
       }
 
-      operations.add(new MulOp("# invert function relative base", extraRelBase, Constant.MINUS_ONE, extraRelBase));
-      operations.add(new AddOp("# revert global relative base", globalRelBase, extraRelBase, globalRelBase));
-      operations.add(new SetRelBase(context).setParameter(extraRelBase));
-      operations.add(new Jump("# jump to caller", false, Constant.ZERO, new StackVariable(0).setOffset(0), null));
+      operations.add(new MulOp("# negate function relative base", stackSize, Constant.MINUS_ONE, stackSize));
+      operations.add(new AddOp("# revert global relative base", globalRelBase, stackSize, globalRelBase));
+      Variable temp = tempSpace.getAny();
+      operations.add(new AddOp("# copy return address to temp", returnAddress, Constant.ZERO, temp));
+      operations.add(new SetRelBase("# revert relative base").setParameter(parentStackSize));
+      operations.add(new Jump(context, false, Constant.ZERO, temp, null));
+      tempSpace.release(temp);
     }
-  }
 
-  Variable getTemp(int index) {
-    while (tempSpace.size() <= index) {
-      tempSpace.add(Variable.intVar("temp_" + index, BigInteger.ZERO, "(temp_" + index + ")"));
-    }
-    return tempSpace.get(index);
-  }
+    public void declareArray(String name, String len, String context) {
+      Parameter lenParam = function.resolveParameter(len);
 
-  Variable getParam(int index) {
-    while (tempSpace.size() <= index) {
-      tempSpace.add(Variable.intVar("param_" + index, BigInteger.ZERO, "(param_" + index + ")"));
+      Variable pointerVar;
+      if (isStack) {
+        pointerVar = addStackVariable(name);
+      } else {
+        pointerVar = addVariable(Variable.pointer(name, null, context));
+      }
+      operations.add(new AddOp(context, globalRelBase, Constant.ZERO, pointerVar));
+      operations.add(new AddOp("# allocate array", globalRelBase, lenParam, globalRelBase));
+      operations.add(new AddOp("# allocate array", stackSize, lenParam, stackSize));
     }
-    return tempSpace.get(index);
+
+    public void addFunctionCall(String funcName, List<Parameter> parameters, List<Variable> returnValues, String context) {
+      Assembler.Function function = functions.get(funcName);
+      if (function == null) {
+        throw new RuntimeException("Could not find function " + funcName);
+      }
+
+      // Copy parameters
+      List<Variable> targetParams = paramSpace.get(parameters.size());
+      int i = 0;
+      for (Parameter parameter : parameters) {
+        operations.add(new AddOp("# prepare for function call: param " + i, parameter, Constant.ZERO, targetParams.get(i)));
+        i++;
+      }
+
+      Variable temp = tempSpace.getAny();
+      operations.add(new MulOp("# save relative base revert", stackSize, Constant.MINUS_ONE, temp));
+      operations.add(new SetRelBase("# set rel base").setParameter(stackSize));
+      operations.add(new AddOp("# save relative base revert", temp, Constant.ZERO, new StackVariable(2)));
+      tempSpace.release(temp);
+
+      Jump jump = new Jump(context, false, Constant.ZERO, new DeferredConstant(function), null);
+      DeferredConstant returnAddress = new DeferredConstant(jump, jump.size());
+
+      operations.add(new AddOp("# save return address", returnAddress, Constant.ZERO, new StackVariable(0)));
+      operations.add(jump);
+
+      // Copy back return values
+      List<Variable> targetReturnParams = paramSpace.get(returnValues.size());
+      i = 0;
+      for (Variable output : returnValues) {
+        Variable returnValue = targetReturnParams.get(i);
+        operations.add(new AddOp("# copy return value " + i, returnValue, Constant.ZERO, output));
+        i++;
+      }
+    }
   }
 }
