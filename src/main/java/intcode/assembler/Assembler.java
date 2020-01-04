@@ -22,6 +22,7 @@ public class Assembler {
   final Map<String, Function> functions = new HashMap<>();
   final Function main;
   private final AddressableMemory globalRelBase;
+  private final Variable stackSize;
 
   private String namespace = "<namespace>";
   private Function function;
@@ -31,6 +32,7 @@ public class Assembler {
     setRelBase = new SetRelBase("# Initial stack offset");
     setRelBase.setAddress(0);
     globalRelBase = new AddressableMemory(setRelBase, 1);
+    stackSize = addVariable(Variable.intVar("__stack_size", BigInteger.ZERO, "current stack size"));
     main = new Function(false, "__main__", "# main function", Collections.emptyList());
     function = main;
   }
@@ -188,7 +190,6 @@ public class Assembler {
   public class Function implements HasAddress {
     private final Map<String, StackVariable> stackVariables = new HashMap<>();
     private final StackVariable returnAddress;
-    private final StackVariable stackSize;
     private final StackVariable parentStackSize;
 
     final List<Op> operations = new ArrayList<>();
@@ -205,7 +206,6 @@ public class Assembler {
       this.name = name;
 
       returnAddress = addStackVariable("__return_address");
-      stackSize = addStackVariable("__size");
       parentStackSize = addStackVariable("__parent_size");
 
       operations.add(new AddOp(context, initialStackSize, Constant.ZERO, stackSize));
@@ -377,10 +377,13 @@ public class Assembler {
         operations.add(new AddOp("# copy return value " + i + " to param space", returnValues.get(i), Constant.ZERO, params.get(i)));
       }
 
-      operations.add(new MulOp("# negate function relative base", stackSize, Constant.MINUS_ONE, stackSize));
-      operations.add(new AddOp("# revert global relative base", globalRelBase, stackSize, globalRelBase));
       Variable temp = tempSpace.getAny();
+      operations.add(new MulOp("# negate function relative base", stackSize, Constant.MINUS_ONE, temp));
+      operations.add(new AddOp("# revert global relative base", globalRelBase, temp, globalRelBase));
+      operations.add(new AddOp("# restore prev stack size", parentStackSize, Constant.ZERO, stackSize));
+
       operations.add(new AddOp("# copy return address to temp", returnAddress, Constant.ZERO, temp));
+      operations.add(new MulOp("# negate parent stack size", parentStackSize, Constant.MINUS_ONE, parentStackSize));
       operations.add(new SetRelBase("# revert relative base").setParameter(parentStackSize));
       operations.add(new Jump(context, false, Constant.ZERO, temp, null));
       tempSpace.release(temp);
@@ -414,11 +417,8 @@ public class Assembler {
         i++;
       }
 
-      Variable temp = tempSpace.getAny();
-      operations.add(new MulOp("# save relative base revert", stackSize, Constant.MINUS_ONE, temp));
       operations.add(new SetRelBase("# set rel base").setParameter(stackSize));
-      operations.add(new AddOp("# save relative base revert", temp, Constant.ZERO, new StackVariable(2)));
-      tempSpace.release(temp);
+      operations.add(new AddOp("# save relative base revert", stackSize, Constant.ZERO, new StackVariable(1)));
 
       Jump jump = new Jump(context, false, Constant.ZERO, new DeferredConstant(function), null);
       DeferredConstant returnAddress = new DeferredConstant(jump, jump.size());
