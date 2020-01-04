@@ -165,7 +165,7 @@ public class Assembler {
       addVariable(Variable.intVar(name, new BigInteger(value), context));
     } else {
       function.addStackVariable(name);
-      function.add(context, function.resolveParameter(name), function.resolveParameter(value), Constant.ZERO);
+      function.operations.add(new SetOp(context, function.resolveParameter(value), function.resolveParameter(name)));
     }
   }
 
@@ -219,7 +219,7 @@ public class Assembler {
       returnAddress = addStackVariable("__return_address");
       parentStackSize = addStackVariable("__parent_size");
 
-      operations.add(new AddOp(context, initialStackSize, Constant.ZERO, stackSize));
+      operations.add(new SetOp(context, initialStackSize, stackSize));
       operations.add(new AddOp("# add global relative base", globalRelBase, stackSize, globalRelBase));
 
       List<Variable> paramVars = paramSpace.get(parameters.size());
@@ -228,13 +228,9 @@ public class Assembler {
       for (String parameter : parameters) {
         Variable inParam = paramVars.get(i);
         StackVariable to = addStackVariable(parameter);
-        operations.add(new AddOp("# copy param " + i, inParam, Constant.ZERO, to));
+        operations.add(new SetOp("# copy param " + i, inParam, to));
         i++;
       }
-    }
-
-    public void add(String context, Parameter target, Parameter a, Parameter b) {
-      operations.add(new AddOp(context, a, b, target));
     }
 
     public void mul(Parameter target, Parameter a, Parameter b, String context) {
@@ -281,7 +277,7 @@ public class Assembler {
       Parameter valueParam = resolveParameter(value);
 
       AddOp rewriteParam = new AddOp(context, array, indexRef, Constant.PLACEHOLDER_POSITION);
-      AddOp addOp = new AddOp("# write to array from value", valueParam, Constant.ZERO, Constant.PLACEHOLDER_POSITION);
+      SetOp addOp = new SetOp("# write to array from value", valueParam, Constant.PLACEHOLDER_POSITION);
 
       rewriteParam.setTarget(DeferredParameter.ofInt(ParameterMode.POSITION, () -> addOp.getAddress() + 3));
       operations.add(rewriteParam);
@@ -300,7 +296,7 @@ public class Assembler {
       Variable targetParam = resolveVariable(target);
 
       AddOp rewriteParam = new AddOp(context, array, indexRef, Constant.PLACEHOLDER_POSITION);
-      AddOp addOp = new AddOp("# write to variable", Constant.PLACEHOLDER_POSITION, Constant.ZERO, targetParam);
+      SetOp addOp = new SetOp("# write to variable", Constant.PLACEHOLDER_POSITION, targetParam);
 
       rewriteParam.setTarget(DeferredParameter.ofInt(ParameterMode.POSITION, () -> addOp.getAddress() + 1));
       operations.add(rewriteParam);
@@ -396,15 +392,15 @@ public class Assembler {
       // Copy return values to temp param space
       List<Variable> params = paramSpace.get(returnValues.size());
       for (int i = 0; i < returnValues.size(); i++) {
-        operations.add(new AddOp("# copy return value " + i + " to param space", returnValues.get(i), Constant.ZERO, params.get(i)));
+        operations.add(new SetOp("# copy return value " + i + " to param space", returnValues.get(i), params.get(i)));
       }
 
       Variable temp = tempSpace.getAny();
       operations.add(new MulOp("# negate function relative base", stackSize, Constant.MINUS_ONE, temp));
       operations.add(new AddOp("# revert global relative base", globalRelBase, temp, globalRelBase));
-      operations.add(new AddOp("# restore prev stack size", parentStackSize, Constant.ZERO, stackSize));
+      operations.add(new SetOp("# restore prev stack size", parentStackSize, stackSize));
 
-      operations.add(new AddOp("# copy return address to temp", returnAddress, Constant.ZERO, temp));
+      operations.add(new SetOp("# copy return address to temp", returnAddress, temp));
       operations.add(new MulOp("# negate parent stack size", parentStackSize, Constant.MINUS_ONE, parentStackSize));
       operations.add(new SetRelBase("# revert relative base").setParameter(parentStackSize));
       operations.add(new Jump(context, false, Constant.ZERO, temp, null));
@@ -421,7 +417,7 @@ public class Assembler {
       } else {
         pointerVar = addVariable(Variable.pointer(name, null, context));
       }
-      operations.add(new AddOp(context, globalRelBase, Constant.ZERO, pointerVar));
+      operations.add(new SetOp(context, globalRelBase, pointerVar));
       operations.add(new AddOp("# allocate array", globalRelBase, lenParam, globalRelBase));
       operations.add(new AddOp("# allocate array", stackSize, lenParam, stackSize));
     }
@@ -440,18 +436,18 @@ public class Assembler {
       List<Variable> targetParams = paramSpace.get(parameters.size());
       int i = 0;
       for (Parameter parameter : parameters) {
-        operations.add(new AddOp("# prepare for function call: param " + i, parameter, Constant.ZERO, targetParams.get(i)));
+        operations.add(new SetOp("# prepare for function call: param " + i, parameter, targetParams.get(i)));
         i++;
       }
 
       operations.add(new SetRelBase("# set rel base").setParameter(stackSize));
-      operations.add(new AddOp("# save relative base revert", stackSize, Constant.ZERO, new StackVariable(1)));
+      operations.add(new SetOp("# save relative base revert", stackSize, new StackVariable(1)));
 
       DeferredParameter jumpTarget = DeferredParameter.ofInt(ParameterMode.IMMEDIATE, function::getAddress);
       Jump jump = new Jump(context, false, Constant.ZERO, jumpTarget, null);
       DeferredParameter returnAddress = DeferredParameter.ofInt(ParameterMode.IMMEDIATE, () -> jump.getAddress() + jump.size());
 
-      operations.add(new AddOp("# save return address", returnAddress, Constant.ZERO, new StackVariable(0)));
+      operations.add(new SetOp("# save return address", returnAddress, new StackVariable(0)));
       operations.add(jump);
 
       validations.add(new ReturnValidation(function, returnValues.size()));
@@ -460,7 +456,7 @@ public class Assembler {
       i = 0;
       for (Variable output : returnValues) {
         Variable returnValue = targetReturnParams.get(i);
-        operations.add(new AddOp("# copy return value " + i, returnValue, Constant.ZERO, output));
+        operations.add(new SetOp("# copy return value " + i, returnValue, output));
         i++;
       }
     }

@@ -15,6 +15,6 @@ public class AddInstruction extends Instruction {
     String target = matcher.group("name");
     String a = matcher.group("a");
     String b = matcher.group("b");
-    function.add(context, function.resolveParameter(target), function.resolveParameter(a), function.resolveParameter(b));
+    function.operations.add(new AddOp(context, function.resolveParameter(a), function.resolveParameter(b), function.resolveParameter(target)));
   }
 }

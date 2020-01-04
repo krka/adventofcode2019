@@ -18,7 +18,7 @@ public class SubInstruction extends Instruction {
 
     Variable tmp = assembler.tempSpace.getAny();
     function.mul(tmp, Constant.MINUS_ONE, b, context);
-    function.add(context, target, a, tmp);
+    function.operations.add(new AddOp(context, a, tmp, target));
     assembler.tempSpace.release(tmp);
   }
 }
