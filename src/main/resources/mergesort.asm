@@ -74,8 +74,8 @@ finish:
   return
 endfunc
 
-#func mergeSort(N, array)
-#  array[N] tempArray
-#  mergeSortInner(0, N, array, tempArray)
-#  return
-#endfunc
+func mergeSort(N, array)
+  array[N] tempArray
+  mergeSortInner(0, N, array, tempArray)
+  return
+endfunc
