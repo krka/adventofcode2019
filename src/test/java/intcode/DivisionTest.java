@@ -9,6 +9,7 @@ import util.Util;
 
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;
@@ -39,8 +40,21 @@ public class DivisionTest {
 
   @Test
   public void testSimple() {
-    intCode.setDebugger(true);
     assertDivision(intCode, 9, 2);
+    assertDivision(intCode, -9, 2);
+    assertDivision(intCode, 9, -2);
+    assertDivision(intCode, -9, -2);
+  }
+
+  @Test
+  public void testHaltOnNan() {
+    intCode.writeStdin((long) 123);
+    intCode.writeStdin((long) 0);
+    intCode.run();
+
+    List<BigInteger> answer = intCode.drainStdout();
+    assertEquals(Collections.emptyList(), answer);
+    assertEquals(IntCode.State.HALTED, intCode.getState());
   }
 
   @Test

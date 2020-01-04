@@ -27,6 +27,7 @@ public class Assembler {
   private String namespace = "<namespace>";
   private Function function;
   private final SetRelBase setRelBase;
+  private final List<ReturnValidation> validations = new ArrayList<>();
 
   public Assembler() {
     setRelBase = new SetRelBase("# Initial stack offset");
@@ -77,6 +78,8 @@ public class Assembler {
 
   private AnnotatedIntCode compile() {
     main.endFunc();
+
+    validations.forEach(ReturnValidation::validate);
 
     AnnotatedIntCode res = new AnnotatedIntCode();
 
@@ -204,12 +207,15 @@ public class Assembler {
     private int address = -1;
 
     private final SettableConstant initialStackSize = new SettableConstant();
+    private final int numParameters;
+    int numReturnValues = -1;
     private int lastReturn;
 
     public Function(boolean isStack, String name, String context, List<String> parameters) {
       this.isStack = isStack;
       this.name = name;
 
+      numParameters = parameters.size();
       returnAddress = addStackVariable("__return_address");
       parentStackSize = addStackVariable("__parent_size");
 
@@ -368,6 +374,9 @@ public class Assembler {
 
     public void addHalt(String context) {
       operations.add(new Halt(context));
+
+      // Halting is kind of returning, I suppose.
+      lastReturn = operations.size();
     }
 
     public void endFunc() {
@@ -378,6 +387,11 @@ public class Assembler {
     }
 
     public void addReturn(List<Parameter> returnValues, String context) {
+      if (numReturnValues == -1) {
+        numReturnValues = returnValues.size();
+      } else if (numReturnValues != returnValues.size()) {
+        throw new RuntimeException("Function " + name + " must always return the same number of values");
+      }
 
       // Copy return values to temp param space
       List<Variable> params = paramSpace.get(returnValues.size());
@@ -418,6 +432,10 @@ public class Assembler {
         throw new RuntimeException("Could not find function " + funcName);
       }
 
+      if (parameters.size() != function.numParameters) {
+        throw new RuntimeException("Function " + funcName + " expects " + function.numParameters + " but got " + parameters.size());
+      }
+
       // Copy parameters
       List<Variable> targetParams = paramSpace.get(parameters.size());
       int i = 0;
@@ -436,6 +454,7 @@ public class Assembler {
       operations.add(new AddOp("# save return address", returnAddress, Constant.ZERO, new StackVariable(0)));
       operations.add(jump);
 
+      validations.add(new ReturnValidation(function, returnValues.size()));
       // Copy back return values
       List<Variable> targetReturnParams = paramSpace.get(returnValues.size());
       i = 0;
