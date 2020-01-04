@@ -1,8 +1,5 @@
 package intcode.assembler;
 
-import java.math.BigInteger;
-import java.util.List;
-
 public class Label extends Op {
   private final String label;
   private boolean defined;
@@ -33,6 +30,6 @@ public class Label extends Op {
     if (!defined) {
       throw new RuntimeException("Label " + label + " is not defined");
     }
-    return new Constant(getAddress());
+    return Constant.of(getAddress());
   }
 }

@@ -2,7 +2,7 @@ package intcode.assembler;
 
 import java.math.BigInteger;
 
-public class SettableConstant implements ImmediateParameter {
+public class SettableConstant implements Parameter {
   private BigInteger value;
 
   public void setValue(BigInteger value) {

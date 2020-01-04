@@ -21,7 +21,7 @@ public class Assembler {
 
   final Map<String, Function> functions = new HashMap<>();
   final Function main;
-  private final AddressableMemory globalRelBase;
+  private final Parameter globalRelBase;
   private final Variable stackSize;
 
   private String namespace = "<namespace>";
@@ -31,7 +31,7 @@ public class Assembler {
   public Assembler() {
     setRelBase = new SetRelBase("# Initial stack offset");
     setRelBase.setAddress(0);
-    globalRelBase = new AddressableMemory(setRelBase, 1);
+    globalRelBase = DeferredParameter.ofInt(ParameterMode.POSITION, () -> setRelBase.getAddress() + 1);
     stackSize = addVariable(Variable.intVar("__stack_size", BigInteger.ZERO, "current stack size"));
     main = new Function(false, "__main__", "# main function", Collections.emptyList());
     function = main;
@@ -76,6 +76,8 @@ public class Assembler {
   }
 
   private AnnotatedIntCode compile() {
+    main.endFunc();
+
     AnnotatedIntCode res = new AnnotatedIntCode();
 
     // 1: set stackpointer -    size: 2
@@ -85,8 +87,8 @@ public class Assembler {
     // 5: define variables
     // 6: define array space
 
-    int pc = setRelBase.size();
-
+    int pc = 0;
+    main.operations.add(0, setRelBase);
 
     pc = main.finalize(pc);
 
@@ -109,9 +111,7 @@ public class Assembler {
       pc += variable.getLen();
     }
 
-    setRelBase.setParameter(Constant.of(pc)).writeTo(res);
-
-    main.finish();
+    setRelBase.setParameter(Constant.of(pc));
     main.writeTo(res);
 
     for (Variable variable : tempSpace.getAll()) {
@@ -140,7 +140,11 @@ public class Assembler {
         if (len != 1) {
           throw new RuntimeException();
         }
-        res.addOperation(AnnotatedOperation.variable("Pointer: " + variable.getName(), BigInteger.valueOf(variable.reference.getAddress())));
+        try {
+          res.addOperation(AnnotatedOperation.variable("Pointer: " + variable.getName(), BigInteger.valueOf(variable.reference.call())));
+        } catch (Exception e) {
+          throw new RuntimeException(e);
+        }
       } else {
         for (int i = 0; i < len; i++) {
           String description = i == 0 ? variable.context : "";
@@ -166,7 +170,7 @@ public class Assembler {
     if (function == main) {
       Variable string = Variable.string(name + "__data__", value, context);
       addVariable(string);
-      addVariable(Variable.pointer(name, string, ""));
+      addVariable(Variable.pointer(name, string::getAddress, ""));
     } else {
       // TODO: add support for strings in functions
       throw new RuntimeException();
@@ -187,7 +191,7 @@ public class Assembler {
     this.function = function;
   }
 
-  public class Function implements HasAddress {
+  public class Function {
     private final Map<String, StackVariable> stackVariables = new HashMap<>();
     private final StackVariable returnAddress;
     private final StackVariable parentStackSize;
@@ -200,6 +204,7 @@ public class Assembler {
     private int address = -1;
 
     private final SettableConstant initialStackSize = new SettableConstant();
+    private int lastReturn;
 
     public Function(boolean isStack, String name, String context, List<String> parameters) {
       this.isStack = isStack;
@@ -269,10 +274,10 @@ public class Assembler {
       Parameter indexRef = resolveParameter(index);
       Parameter valueParam = resolveParameter(value);
 
-      AddOp rewriteParam = new AddOp(context, array, indexRef, Address.placeHolder());
-      AddOp addOp = new AddOp("# write to array from value", valueParam, Constant.ZERO, Address.placeHolder());
+      AddOp rewriteParam = new AddOp(context, array, indexRef, Constant.PLACEHOLDER_POSITION);
+      AddOp addOp = new AddOp("# write to array from value", valueParam, Constant.ZERO, Constant.PLACEHOLDER_POSITION);
 
-      rewriteParam.setTarget(new AddressableMemory(rewriteParam, 7));
+      rewriteParam.setTarget(DeferredParameter.ofInt(ParameterMode.POSITION, () -> addOp.getAddress() + 3));
       operations.add(rewriteParam);
       operations.add(addOp);
     }
@@ -288,10 +293,10 @@ public class Assembler {
       Parameter indexRef = resolveParameter(index);
       Variable targetParam = resolveVariable(target);
 
-      AddOp rewriteParam = new AddOp(context, array, indexRef, Address.placeHolder());
-      AddOp addOp = new AddOp("# write to variable", Address.placeHolder(), Constant.ZERO, targetParam);
+      AddOp rewriteParam = new AddOp(context, array, indexRef, Constant.PLACEHOLDER_POSITION);
+      AddOp addOp = new AddOp("# write to variable", Constant.PLACEHOLDER_POSITION, Constant.ZERO, targetParam);
 
-      rewriteParam.setTarget(new AddressableMemory(rewriteParam, 5));
+      rewriteParam.setTarget(DeferredParameter.ofInt(ParameterMode.POSITION, () -> addOp.getAddress() + 1));
       operations.add(rewriteParam);
       operations.add(addOp);
     }
@@ -312,7 +317,7 @@ public class Assembler {
 
     Parameter resolveParameter(String expression) {
       try {
-        return new Constant(new BigInteger(expression));
+        return Constant.of(new BigInteger(expression));
       } catch (NumberFormatException e) {
         return resolveVariable(expression);
       }
@@ -365,7 +370,10 @@ public class Assembler {
       operations.add(new Halt(context));
     }
 
-    public void finish() {
+    public void endFunc() {
+      if (operations.size() != lastReturn) {
+        addReturn(Collections.emptyList(), "implicit return");
+      }
       initialStackSize.setValue(stackVariables.size());
     }
 
@@ -387,6 +395,7 @@ public class Assembler {
       operations.add(new SetRelBase("# revert relative base").setParameter(parentStackSize));
       operations.add(new Jump(context, false, Constant.ZERO, temp, null));
       tempSpace.release(temp);
+      lastReturn = operations.size();
     }
 
     public void declareArray(String name, String len, String context) {
@@ -420,8 +429,9 @@ public class Assembler {
       operations.add(new SetRelBase("# set rel base").setParameter(stackSize));
       operations.add(new AddOp("# save relative base revert", stackSize, Constant.ZERO, new StackVariable(1)));
 
-      Jump jump = new Jump(context, false, Constant.ZERO, new DeferredConstant(function), null);
-      DeferredConstant returnAddress = new DeferredConstant(jump, jump.size());
+      DeferredParameter jumpTarget = DeferredParameter.ofInt(ParameterMode.IMMEDIATE, function::getAddress);
+      Jump jump = new Jump(context, false, Constant.ZERO, jumpTarget, null);
+      DeferredParameter returnAddress = DeferredParameter.ofInt(ParameterMode.IMMEDIATE, () -> jump.getAddress() + jump.size());
 
       operations.add(new AddOp("# save return address", returnAddress, Constant.ZERO, new StackVariable(0)));
       operations.add(jump);

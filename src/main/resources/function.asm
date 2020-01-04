@@ -40,4 +40,9 @@ output(z)
 z = rec(6)
 output(z)
 
+func implicitReturn()
+endfunc
+
+implicitReturn()
+
 halt

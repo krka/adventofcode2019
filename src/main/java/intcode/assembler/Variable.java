@@ -1,17 +1,18 @@
 package intcode.assembler;
 
 import java.math.BigInteger;
+import java.util.concurrent.Callable;
 
-class Variable implements Parameter, HasAddress {
+class Variable implements Parameter {
   final String type;
   private final String name;
   private final int len;
   final BigInteger[] values;
-  final HasAddress reference;
+  final Callable<Integer> reference;
   final String context;
   private int address = -1;
 
-  public Variable(String type, String name, int len, BigInteger[] values, HasAddress reference, String context) {
+  public Variable(String type, String name, int len, BigInteger[] values, Callable<Integer> reference, String context) {
     this.type = type;
     this.name = name;
     this.len = len;
@@ -24,7 +25,7 @@ class Variable implements Parameter, HasAddress {
     return new Variable("int", name, 1, new BigInteger[]{value}, null, context);
   }
 
-  public static Variable pointer(String name, HasAddress reference, String context) {
+  public static Variable pointer(String name, Callable<Integer> reference, String context) {
     return new Variable("pointer", name, 1, null, reference, context);
   }
 
@@ -64,7 +65,6 @@ class Variable implements Parameter, HasAddress {
     this.address = address;
   }
 
-  @Override
   public int getAddress() {
     if (address == -1) {
       throw new RuntimeException("Can't resolve it before it has been set");

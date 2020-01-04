@@ -18,7 +18,10 @@ public class NoReturnFunctionCallInstruction extends Instruction {
 
     List<Parameter> parameters2 = new ArrayList<>();
     for (String parameter : parameters) {
-      parameters2.add(function.resolveParameter(parameter.trim()));
+      String param = parameter.trim();
+      if (!param.isEmpty()) {
+        parameters2.add(function.resolveParameter(param));
+      }
     }
 
     function.addFunctionCall(funcName, parameters2, Collections.emptyList(), context);

@@ -1,13 +1,12 @@
 package intcode.assembler;
 
-abstract class Op implements HasAddress {
+abstract class Op {
   private int address = -1;
 
   final void setAddress(int address) {
     this.address = address;
   }
 
-  @Override
   public final int getAddress() {
     if (address == -1) {
       throw new RuntimeException("Address not set");
