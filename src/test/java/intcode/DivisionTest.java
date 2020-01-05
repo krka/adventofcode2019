@@ -75,6 +75,17 @@ public class DivisionTest {
   }
 
   @Test
+  public void testReallyBig() {
+    BigInteger n = new BigInteger("17");
+    BigInteger d = new BigInteger("3");
+    for (int i = 0; i < 1000; i++) {
+      System.out.println("Testing division where n has " + n.bitLength() + " bits");
+      assertDivision(intCode, n, d);
+      n = n.multiply(BigInteger.TWO);
+    }
+  }
+
+  @Test
   public void testRandom() {
     Random random = new Random(1234L);
     for (int i = 0; i < 10000; i++) {
@@ -83,8 +94,12 @@ public class DivisionTest {
   }
 
   private void assertDivision(IntCode intcode, long n, long d) {
-    long q = n / d;
-    long r = n % d;
+    assertDivision(intcode, BigInteger.valueOf(n), BigInteger.valueOf(d));
+  }
+
+  private void assertDivision(IntCode intcode, BigInteger n, BigInteger d) {
+    BigInteger q = n.divide(d);
+    BigInteger r = n.remainder(d);
     intcode.writeStdin(n);
     intcode.writeStdin(d);
     long before = intcode.getInstrCount();
@@ -98,7 +113,7 @@ public class DivisionTest {
 
     List<BigInteger> answer = intcode.drainStdout();
     String message = String.format("%d / %d should be q=%d, r=%d", n, d, q, r);
-    assertEquals(message, Util.toBigIntFromLong(Arrays.asList(q, r)), answer);
+    assertEquals(message, Arrays.asList(q, r), answer);
     //System.out.println(message + " - OK: " + numInstructions + " instructions");
   }
 }

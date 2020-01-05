@@ -1,19 +1,20 @@
 int i = 0
 int k = 1
 int kd = 0
-int kdneg = 0
 int q = 0
 int neg_n = 0
 int neg_d = 0
+int extra = 0
 array[64] powtwo
 
 setup_powtwo:
 powtwo[i] = k
 k = k * 2
 i = i + 1
-if i != 64 jump setup_powtwo
+if i < 64 jump setup_powtwo
 
 func div(N, D)
+  q = 0
   if not D jump nan
   neg_n = 1
   neg_d = 1
@@ -27,20 +28,44 @@ skip_neg_n:
 skip_neg_d:
   i = 0
   kd = D
+  k = 1
 find_range:
   i = i + 1
+  k = k * 2
   kd = kd * 2
   if N >= kd jump find_range
 
-  q = 0
+  extra = i - 64
+  if extra > 0 jump setup_extra
+  jump loop_start
+
+setup_extra:
+  array[extra] powtwo_extra
+  i = 0
+setup_extra_loop:
+  powtwo_extra[i] = k
+  k = k * 2
+  i = i + 1
+  if i < extra jump setup_extra_loop
+
+extra_loop_start:
+  i = i - 1
+  k = powtwo_extra[i]
+  kd = k * D
+  if N < kd jump extra_next_iter
+  q = q + k
+  N = N - kd
+extra_next_iter:
+  if i jump extra_loop_start
+i = 64
+
 loop_start:
-  i = i + -1
+  i = i - 1
   k = powtwo[i]
   kd = k * D
   if N < kd jump next_iter
   q = q + k
-  kdneg = kd * -1
-  N = N + kdneg
+  N = N - kd
 next_iter:
   if i jump loop_start
   q = q * neg_d

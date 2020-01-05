@@ -434,7 +434,7 @@ public class Assembler {
 
       Parameter lenParam = function.resolveParameter(len);
 
-      if (lenParam instanceof Constant) {
+      if (isStack && lenParam instanceof Constant) {
         int arraySize = lenParam.value().intValueExact();
         allocations.add(new StaticAllocation(pointerVar, arraySize));
       } else {
