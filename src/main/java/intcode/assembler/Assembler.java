@@ -200,10 +200,13 @@ public class Assembler {
     private final StackVariable parentStackSize;
 
     final List<Op> operations = new ArrayList<>();
+    final List<StaticAllocation> allocations = new ArrayList<>();
+
     private final Map<String, Label> labels = new HashMap<>();
     private final boolean isStack;
 
     public final String name;
+    private final int injectStackAllocations;
     private int address = -1;
 
     private final SettableConstant initialStackSize = new SettableConstant();
@@ -220,7 +223,7 @@ public class Assembler {
       parentStackSize = addStackVariable("__parent_size");
 
       operations.add(new SetOp(context, initialStackSize, stackSize));
-      operations.add(new AddOp("# add global relative base", globalRelBase, stackSize, globalRelBase));
+      operations.add(new AddOp("# add global relative base", globalRelBase, initialStackSize, globalRelBase));
 
       List<Variable> paramVars = paramSpace.get(parameters.size());
 
@@ -231,6 +234,7 @@ public class Assembler {
         operations.add(new SetOp("# copy param " + i, inParam, to));
         i++;
       }
+      injectStackAllocations = operations.size();
     }
 
     public void mul(Parameter target, Parameter a, Parameter b, String context) {
@@ -379,7 +383,18 @@ public class Assembler {
       if (operations.size() != lastReturn) {
         addReturn(Collections.emptyList(), "implicit return");
       }
-      initialStackSize.setValue(stackVariables.size());
+      List<Op> stackAllocationOperations = new ArrayList<>();
+
+      int stackSize = stackVariables.size();
+      Variable temp = tempSpace.getAny();
+      for (StaticAllocation allocation : allocations) {
+        stackAllocationOperations.add(new AddOp("", globalRelBase, Constant.of(stackSize), temp));
+        stackAllocationOperations.add(new SetOp("# allocate array", temp, allocation.variable));
+        stackSize += allocation.size;
+      }
+      tempSpace.release(temp);
+      operations.addAll(injectStackAllocations, stackAllocationOperations);
+      initialStackSize.setValue(stackSize);
     }
 
     public void addReturn(List<Parameter> returnValues, String context) {
@@ -405,21 +420,28 @@ public class Assembler {
       operations.add(new SetRelBase("# revert relative base").setParameter(parentStackSize));
       operations.add(new Jump(context, false, Constant.ZERO, temp, null));
       tempSpace.release(temp);
+
       lastReturn = operations.size();
     }
 
     public void declareArray(String name, String len, String context) {
-      Parameter lenParam = function.resolveParameter(len);
-
       Variable pointerVar;
       if (isStack) {
         pointerVar = addStackVariable(name);
       } else {
         pointerVar = addVariable(Variable.pointer(name, null, context));
       }
-      operations.add(new SetOp(context, globalRelBase, pointerVar));
-      operations.add(new AddOp("# allocate array", globalRelBase, lenParam, globalRelBase));
-      operations.add(new AddOp("# allocate array", stackSize, lenParam, stackSize));
+
+      Parameter lenParam = function.resolveParameter(len);
+
+      if (lenParam instanceof Constant) {
+        int arraySize = lenParam.value().intValueExact();
+        allocations.add(new StaticAllocation(pointerVar, arraySize));
+      } else {
+        operations.add(new SetOp(context, globalRelBase, pointerVar));
+        operations.add(new AddOp("# allocate array", globalRelBase, lenParam, globalRelBase));
+        operations.add(new AddOp("# allocate array", stackSize, lenParam, stackSize));
+      }
     }
 
     public void addFunctionCall(String funcName, List<Parameter> parameters, List<Variable> returnValues, String context) {
