@@ -1,22 +1,28 @@
-int i = 0
-int k = 1
-int kd = 0
-int kdneg = 0
+int D2 = 0
+int k2 = 0
 int q = 0
-int neg_n = 0
-int neg_d = 0
-array[64] powtwo
+int r = 0
 
-setup_powtwo:
-powtwo[i] = k
-k = k * 2
-i = i + 1
-if i != 64 jump setup_powtwo
+func divInner(N, D, k)
+  if N < D jump ret0
+
+  D2 = 2 * D
+  k2 = 2 * k
+
+  q, r = divInner(N, D2, k2)
+  if D > r jump skip_incr
+  q = q + k
+  r = r - D
+skip_incr:
+  return q, r
+ret0:
+  return 0, N
+endfunc
 
 func div(N, D)
-  if not D jump nan
-  neg_n = 1
-  neg_d = 1
+  if not D jump NaN
+  int neg_n = 1
+  int neg_d = 1
   if N >= 0 jump skip_neg_n
   neg_n = -1
   N = N * -1
@@ -25,28 +31,11 @@ skip_neg_n:
   neg_d = -1
   D = D * -1
 skip_neg_d:
-  i = 0
-  kd = D
-find_range:
-  i = i + 1
-  kd = kd * 2
-  if N >= kd jump find_range
-
-  q = 0
-loop_start:
-  i = i + -1
-  k = powtwo[i]
-  kd = k * D
-  if N < kd jump next_iter
-  q = q + k
-  kdneg = kd * -1
-  N = N + kdneg
-next_iter:
-  if i jump loop_start
-  q = q * neg_d
-  q = q * neg_n
+  D, N = divInner(N, D, 1)
+  D = D * neg_d
+  D = D * neg_n
   N = N * neg_n
-  return q, N
-nan:
+  return D, N
+NaN:
   halt
 endfunc
