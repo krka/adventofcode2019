@@ -42,9 +42,10 @@ find_range:
 setup_extra:
   array[extra] powtwo_extra
   i = 0
+  k = powtwo[63]
 setup_extra_loop:
-  powtwo_extra[i] = k
   k = k * 2
+  powtwo_extra[i] = k
   i = i + 1
   if i < extra jump setup_extra_loop
 

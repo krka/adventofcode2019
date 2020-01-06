@@ -78,7 +78,7 @@ public class DivisionTest {
   public void testReallyBig() {
     BigInteger n = new BigInteger("17");
     BigInteger d = new BigInteger("3");
-    for (int i = 0; i < 1000; i++) {
+    for (int i = 0; i < 200; i++) {
       System.out.println("Testing division where n has " + n.bitLength() + " bits");
       assertDivision(intCode, n, d);
       n = n.multiply(BigInteger.TWO);
