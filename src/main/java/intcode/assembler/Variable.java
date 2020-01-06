@@ -3,7 +3,7 @@ package intcode.assembler;
 import java.math.BigInteger;
 import java.util.concurrent.Callable;
 
-class Variable implements Parameter {
+public class Variable implements Parameter {
   final String type;
   private final String name;
   private final int len;
@@ -73,6 +73,11 @@ class Variable implements Parameter {
   }
 
   public String getName() {
+    return name;
+  }
+
+  @Override
+  public String toString() {
     return name;
   }
 }

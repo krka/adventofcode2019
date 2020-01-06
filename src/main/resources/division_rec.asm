@@ -25,15 +25,14 @@ func div(N, D)
   int neg_d = 1
   if N >= 0 jump skip_neg_n
   neg_n = -1
-  N = N * -1
+  N = -N
 skip_neg_n:
   if D >= 0 jump skip_neg_d
   neg_d = -1
-  D = D * -1
+  D = -D
 skip_neg_d:
   D, N = divInner(N, D, 1)
-  D = D * neg_d
-  D = D * neg_n
+  D = D * neg_d * neg_n
   N = N * neg_n
   return D, N
 NaN:

@@ -33,6 +33,9 @@ public class TempSpace {
   }
 
   public void release(Variable variable) {
+    if (variable == null) {
+      return;
+    }
     if (!allVariables.contains(variable)) {
       throw new RuntimeException("Can't release unrelated variable");
     }

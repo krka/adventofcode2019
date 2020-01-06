@@ -69,8 +69,7 @@ loop_start:
   N = N - kd
 next_iter:
   if i jump loop_start
-  q = q * neg_d
-  q = q * neg_n
+  q = q * neg_d * neg_n
   N = N * neg_n
   return q, N
 nan:

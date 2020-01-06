@@ -37,7 +37,7 @@ public class AssemblerTest {
 
     intCode.step(1000);
     assertEquals(IntCode.State.HALTED, intCode.getState());
-    assertEquals(Util.toBigInt(Arrays.asList(123, 1234, 120, 720)), intCode.drainStdout());
+    assertEquals(Util.toBigInt(Arrays.asList(123, 1234, 120, 720, -7429993)), intCode.drainStdout());
   }
 
   @Test

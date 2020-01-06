@@ -22,4 +22,10 @@ public class SettableConstant implements Parameter {
   public BigInteger value() {
     return value;
   }
+
+  @Override
+  public String toString() {
+    return value().toString();
+  }
+
 }

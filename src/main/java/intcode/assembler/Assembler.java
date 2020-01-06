@@ -1,5 +1,7 @@
 package intcode.assembler;
 
+import intcode.assembler.parser.ExpressionParser;
+import intcode.assembler.parser.SetStatement;
 import util.Util;
 
 import java.math.BigInteger;
@@ -16,7 +18,7 @@ public class Assembler {
   private final Map<String, Variable> variables = new HashMap<>();
   private final List<Variable> variableOrdering = new ArrayList<>();
 
-  final TempSpace tempSpace = new TempSpace("temp_");
+  public final TempSpace tempSpace = new TempSpace("temp_");
   final ParamSpace paramSpace = new ParamSpace("param_");
 
   final Map<String, Function> functions = new HashMap<>();
@@ -64,8 +66,14 @@ public class Assembler {
         lineNumber++;
         line = line.trim();
         if (!line.isEmpty()) {
-          if (!Parser.parse(line, this, function, resource, lineNumber)) {
-            throw new RuntimeException("Unexpected line: " + line);
+          String context = resource + ":" + lineNumber + "    " + line;
+          if (!Parser.parse(line, this, function, context)) {
+            SetStatement setStatement = ExpressionParser.parseSetStatement(line);
+            if (setStatement != null) {
+              setStatement.apply(this, function, context);
+            } else {
+              throw new RuntimeException("Unexpected line: " + line);
+            }
           }
         }
       }
@@ -199,7 +207,7 @@ public class Assembler {
     private final StackVariable returnAddress;
     private final StackVariable parentStackSize;
 
-    final List<Op> operations = new ArrayList<>();
+    public final List<Op> operations = new ArrayList<>();
     final List<StaticAllocation> allocations = new ArrayList<>();
 
     private final Map<String, Label> labels = new HashMap<>();
@@ -307,7 +315,7 @@ public class Assembler {
       operations.add(addOp);
     }
 
-    Variable resolveVariable(String variableName) {
+    public Variable resolveVariable(String variableName) {
       StackVariable stackVariable = stackVariables.get(variableName);
       if (stackVariable != null) {
         return stackVariable;
@@ -337,7 +345,7 @@ public class Assembler {
       if (stackVariables.containsKey(variableName)) {
         throw new RuntimeException("Stack variable already defined: " + variableName);
       }
-      StackVariable variable = new StackVariable(stackVariables.size());
+      StackVariable variable = new StackVariable(variableName, stackVariables.size());
       stackVariables.put(variableName, variable);
       return variable;
     }
@@ -463,13 +471,13 @@ public class Assembler {
       }
 
       operations.add(new SetRelBase("# set rel base").setParameter(stackSize));
-      operations.add(new SetOp("# save relative base revert", stackSize, new StackVariable(1)));
+      operations.add(new SetOp("# save relative base revert", stackSize, new StackVariable("stack size", 1)));
 
       DeferredParameter jumpTarget = DeferredParameter.ofInt(ParameterMode.IMMEDIATE, function::getAddress);
       Jump jump = new Jump(context, false, Constant.ZERO, jumpTarget, null);
       DeferredParameter returnAddress = DeferredParameter.ofInt(ParameterMode.IMMEDIATE, () -> jump.getAddress() + jump.size());
 
-      operations.add(new SetOp("# save return address", returnAddress, new StackVariable(0)));
+      operations.add(new SetOp("# save return address", returnAddress, new StackVariable("ret addr", 0)));
       operations.add(jump);
 
       validations.add(new ReturnValidation(function, returnValues.size()));

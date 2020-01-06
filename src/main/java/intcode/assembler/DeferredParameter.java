@@ -35,4 +35,15 @@ class DeferredParameter implements Parameter {
     }
   }
 
+  @Override
+  public String toString() {
+    if (mode == ParameterMode.IMMEDIATE) {
+      return value().toString();
+    } else if (mode == ParameterMode.POSITION) {
+      return "mem[" + value() + "]";
+    } else {
+      throw new RuntimeException();
+    }
+  }
+
 }

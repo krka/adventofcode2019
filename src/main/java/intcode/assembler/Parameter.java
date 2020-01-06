@@ -2,7 +2,7 @@ package intcode.assembler;
 
 import java.math.BigInteger;
 
-interface Parameter {
+public interface Parameter {
   ParameterMode mode();
   BigInteger value();
 

@@ -2,12 +2,12 @@ package intcode.assembler;
 
 import java.math.BigInteger;
 
-class Constant implements Parameter {
+public class Constant implements Parameter {
 
-  static final Constant MINUS_ONE = Constant.of(-1);
-  static final Constant ZERO = Constant.of(0);
+  public static final Constant MINUS_ONE = Constant.of(-1);
+  public static final Constant ZERO = Constant.of(0);
 
-  static final Constant PLACEHOLDER_POSITION = Constant.of(ParameterMode.POSITION, BigInteger.ZERO);
+  public static final Constant PLACEHOLDER_POSITION = Constant.of(ParameterMode.POSITION, BigInteger.ZERO);
 
   private final ParameterMode mode;
   private final BigInteger constant;
@@ -43,4 +43,14 @@ class Constant implements Parameter {
     return constant;
   }
 
+  @Override
+  public String toString() {
+    if (mode == ParameterMode.IMMEDIATE) {
+      return value().toString();
+    } else if (mode == ParameterMode.POSITION) {
+      return "mem[" + value() + "]";
+    } else {
+      throw new RuntimeException();
+    }
+  }
 }

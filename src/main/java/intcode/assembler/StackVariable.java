@@ -3,10 +3,12 @@ package intcode.assembler;
 import java.math.BigInteger;
 
 class StackVariable extends Variable {
+  private final String name;
   private final int index;
 
-  public StackVariable(int index) {
-    super("int", "stack_" + index, 1, new BigInteger[]{BigInteger.ZERO}, null, "# stack " + index);
+  public StackVariable(String name, int index) {
+    super("int", name, 1, new BigInteger[]{BigInteger.ZERO}, null, "# stack " + index);
+    this.name = name;
     this.index = index;
   }
 
@@ -18,6 +20,11 @@ class StackVariable extends Variable {
   @Override
   public BigInteger value() {
     return BigInteger.valueOf(index);
+  }
+
+  @Override
+  public String toString() {
+    return name;
   }
 
 }
