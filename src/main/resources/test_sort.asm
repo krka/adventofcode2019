@@ -39,4 +39,4 @@ output(tmp)
 i = i + 1
 if i < 100 jump emit
 
-halt
+halt()

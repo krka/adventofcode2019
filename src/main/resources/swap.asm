@@ -14,4 +14,4 @@ z, w = swap(x, y)
 output(z)
 output(w)
 
-halt
+halt()

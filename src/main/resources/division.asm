@@ -73,5 +73,5 @@ next_iter:
   N = N * neg_n
   return q, N
 nan:
-  halt
+  throw()
 endfunc

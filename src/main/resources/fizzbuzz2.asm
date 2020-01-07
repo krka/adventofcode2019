@@ -47,4 +47,4 @@ output(10)
 endloop:
 if i != N jump loop
 
-halt
+halt()

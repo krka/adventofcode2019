@@ -23,4 +23,4 @@ x = arr[3 - 1] + arr[2 - 1]
 output(x)
 
 
-halt
+halt()

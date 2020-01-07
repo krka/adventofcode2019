@@ -13,6 +13,8 @@ import java.util.Set;
 
 public class IntConstant implements ExprNode {
   public static final ExprNode ZERO = new IntConstant(BigInteger.ZERO);
+  public static final ExprNode ONE = new IntConstant(BigInteger.ONE);
+
   private final BigInteger value;
 
   public IntConstant(BigInteger value) {

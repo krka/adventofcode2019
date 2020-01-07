@@ -24,9 +24,7 @@ if 1 >= 1 jump step3
 jump fail
 
 step3:
-  output(1)
-  halt
+  halt()
 
 fail:
-  output(0)
-  halt
+  throw()

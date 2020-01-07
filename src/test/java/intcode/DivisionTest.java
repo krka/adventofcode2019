@@ -46,15 +46,11 @@ public class DivisionTest {
     assertDivision(intCode, -9, -2);
   }
 
-  @Test
-  public void testHaltOnNan() {
+  @Test(expected = RuntimeException.class)
+  public void testCrashOnNaN() {
     intCode.writeStdin((long) 123);
     intCode.writeStdin((long) 0);
     intCode.run();
-
-    List<BigInteger> answer = intCode.drainStdout();
-    assertEquals(Collections.emptyList(), answer);
-    assertEquals(IntCode.State.HALTED, intCode.getState());
   }
 
   @Test

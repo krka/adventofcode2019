@@ -46,7 +46,6 @@ public class AssemblerTest {
 
     intCode.run();
     assertEquals(IntCode.State.HALTED, intCode.getState());
-    assertEquals(Arrays.asList(BigInteger.valueOf(1)), intCode.drainStdout());
   }
 
   @Test

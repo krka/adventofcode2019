@@ -4,6 +4,7 @@ import NegNode.NegNode;
 import org.petitparser.context.Result;
 import org.petitparser.parser.Parser;
 import org.petitparser.parser.primitive.CharacterParser;
+import org.petitparser.parser.primitive.StringParser;
 import org.petitparser.tools.ExpressionBuilder;
 
 import java.math.BigInteger;
@@ -43,6 +44,12 @@ public class ExpressionParser {
 
     expressionBuilder.group()
             .left(CharacterParser.of('+').trim(), (List<Object> o) -> new AddNode((ExprNode) o.get(0), (ExprNode) o.get(2)))
+            .left(CharacterParser.of('-').trim(), (List<Object> o) -> new AddNode((ExprNode) o.get(0), new NegNode((ExprNode) o.get(2))));
+
+    expressionBuilder.group()
+            .left(StringParser.of("==").trim(), (List<Object> o) -> new EqNode((ExprNode) o.get(0), (ExprNode) o.get(2)))
+            .left(StringParser.of("<").trim(), (List<Object> o) -> new LessThanNode((ExprNode) o.get(0), (ExprNode) o.get(2)))
+            .left(StringParser.of(">").trim(), (List<Object> o) -> new GreaterThanNode((ExprNode) o.get(0), (ExprNode) o.get(2)))
             .left(CharacterParser.of('-').trim(), (List<Object> o) -> new AddNode((ExprNode) o.get(0), new NegNode((ExprNode) o.get(2))));
 
     EXPRESSION = expressionBuilder.build().trim();

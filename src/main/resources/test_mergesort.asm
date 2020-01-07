@@ -22,4 +22,4 @@ output(tmp)
 i = i + 1
 if i < N jump emit
 
-halt
+halt()

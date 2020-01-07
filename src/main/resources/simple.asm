@@ -7,4 +7,4 @@ b = 1 + 2
 c = a + b
 c = c + 90
 output(c)
-halt
+halt()

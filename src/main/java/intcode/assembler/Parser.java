@@ -9,8 +9,6 @@ public class Parser {
     INSTRUCTIONS.add(new IncludeResource());
     INSTRUCTIONS.add(new Comment());
     INSTRUCTIONS.add(new LabelInstruction());
-    INSTRUCTIONS.add(new InputInstruction());
-    INSTRUCTIONS.add(new OutputInstruction());
     INSTRUCTIONS.add(new DeclareInt());
     INSTRUCTIONS.add(new DeclareString());
     INSTRUCTIONS.add(new DeclareArray());
@@ -28,8 +26,6 @@ public class Parser {
     INSTRUCTIONS.add(new JumpLessThanEqInstruction());
     INSTRUCTIONS.add(new JumpGreaterThanInstruction());
     INSTRUCTIONS.add(new JumpGreaterThanEqInstruction());
-
-    INSTRUCTIONS.add(new HaltInstruction());
 
     INSTRUCTIONS.add(new FunctionCallInstruction());
     INSTRUCTIONS.add(new NoReturnFunctionCallInstruction());

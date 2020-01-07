@@ -349,6 +349,13 @@ public class Assembler {
       lastReturn = operations.size();
     }
 
+    public void addThrow(String context) {
+      operations.add(new Throw(context));
+
+      // Throwing is kind of returning, I suppose.
+      lastReturn = operations.size();
+    }
+
     public void endFunc() {
       if (operations.size() != lastReturn) {
         addReturn(Collections.emptyList(), "implicit return");
@@ -415,7 +422,37 @@ public class Assembler {
     }
 
     public void addFunctionCall(String funcName, List<Parameter> parameters, List<Variable> returnValues, String context) {
-      Assembler.Function function = functions.get(funcName);
+      if (funcName.equals("output")) {
+        if (parameters.size() == 1 && returnValues.size() == 0) {
+          operations.add(new Output(parameters.get(0), context));
+        } else {
+          throw new RuntimeException("output() requires only one parameter and zero return values");
+        }
+      } else if (funcName.equals("input")) {
+        if (parameters.size() == 0 && returnValues.size() == 1) {
+          operations.add(new Input(returnValues.get(0), context));
+        } else {
+          throw new RuntimeException("input() requires only one return value and zero parameters");
+        }
+      } else if (funcName.equals("halt")) {
+        if (parameters.size() == 0 && returnValues.size() == 0) {
+          addHalt(context);
+        } else {
+          throw new RuntimeException("halt() requires only zero return values and zero parameters");
+        }
+      } else if (funcName.equals("throw")) {
+        if (parameters.size() == 0 && returnValues.size() == 0) {
+          addThrow(context);
+        } else {
+          throw new RuntimeException("throw() requires only zero return values and zero parameters");
+        }
+      } else {
+        addFunctionCall2(funcName, parameters, returnValues, context);
+      }
+    }
+
+    private void addFunctionCall2(String funcName, List<Parameter> parameters, List<Variable> returnValues, String context) {
+      Function function = functions.get(funcName);
       if (function == null) {
         throw new RuntimeException("Could not find function " + funcName);
       }
