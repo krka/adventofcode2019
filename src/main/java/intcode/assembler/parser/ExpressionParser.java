@@ -45,17 +45,17 @@ public class ExpressionParser {
             .left(CharacterParser.of('+').trim(), (List<Object> o) -> new AddNode((ExprNode) o.get(0), (ExprNode) o.get(2)))
             .left(CharacterParser.of('-').trim(), (List<Object> o) -> new AddNode((ExprNode) o.get(0), new NegNode((ExprNode) o.get(2))));
 
-    EXPRESSION = expressionBuilder.build().trim().end();
+    EXPRESSION = expressionBuilder.build().trim();
 
-    SET_STATEMENT = IDENTIFIER.flatten().map(VarNode::new).seq(CharacterParser.of('=').trim()).seq(EXPRESSION).end()
-    .map((List<Object> o) -> new SetStatement((VarNode) o.get(0), (ExprNode) o.get(2)));
+    SET_STATEMENT = EXPRESSION.trim().seq(CharacterParser.of('=').trim()).seq(EXPRESSION.trim())
+      .map((List<Object> o) -> new SetStatement((ExprNode) o.get(0), (ExprNode) o.get(2)));
   }
 
   public static ExprNode parse(String s) {
-    return EXPRESSION.parse(s).get();
+    return EXPRESSION.end().parse(s).get();
   }
   public static SetStatement parseSetStatement(String line) {
-    Result parse = SET_STATEMENT.parse(line);
+    Result parse = SET_STATEMENT.end().parse(line);
     if (parse.isSuccess()) {
       return parse.get();
     }

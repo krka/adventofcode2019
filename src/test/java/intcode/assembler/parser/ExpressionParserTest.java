@@ -32,11 +32,6 @@ public class ExpressionParserTest {
   }
 
   @Test
-  public void testSetStatementFailure() {
-    assertNull(ExpressionParser.parseSetStatement("123 = x"));
-  }
-
-  @Test
   public void testParen() {
     ExprNode expr = ExpressionParser.parse("10 * (123 + 5)").optimize();
     ExprNode expected = ExpressionParser.parse("1280").optimize();

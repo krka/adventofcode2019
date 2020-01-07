@@ -52,6 +52,14 @@ public class ArrayNode implements ExprNode {
             '}';
   }
 
+  public ExprNode getArray() {
+    return array;
+  }
+
+  public ExprNode getIndex() {
+    return index;
+  }
+
   @Override
   public ExprNode optimize() {
     return new ArrayNode(array.optimize(), index.optimize());

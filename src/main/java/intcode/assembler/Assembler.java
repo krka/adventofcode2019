@@ -277,44 +277,6 @@ public class Assembler {
       return labels.computeIfAbsent(namespace + ":" + label, ignore -> new Label(label));
     }
 
-    public void setArray(String arrayName, String index, String value, String context) {
-
-      // setarray <arrayName> <index> <value>
-      // is expressed as:
-      // 1 - rewrite: p1:<arrayName = addr> + p2:<index> target:<next op param 3>
-      // 2 - add:     p1:<value> = p2:0 + target:(will be overwritten)
-
-      Variable array = resolveVariable(arrayName);
-      Parameter indexRef = resolveParameter(index);
-      Parameter valueParam = resolveParameter(value);
-
-      AddOp rewriteParam = new AddOp(context, array, indexRef, Constant.PLACEHOLDER_POSITION);
-      SetOp addOp = new SetOp("# write to array from value", valueParam, Constant.PLACEHOLDER_POSITION);
-
-      rewriteParam.setTarget(DeferredParameter.ofInt(ParameterMode.POSITION, () -> addOp.getAddress() + 3));
-      operations.add(rewriteParam);
-      operations.add(addOp);
-    }
-
-    public void getArray(String arrayName, String index, String target, String context) {
-
-      // getarray <arrayName> <index> <target>
-      // is expressed as:
-      // 1 - rewrite: p1:<arrayName = addr> + p2:<index> target:<next op param 1>
-      // 2 - add:     p1:(will = be + overwritten) p2:0 target:<target>
-
-      Parameter array = resolveParameter(arrayName);
-      Parameter indexRef = resolveParameter(index);
-      Variable targetParam = resolveVariable(target);
-
-      AddOp rewriteParam = new AddOp(context, array, indexRef, Constant.PLACEHOLDER_POSITION);
-      SetOp addOp = new SetOp("# write to variable", Constant.PLACEHOLDER_POSITION, targetParam);
-
-      rewriteParam.setTarget(DeferredParameter.ofInt(ParameterMode.POSITION, () -> addOp.getAddress() + 1));
-      operations.add(rewriteParam);
-      operations.add(addOp);
-    }
-
     public Variable resolveVariable(String variableName) {
       StackVariable stackVariable = stackVariables.get(variableName);
       if (stackVariable != null) {
