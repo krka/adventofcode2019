@@ -2,9 +2,11 @@ package intcode.assembler.parser;
 
 import intcode.assembler.Assembler;
 import intcode.assembler.Parameter;
+import intcode.assembler.TempVariable;
 import intcode.assembler.Variable;
 
 import java.math.BigInteger;
+import java.util.Set;
 
 public interface ExprNode {
   ExprNode optimize();
@@ -12,5 +14,6 @@ public interface ExprNode {
 
   void assignTo(Variable target, Assembler assembler, Assembler.Function function, String context);
 
-  Parameter asParameter(Assembler.Function function);
+  Parameter toParameter(Assembler assembler, Assembler.Function function, Set<TempVariable> tempParams);
+
 }

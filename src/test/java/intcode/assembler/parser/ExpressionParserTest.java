@@ -42,4 +42,11 @@ public class ExpressionParserTest {
     ExprNode expected = ExpressionParser.parse("1280").optimize();
     assertEquals(expected, expr);
   }
+
+  @Test
+  public void testArray() {
+    ExprNode expr = ExpressionParser.parse("array[100 + 2]").optimize();
+    ArrayNode expected = new ArrayNode(new VarNode("array"), new IndexNode(new IntConstant(BigInteger.valueOf(102))));
+    assertEquals(expected, expr);
+  }
 }

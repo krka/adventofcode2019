@@ -3,10 +3,13 @@ package intcode.assembler.parser;
 import intcode.assembler.Assembler;
 import intcode.assembler.MulOp;
 import intcode.assembler.Parameter;
+import intcode.assembler.TempVariable;
 import intcode.assembler.Variable;
 
 import java.math.BigInteger;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 class MulNode implements ExprNode {
   private final ExprNode left;
@@ -65,29 +68,24 @@ class MulNode implements ExprNode {
 
   @Override
   public void assignTo(Variable target, Assembler assembler, Assembler.Function function, String context) {
-    Variable leftTemp = null;
-    Variable rightTemp = null;
-    Parameter leftParam = left.asParameter(function);
-    if (leftParam == null) {
-      leftTemp = assembler.tempSpace.getAny();
-      left.assignTo(leftTemp, assembler, function, "# " + leftTemp + " = " + left.toString());
-      leftParam = leftTemp;
-    }
-    Parameter rightParam = right.asParameter(function);
-    if (rightParam == null) {
-      rightTemp = assembler.tempSpace.getAny();
-      right.assignTo(rightTemp, assembler, function, "# " + rightTemp + " = " + right.toString());
-      rightParam = rightTemp;
-    }
+    Set<TempVariable> tempParams = new HashSet<>();
+    Parameter leftParam = left.toParameter(assembler, function, tempParams);
+    Parameter rightParam = right.toParameter(assembler, function, tempParams);
 
     function.operations.add(new MulOp(context, leftParam, rightParam, target));
 
-    assembler.tempSpace.release(leftTemp);
-    assembler.tempSpace.release(rightTemp);
+    tempParams.forEach(TempVariable::release);
   }
 
   @Override
-  public Parameter asParameter(Assembler.Function function) {
-    return null;
+  public Parameter toParameter(Assembler assembler, Assembler.Function function, Set<TempVariable> tempParams) {
+    Parameter leftParam = left.toParameter(assembler, function, tempParams);
+    Parameter rightParam = right.toParameter(assembler, function, tempParams);
+
+    TempVariable target = assembler.tempSpace.getAny();
+    tempParams.add(target);
+    function.operations.add(new MulOp(" # todo", leftParam, rightParam, target));
+    return target;
   }
+
 }

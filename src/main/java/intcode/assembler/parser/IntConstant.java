@@ -4,10 +4,12 @@ import intcode.assembler.Assembler;
 import intcode.assembler.Constant;
 import intcode.assembler.Parameter;
 import intcode.assembler.SetOp;
+import intcode.assembler.TempVariable;
 import intcode.assembler.Variable;
 
 import java.math.BigInteger;
 import java.util.Objects;
+import java.util.Set;
 
 public class IntConstant implements ExprNode {
   public static final ExprNode ZERO = new IntConstant(BigInteger.ZERO);
@@ -51,7 +53,8 @@ public class IntConstant implements ExprNode {
   }
 
   @Override
-  public Parameter asParameter(Assembler.Function function) {
+  public Parameter toParameter(Assembler assembler, Assembler.Function function, Set<TempVariable> tempParams) {
     return Constant.of(value);
   }
+
 }

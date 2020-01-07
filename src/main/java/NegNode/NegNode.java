@@ -1,16 +1,18 @@
 package NegNode;
 
-import intcode.IntCode;
 import intcode.assembler.Assembler;
 import intcode.assembler.Constant;
 import intcode.assembler.MulOp;
 import intcode.assembler.Parameter;
+import intcode.assembler.TempVariable;
 import intcode.assembler.Variable;
 import intcode.assembler.parser.ExprNode;
 import intcode.assembler.parser.IntConstant;
 
 import java.math.BigInteger;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 public class NegNode implements ExprNode {
   private final ExprNode child;
@@ -54,19 +56,19 @@ public class NegNode implements ExprNode {
 
   @Override
   public void assignTo(Variable target, Assembler assembler, Assembler.Function function, String context) {
-    Parameter parameter = child.asParameter(function);
-    if (parameter != null) {
-      function.operations.add(new MulOp(context, parameter, Constant.MINUS_ONE, target));
-    } else {
-      Variable temp = assembler.tempSpace.getAny();
-      child.assignTo(temp, assembler, function, "# " + temp.getName() + " = " + child.toString());
-      function.operations.add(new MulOp(context, temp, Constant.MINUS_ONE, target));
-      assembler.tempSpace.release(temp);
-    }
+    Set<TempVariable> tempParams = new HashSet<>();
+    Parameter parameter = child.toParameter(assembler, function, tempParams);
+    function.operations.add(new MulOp(context, parameter, Constant.MINUS_ONE, target));
+    tempParams.forEach(TempVariable::release);
   }
 
   @Override
-  public Parameter asParameter(Assembler.Function function) {
-    return null;
+  public Parameter toParameter(Assembler assembler, Assembler.Function function, Set<TempVariable> tempParams) {
+    TempVariable target = assembler.tempSpace.getAny();
+    tempParams.add(target);
+    Parameter parameter = child.toParameter(assembler, function, tempParams);
+    function.operations.add(new MulOp("todo", parameter, Constant.MINUS_ONE, target));
+    return target;
   }
+
 }

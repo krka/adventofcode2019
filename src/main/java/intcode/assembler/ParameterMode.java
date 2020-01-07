@@ -1,6 +1,6 @@
 package intcode.assembler;
 
-enum ParameterMode {
+public enum ParameterMode {
   POSITION,
   IMMEDIATE,
   RELATIVE

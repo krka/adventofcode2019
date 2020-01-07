@@ -3,7 +3,7 @@ package intcode.assembler;
 import java.math.BigInteger;
 import java.util.concurrent.Callable;
 
-class DeferredParameter implements Parameter {
+public class DeferredParameter implements Parameter {
 
   private final Callable<BigInteger> func;
   private final ParameterMode mode;

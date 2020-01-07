@@ -14,9 +14,9 @@ public class JumpLessThanEqInstruction extends Instruction {
     String a = matcher.group("a");
     String b = matcher.group("b");
 
-    Variable tmpVariable = assembler.tempSpace.getAny();
-    function.lessThan(tmpVariable, b, a, context);
-    function.jump(false, tmpVariable, label, "# jump if false");
-    assembler.tempSpace.release(tmpVariable);
+    try (TempVariable tmpVariable = assembler.tempSpace.getAny()) {
+      function.lessThan(tmpVariable, b, a, context);
+      function.jump(false, tmpVariable, label, "# jump if false");
+    }
   }
 }

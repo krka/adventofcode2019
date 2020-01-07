@@ -16,9 +16,9 @@ public class SubInstruction extends Instruction {
     Parameter b = function.resolveParameter(matcher.group("b"));
     Parameter target = function.resolveParameter(matcher.group("name"));
 
-    Variable tmp = assembler.tempSpace.getAny();
-    function.mul(tmp, Constant.MINUS_ONE, b, context);
-    function.operations.add(new AddOp(context, a, tmp, target));
-    assembler.tempSpace.release(tmp);
+    try (TempVariable tmp = assembler.tempSpace.getAny()) {
+      function.mul(tmp, Constant.MINUS_ONE, b, context);
+      function.operations.add(new AddOp(context, a, tmp, target));
+    }
   }
 }

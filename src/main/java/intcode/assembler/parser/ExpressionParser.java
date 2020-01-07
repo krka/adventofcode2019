@@ -30,10 +30,13 @@ public class ExpressionParser {
             .wrapper(CharacterParser.of('(').trim(), CharacterParser.of(')').trim(), (List<Object> o) -> o.get(1));
 
     expressionBuilder.group()
-            .prefix(CharacterParser.of('-').trim(), (List<Object> o) -> new NegNode((ExprNode) o.get(1)));
+            .wrapper(CharacterParser.of('[').trim(), CharacterParser.of(']').trim(), (List<Object> o) -> new IndexNode((ExprNode) o.get(1)));
 
-    // TODO: implement arrays
-    //expressionBuilder.group().wrapper(IDENTIFIER.trim().seq(CharacterParser.of('[').trim()), CharacterParser.of(']').trim());
+    expressionBuilder.group()
+            .left(CharacterParser.of('[').and(), (List<Object> o) -> new ArrayNode((ExprNode) o.get(0), (IndexNode) o.get(2)));
+
+    expressionBuilder.group()
+            .prefix(CharacterParser.of('-').trim(), (List<Object> o) -> new NegNode((ExprNode) o.get(1)));
 
     expressionBuilder.group()
             .left(CharacterParser.of('*').trim(), (List<Object> o) -> new MulNode((ExprNode) o.get(0), (ExprNode) o.get(2)));
@@ -51,7 +54,6 @@ public class ExpressionParser {
   public static ExprNode parse(String s) {
     return EXPRESSION.parse(s).get();
   }
-
   public static SetStatement parseSetStatement(String line) {
     Result parse = SET_STATEMENT.parse(line);
     if (parse.isSuccess()) {

@@ -394,7 +394,7 @@ public class Assembler {
       List<Op> stackAllocationOperations = new ArrayList<>();
 
       int stackSize = stackVariables.size();
-      Variable temp = tempSpace.getAny();
+      TempVariable temp = tempSpace.getAny();
       for (StaticAllocation allocation : allocations) {
         stackAllocationOperations.add(new AddOp("", globalRelBase, Constant.of(stackSize), temp));
         stackAllocationOperations.add(new SetOp("# allocate array", temp, allocation.variable));
@@ -418,7 +418,7 @@ public class Assembler {
         operations.add(new SetOp("# copy return value " + i + " to param space", returnValues.get(i), params.get(i)));
       }
 
-      Variable temp = tempSpace.getAny();
+      TempVariable temp = tempSpace.getAny();
       operations.add(new MulOp("# negate function relative base", stackSize, Constant.MINUS_ONE, temp));
       operations.add(new AddOp("# revert global relative base", globalRelBase, temp, globalRelBase));
       operations.add(new SetOp("# restore prev stack size", parentStackSize, stackSize));

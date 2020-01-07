@@ -1,6 +1,6 @@
 package intcode.assembler;
 
-abstract class Op {
+public abstract class Op {
   private int address = -1;
 
   final void setAddress(int address) {
