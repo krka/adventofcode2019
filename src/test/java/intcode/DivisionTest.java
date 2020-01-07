@@ -5,11 +5,9 @@ import intcode.assembler.Assembler;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import util.Util;
 
 import java.math.BigInteger;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;

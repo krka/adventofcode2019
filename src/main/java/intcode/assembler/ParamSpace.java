@@ -2,9 +2,7 @@ package intcode.assembler;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class ParamSpace {
   private final List<Variable> variables = new ArrayList<>();

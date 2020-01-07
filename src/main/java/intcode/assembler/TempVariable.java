@@ -1,9 +1,7 @@
 package intcode.assembler;
 
 import java.io.Closeable;
-import java.io.IOException;
 import java.math.BigInteger;
-import java.util.concurrent.Callable;
 
 public class TempVariable extends Variable implements Closeable {
   private final TempSpace tempSpace;

@@ -4,7 +4,6 @@ import intcode.assembler.Assembler;
 import intcode.assembler.TempVariable;
 import intcode.assembler.Variable;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;

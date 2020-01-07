@@ -3,7 +3,6 @@ package aoc;
 import intcode.IntCode;
 import util.Vector3;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.util.HashSet;
 import java.util.LinkedList;

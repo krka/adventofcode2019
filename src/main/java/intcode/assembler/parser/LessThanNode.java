@@ -1,7 +1,6 @@
 package intcode.assembler.parser;
 
 import intcode.assembler.Assembler;
-import intcode.assembler.EqOp;
 import intcode.assembler.LessThanOp;
 import intcode.assembler.Parameter;
 import intcode.assembler.TempVariable;

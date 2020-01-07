@@ -4,7 +4,6 @@ import intcode.IntCode;
 import util.Util;
 
 import java.math.BigInteger;
-import java.util.Arrays;
 import java.util.List;
 
 public class Day21 {

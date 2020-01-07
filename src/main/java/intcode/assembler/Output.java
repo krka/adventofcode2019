@@ -1,7 +1,6 @@
 package intcode.assembler;
 
 import java.math.BigInteger;
-import java.util.List;
 
 public class Output extends Op {
   private final Parameter parameter;

@@ -1,8 +1,5 @@
 package intcode.assembler;
 
-import java.math.BigInteger;
-import java.util.List;
-
 public class Halt extends Op {
 
   private final String context;

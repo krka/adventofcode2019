@@ -1,18 +1,8 @@
 package intcode.assembler.parser;
 
-import intcode.assembler.AddOp;
 import intcode.assembler.Assembler;
-import intcode.assembler.Constant;
-import intcode.assembler.DeferredParameter;
-import intcode.assembler.Parameter;
-import intcode.assembler.ParameterMode;
-import intcode.assembler.SetOp;
-import intcode.assembler.TempVariable;
-import intcode.assembler.Variable;
 
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 
 public class SetStatement {
   private final ExprNode target;

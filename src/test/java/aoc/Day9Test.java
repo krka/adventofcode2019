@@ -3,7 +3,6 @@ package aoc;
 import intcode.IntCode;
 import org.junit.Test;
 
-import java.lang.reflect.Array;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
@@ -19,7 +18,7 @@ public class Day9Test {
     IntCode vm = IntCode.fromString(input);
     vm.run();
     List<BigInteger> output = vm.drainStdout();
-    List<BigInteger> expected = Arrays.asList(input.split(",")).stream()
+    List<BigInteger> expected = Arrays.stream(input.split(","))
             .map(BigInteger::new)
             .collect(Collectors.toList());
     assertEquals(expected, output);

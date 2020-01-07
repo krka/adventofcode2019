@@ -2,7 +2,6 @@ package aoc;
 
 import org.junit.Test;
 
-import java.io.IOException;
 import java.math.BigInteger;
 
 import static org.junit.Assert.*;

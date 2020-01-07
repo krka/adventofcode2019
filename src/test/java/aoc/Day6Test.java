@@ -3,8 +3,6 @@ package aoc;
 import aoc.Day6;
 import org.junit.Test;
 
-import java.io.IOException;
-
 import static org.junit.Assert.assertEquals;
 
 public class Day6Test {

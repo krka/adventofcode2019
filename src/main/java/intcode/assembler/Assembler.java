@@ -1,6 +1,5 @@
 package intcode.assembler;
 
-import intcode.assembler.parser.ExprNode;
 import intcode.assembler.parser.ExpressionParser;
 import intcode.assembler.parser.FunctionCallStatement;
 import intcode.assembler.parser.SetStatement;
