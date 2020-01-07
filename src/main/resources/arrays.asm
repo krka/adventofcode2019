@@ -7,20 +7,16 @@ arr[1] = 20
 arr[2] = 30
 arr[3] = 40
 
-x = arr[2]
-output(x)
+output(arr[2])
 
-x = arr[3]
-output(x)
+output(arr[3])
 
-x = arr[3 - 1]
-output(x)
+output(arr[3 - 1])
 
 arr[3] = arr[2]
 
 arr[2] = arr[1]
-x = arr[3 - 1] + arr[2 - 1]
-output(x)
+output(arr[3 - 1] + arr[2 - 1])
 
 
 halt()

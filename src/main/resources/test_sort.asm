@@ -1,14 +1,12 @@
 int i = 0
 int j = 0
-int tmp = 0
 array[100] numbers
 
 int outer = 0
 int inner = 0
 
 read_input:
-tmp = input()
-numbers[i] = tmp
+numbers[i] = input()
 i = i + 1
 if i != 100 jump read_input
 
@@ -34,8 +32,7 @@ if i < 99 jump outer_loop
 
 i = 0
 emit:
-tmp = numbers[i]
-output(tmp)
+output(numbers[i])
 i = i + 1
 if i < 100 jump emit
 
