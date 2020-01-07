@@ -27,9 +27,6 @@ public class Parser {
     INSTRUCTIONS.add(new JumpGreaterThanInstruction());
     INSTRUCTIONS.add(new JumpGreaterThanEqInstruction());
 
-    INSTRUCTIONS.add(new FunctionCallInstruction());
-    INSTRUCTIONS.add(new NoReturnFunctionCallInstruction());
-
     INSTRUCTIONS.add(new FunctionDefinitionInstruction());
     INSTRUCTIONS.add(new EndFuncInstruction());
     INSTRUCTIONS.add(new ReturnInstruction());

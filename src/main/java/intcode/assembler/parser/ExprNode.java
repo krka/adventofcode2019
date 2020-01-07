@@ -16,4 +16,7 @@ public interface ExprNode {
 
   Parameter toParameter(Assembler assembler, Assembler.Function function, Set<TempVariable> tempParams);
 
+  default void assignValue(Assembler assembler, Assembler.Function function, String context, ExprNode expr) {
+    throw new RuntimeException("Can't assign a value to " + this.getClass().getSimpleName());
+  }
 }

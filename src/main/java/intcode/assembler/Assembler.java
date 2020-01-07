@@ -1,6 +1,8 @@
 package intcode.assembler;
 
+import intcode.assembler.parser.ExprNode;
 import intcode.assembler.parser.ExpressionParser;
+import intcode.assembler.parser.FunctionCallStatement;
 import intcode.assembler.parser.SetStatement;
 import util.Util;
 
@@ -19,7 +21,7 @@ public class Assembler {
   private final List<Variable> variableOrdering = new ArrayList<>();
 
   public final TempSpace tempSpace = new TempSpace("temp_");
-  final ParamSpace paramSpace = new ParamSpace("param_");
+  public final ParamSpace paramSpace = new ParamSpace("param_");
 
   final Map<String, Function> functions = new HashMap<>();
   final Function main;
@@ -72,7 +74,12 @@ public class Assembler {
             if (setStatement != null) {
               setStatement.apply(this, function, context);
             } else {
-              throw new RuntimeException("Unexpected line: " + line);
+              FunctionCallStatement functionCallStatement = ExpressionParser.parseFunctionCall(line);
+              if (functionCallStatement != null) {
+                functionCallStatement.apply(this, function, context);
+              } else {
+                throw new RuntimeException("Unexpected line: " + line);
+              }
             }
           }
         }
@@ -421,52 +428,46 @@ public class Assembler {
       }
     }
 
-    public void addFunctionCall(String funcName, List<Parameter> parameters, List<Variable> returnValues, String context) {
+    public void addFunctionCall(String funcName, int parameters, int returnVars, String context) {
       if (funcName.equals("output")) {
-        if (parameters.size() == 1 && returnValues.size() == 0) {
-          operations.add(new Output(parameters.get(0), context));
+        if (parameters == 1 && returnVars == 0) {
+          List<Variable> param = paramSpace.get(1);
+          operations.add(new Output(param.get(0), context));
         } else {
           throw new RuntimeException("output() requires only one parameter and zero return values");
         }
       } else if (funcName.equals("input")) {
-        if (parameters.size() == 0 && returnValues.size() == 1) {
-          operations.add(new Input(returnValues.get(0), context));
+        if (parameters == 0 && returnVars == 1) {
+          List<Variable> param = paramSpace.get(1);
+          operations.add(new Input(param.get(0), context));
         } else {
           throw new RuntimeException("input() requires only one return value and zero parameters");
         }
       } else if (funcName.equals("halt")) {
-        if (parameters.size() == 0 && returnValues.size() == 0) {
+        if (parameters == 0 && returnVars == 0) {
           addHalt(context);
         } else {
           throw new RuntimeException("halt() requires only zero return values and zero parameters");
         }
       } else if (funcName.equals("throw")) {
-        if (parameters.size() == 0 && returnValues.size() == 0) {
+        if (parameters == 0 && returnVars == 0) {
           addThrow(context);
         } else {
           throw new RuntimeException("throw() requires only zero return values and zero parameters");
         }
       } else {
-        addFunctionCall2(funcName, parameters, returnValues, context);
+        addFunctionCall2(funcName, parameters, returnVars, context);
       }
     }
 
-    private void addFunctionCall2(String funcName, List<Parameter> parameters, List<Variable> returnValues, String context) {
+    private void addFunctionCall2(String funcName, int parameters, int returnVars, String context) {
       Function function = functions.get(funcName);
       if (function == null) {
         throw new RuntimeException("Could not find function " + funcName);
       }
 
-      if (parameters.size() != function.numParameters) {
-        throw new RuntimeException("Function " + funcName + " expects " + function.numParameters + " but got " + parameters.size());
-      }
-
-      // Copy parameters
-      List<Variable> targetParams = paramSpace.get(parameters.size());
-      int i = 0;
-      for (Parameter parameter : parameters) {
-        operations.add(new SetOp("# prepare for function call: param " + i, parameter, targetParams.get(i)));
-        i++;
+      if (parameters != function.numParameters) {
+        throw new RuntimeException("Function " + funcName + " expects " + function.numParameters + " but got " + parameters);
       }
 
       operations.add(new SetRelBase("# set rel base").setParameter(stackSize));
@@ -479,15 +480,7 @@ public class Assembler {
       operations.add(new SetOp("# save return address", returnAddress, new StackVariable("ret addr", 0)));
       operations.add(jump);
 
-      validations.add(new ReturnValidation(function, returnValues.size()));
-      // Copy back return values
-      List<Variable> targetReturnParams = paramSpace.get(returnValues.size());
-      i = 0;
-      for (Variable output : returnValues) {
-        Variable returnValue = targetReturnParams.get(i);
-        operations.add(new SetOp("# copy return value " + i, returnValue, output));
-        i++;
-      }
+      validations.add(new ReturnValidation(function, returnVars));
     }
   }
 }

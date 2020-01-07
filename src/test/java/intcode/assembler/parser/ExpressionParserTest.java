@@ -4,6 +4,8 @@ import NegNode.NegNode;
 import org.junit.Test;
 
 import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -43,5 +45,29 @@ public class ExpressionParserTest {
     ExprNode expr = ExpressionParser.parse("array[100 + 2]").optimize();
     ArrayNode expected = new ArrayNode(new VarNode("array"), new IndexNode(new IntConstant(BigInteger.valueOf(102))));
     assertEquals(expected, expr);
+  }
+
+  @Test
+  public void testFunctionCall() {
+    FunctionCallStatement call = ExpressionParser.parseFunctionCall("foo()");
+    assertEquals(Collections.emptyList(), call.getReturnVars());
+    assertEquals(Collections.emptyList(), call.getParameters());
+    assertEquals("foo", call.getFuncName());
+  }
+
+  @Test
+  public void testFunctionCallWithParameters() {
+    FunctionCallStatement call = ExpressionParser.parseFunctionCall("foo(0, 1, 2)");
+    assertEquals(Collections.emptyList(), call.getReturnVars());
+    assertEquals(Arrays.asList(IntConstant.ZERO, IntConstant.ONE, new IntConstant(BigInteger.valueOf(2))), call.getParameters());
+    assertEquals("foo", call.getFuncName());
+  }
+
+  @Test
+  public void testFunctionCallWithReturnValues() {
+    FunctionCallStatement call = ExpressionParser.parseFunctionCall("a, b = foo(0, 1, 2)");
+    assertEquals(Arrays.asList(new VarNode("a"), new VarNode("b")), call.getReturnVars());
+    assertEquals(Arrays.asList(IntConstant.ZERO, IntConstant.ONE, new IntConstant(BigInteger.valueOf(2))), call.getParameters());
+    assertEquals("foo", call.getFuncName());
   }
 }

@@ -43,27 +43,6 @@ public class SetStatement {
   }
 
   public void apply(Assembler assembler, Assembler.Function function, String context) {
-    if (target instanceof VarNode) {
-      VarNode varNode = (VarNode) this.target;
-      Variable variable = function.resolveVariable(varNode.getName());
-      expr.assignTo(variable, assembler, function, context);
-    } else if (target instanceof ArrayNode) {
-      ArrayNode arrayNode = (ArrayNode) target;
-
-      Set<TempVariable> tempParams = new HashSet<>();
-      Parameter arrayParam = arrayNode.getArray().toParameter(assembler, function, tempParams);
-      Parameter indexParam = arrayNode.getIndex().toParameter(assembler, function, tempParams);
-      Parameter valueParam = expr.toParameter(assembler, function, tempParams);
-
-      AddOp rewriteParam = new AddOp(context, arrayParam, indexParam, Constant.PLACEHOLDER_POSITION);
-      SetOp addOp = new SetOp("# write to array from value", valueParam, Constant.PLACEHOLDER_POSITION);
-
-      rewriteParam.setTarget(DeferredParameter.ofInt(ParameterMode.POSITION, () -> addOp.getAddress() + 3));
-      function.operations.add(rewriteParam);
-      function.operations.add(addOp);
-      tempParams.forEach(TempVariable::release);
-    } else {
-      throw new RuntimeException("Can't assign a value to " + target);
-    }
+    target.assignValue(assembler, function, context, expr);
   }
 }

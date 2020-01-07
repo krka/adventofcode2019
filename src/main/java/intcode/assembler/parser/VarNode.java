@@ -56,6 +56,12 @@ class VarNode implements ExprNode {
     return function.resolveVariable(name);
   }
 
+  @Override
+  public void assignValue(Assembler assembler, Assembler.Function function, String context, ExprNode expr) {
+    Variable variable = function.resolveVariable(name);
+    expr.assignTo(variable, assembler, function, context);
+  }
+
   public String getName() {
     return name;
   }

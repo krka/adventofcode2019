@@ -3,11 +3,13 @@ package intcode.assembler.parser;
 import NegNode.NegNode;
 import org.petitparser.context.Result;
 import org.petitparser.parser.Parser;
+import org.petitparser.parser.combinators.SequenceParser;
 import org.petitparser.parser.primitive.CharacterParser;
 import org.petitparser.parser.primitive.StringParser;
 import org.petitparser.tools.ExpressionBuilder;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ExpressionParser {
@@ -20,6 +22,8 @@ public class ExpressionParser {
 
   private static final Parser EXPRESSION;
   private static final Parser SET_STATEMENT;
+  private static final Parser EXPRESSION_LIST;
+  private static final Parser FUNCTION_CALL;
 
   static {
     ExpressionBuilder expressionBuilder = new ExpressionBuilder();
@@ -56,13 +60,55 @@ public class ExpressionParser {
 
     SET_STATEMENT = EXPRESSION.trim().seq(CharacterParser.of('=').trim()).seq(EXPRESSION.trim())
       .map((List<Object> o) -> new SetStatement((ExprNode) o.get(0), (ExprNode) o.get(2)));
+
+    EXPRESSION_LIST = EXPRESSION.trim().seq(CharacterParser.of(',').trim().seq(EXPRESSION.trim()).star())
+            .map((List<Object> o) -> flattenExpr(o));
+
+    Parser assigningToSomething = EXPRESSION_LIST.trim().seq(CharacterParser.of('=').trim());
+    Parser theCall = IDENTIFIER.flatten().trim()
+            .seq(CharacterParser.of('(').trim())
+            .seq(EXPRESSION_LIST.optional())
+            .seq(CharacterParser.of(')').trim())
+            .map((List<Object> o) -> new FunctionCallStatement((String) o.get(0), flattenExpr(o.get(2))));
+
+    FUNCTION_CALL = assigningToSomething.optional()
+            .seq(theCall)
+            .map((List<Object> o) -> ((FunctionCallStatement) o.get(1)).withReturnValues(flattenExpr(o.get(0))));
+  }
+
+  public static List<ExprNode> flattenExpr(Object o) {
+    List<ExprNode> res = new ArrayList<>();
+    flattenExpr(res, o);
+    return res;
+  }
+
+  private static void flattenExpr(List<ExprNode> res, Object o) {
+    if (o == null) {
+      return;
+    }
+    if (o instanceof List) {
+      for (Object o2 : (List<Object>) o) {
+        flattenExpr(res, o2);
+      }
+    } else if (o instanceof ExprNode) {
+      res.add((ExprNode) o);
+    }
   }
 
   public static ExprNode parse(String s) {
     return EXPRESSION.end().parse(s).get();
   }
+
   public static SetStatement parseSetStatement(String line) {
     Result parse = SET_STATEMENT.end().parse(line);
+    if (parse.isSuccess()) {
+      return parse.get();
+    }
+    return null;
+  }
+
+  public static FunctionCallStatement parseFunctionCall(String line) {
+    Result parse = FUNCTION_CALL.end().parse(line);
     if (parse.isSuccess()) {
       return parse.get();
     }

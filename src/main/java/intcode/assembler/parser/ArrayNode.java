@@ -94,6 +94,22 @@ public class ArrayNode implements ExprNode {
     return target;
   }
 
+  @Override
+  public void assignValue(Assembler assembler, Assembler.Function function, String context, ExprNode expr) {
+    Set<TempVariable> tempParams = new HashSet<>();
+    Parameter arrayParam = array.toParameter(assembler, function, tempParams);
+    Parameter indexParam = index.toParameter(assembler, function, tempParams);
+    Parameter valueParam = expr.toParameter(assembler, function, tempParams);
+
+    AddOp rewriteParam = new AddOp(context, arrayParam, indexParam, Constant.PLACEHOLDER_POSITION);
+    SetOp addOp = new SetOp("# write to array from value", valueParam, Constant.PLACEHOLDER_POSITION);
+
+    rewriteParam.setTarget(DeferredParameter.ofInt(ParameterMode.POSITION, () -> addOp.getAddress() + 3));
+    function.operations.add(rewriteParam);
+    function.operations.add(addOp);
+    tempParams.forEach(TempVariable::release);
+  }
+
   private void arrayLookup(List<Op> operations, Variable target, Parameter arrayParam, Parameter indexParam) {
     AddOp rewriteParam = new AddOp("# todo", arrayParam, indexParam, Constant.PLACEHOLDER_POSITION);
     SetOp addOp = new SetOp("# write to variable", Constant.PLACEHOLDER_POSITION, target);
