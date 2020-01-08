@@ -370,7 +370,11 @@ public class Assembler {
 
     public void endFunc() {
       if (operations.size() != lastReturn) {
-        addReturn(Collections.emptyList(), "implicit return");
+        if (function == main) {
+          addHalt("implicit halt");
+        } else {
+          addReturn(Collections.emptyList(), "implicit return");
+        }
       }
       List<Op> stackAllocationOperations = new ArrayList<>();
 

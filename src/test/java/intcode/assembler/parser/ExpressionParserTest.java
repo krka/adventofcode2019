@@ -75,4 +75,11 @@ public class ExpressionParserTest {
     assertEquals("foo", statement.getLabel());
     assertEquals(ExpressionParser.parse("a == b").optimize(), statement.getCondition());
   }
+
+  @Test
+  public void testFuncExpr() {
+    ExprNode expression = ExpressionParser.parse("foo(0, 1) + bar()");
+    ExprNode expected = new AddNode(new FunctionCallNode("foo", new ExpressionList(IntConstant.ZERO, IntConstant.ONE)), new FunctionCallNode("bar", new ExpressionList(null, null)));
+    assertEquals(expected, expression);
+  }
 }

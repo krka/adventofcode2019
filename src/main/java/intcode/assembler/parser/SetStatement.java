@@ -35,4 +35,8 @@ public class SetStatement {
   public void apply(Assembler assembler, Assembler.Function function, String context) {
     target.assignValue(assembler, function, context, expr);
   }
+
+  public boolean valid() {
+    return target.canAssign();
+  }
 }

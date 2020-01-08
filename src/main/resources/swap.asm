@@ -1,3 +1,5 @@
+#include stdlib.asm
+
 func swap(a, b)
   return b, a
 endfunc
@@ -11,7 +13,6 @@ x = 100
 y = 23
 
 z, w = swap(x, y)
-output(z)
-output(w)
 
-halt()
+assert(z == 23)
+assert(w == 100)

@@ -15,19 +15,28 @@ public class FunctionCallStatement {
 
   public FunctionCallStatement(String funcName, List<ExprNode> parameters) {
     this.funcName = funcName;
-    this.parameters = parameters;
+    this.parameters = flatten(parameters);
     this.returnVars = Collections.emptyList();
+  }
+
+  private List<ExprNode> flatten(List<ExprNode> parameters) {
+    if (parameters.size() != 1) {
+      return parameters;
+    }
+    ExprNode exprNode = parameters.get(0);
+    if (exprNode instanceof ExpressionList) {
+      return ((ExpressionList) exprNode).expressions;
+    }
+    return parameters;
   }
 
   public FunctionCallStatement(String funcName, List<ExprNode> parameters, List<ExprNode> returnVars) {
     this.funcName = funcName;
-    this.parameters = parameters;
-    this.returnVars = returnVars;
+    this.parameters = flatten(parameters);
+    this.returnVars = flatten(returnVars);
   }
 
   public void apply(Assembler assembler, Assembler.Function function, String context) {
-    HashSet<TempVariable> tempParams = new HashSet<>();
-
     // Copy parameters
     List<Variable> targetParams = assembler.paramSpace.get(parameters.size());
     int i = 0;

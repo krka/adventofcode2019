@@ -33,7 +33,6 @@ public class AssemblerTest {
     System.out.println(annotatedIntCode.toString());
     List<BigInteger> compile = annotatedIntCode.getIntCode();
     IntCode intCode = IntCode.fromResource(compile);
-    //intCode.setDebugger(true);
 
     intCode.step(1000);
     assertEquals(IntCode.State.HALTED, intCode.getState());
@@ -51,10 +50,8 @@ public class AssemblerTest {
   @Test
   public void testSwap() {
     IntCode intCode = IntCode.fromResource(Assembler.compile("swap.asm"));
-
     intCode.run();
     assertEquals(IntCode.State.HALTED, intCode.getState());
-    assertEquals(Util.toBigInt(Arrays.asList(23, 100)), intCode.drainStdout());
   }
 
   @Test
@@ -73,6 +70,13 @@ public class AssemblerTest {
     assertEquals(IntCode.State.HALTED, intCode.getState());
     List<String> lines = intCode.readAllASCIILines();
     assertEquals(Arrays.asList("Hello World!"), lines);
+  }
+
+  @Test
+  public void testStdlib() {
+    IntCode intCode = IntCode.fromResource(Assembler.compile("test_stdlib.asm"));
+    intCode.run();
+    assertEquals(IntCode.State.HALTED, intCode.getState());
   }
 
   @Test

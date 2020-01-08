@@ -36,4 +36,4 @@ output(numbers[i])
 i = i + 1
 if i < 100 jump emit
 
-halt()
+

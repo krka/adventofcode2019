@@ -34,10 +34,10 @@ finish1:
   return 1
 endfunc
 
-z = rec(5)
+z = rec(5) + 0
 output(z)
 
-z = rec(6)
+z = 10 + rec(6) - 10
 output(z)
 
 func implicitReturn()
@@ -49,4 +49,4 @@ x = 100 * -x * (y + z) + 7
 
 output(x)
 
-halt()
+

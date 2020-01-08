@@ -41,8 +41,18 @@ public class ExpressionParser {
             .left(CharacterParser.of('[').and(), (List<Object> o) -> new ArrayNode((ExprNode) o.get(0), (IndexNode) o.get(2)));
 
     expressionBuilder.group()
+            .left(CharacterParser.of('(').and(), (List<Object> o) -> new FunctionCallNode((VarNode) o.get(0), (ExprNode) o.get(2)));
+
+    // Need special case for the empty expression list
+    expressionBuilder.group()
+            .postfix(CharacterParser.of('(').trim().seq(CharacterParser.of(')').trim()), (List<Object> o) -> new FunctionCallNode((VarNode) o.get(0), ExpressionList.empty()));
+
+    expressionBuilder.group()
             .prefix(CharacterParser.of('-').trim(), (List<Object> o) -> new NegNode((ExprNode) o.get(1)))
             .prefix(CharacterParser.of('!').trim(), (List<Object> o) -> new NotNode((ExprNode) o.get(1)));
+
+    expressionBuilder.group()
+            .left(CharacterParser.of(',').trim(), (List<Object> o) -> new ExpressionList((ExprNode) o.get(0), (ExprNode) o.get(2)));
 
     expressionBuilder.group()
             .left(CharacterParser.of('*').trim(), (List<Object> o) -> new MulNode((ExprNode) o.get(0), (ExprNode) o.get(2)));
@@ -121,7 +131,10 @@ public class ExpressionParser {
   public static SetStatement parseSetStatement(String line) {
     Result parse = SET_STATEMENT.end().parse(line);
     if (parse.isSuccess()) {
-      return parse.get();
+      SetStatement res = parse.get();
+      if (res.valid()) {
+        return res;
+      }
     }
     return null;
   }

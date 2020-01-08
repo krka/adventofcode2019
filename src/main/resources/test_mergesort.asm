@@ -19,4 +19,4 @@ output(array[i])
 i = i + 1
 if i < N jump emit
 
-halt()
+

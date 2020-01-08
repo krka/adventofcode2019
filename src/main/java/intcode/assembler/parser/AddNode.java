@@ -73,12 +73,9 @@ class AddNode implements ExprNode {
 
   @Override
   public Parameter toParameter(Assembler assembler, Assembler.Function function, Set<TempVariable> tempParams) {
-    Parameter leftParam = left.toParameter(assembler, function, tempParams);
-    Parameter rightParam = right.toParameter(assembler, function, tempParams);
-
     TempVariable target = assembler.tempSpace.getAny();
     tempParams.add(target);
-    function.operations.add(new AddOp(" # todo", leftParam, rightParam, target));
+    assignTo(target, assembler, function, " todo");
     return target;
   }
 }

@@ -7,4 +7,4 @@ b = !0 + 2
 c = a + b
 c = c + 90 + !1
 output(c)
-halt()
+

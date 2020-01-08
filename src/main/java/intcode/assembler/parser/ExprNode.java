@@ -19,4 +19,8 @@ public interface ExprNode {
   default void assignValue(Assembler assembler, Assembler.Function function, String context, ExprNode expr) {
     throw new RuntimeException("Can't assign a value to " + this.getClass().getSimpleName());
   }
+
+  default boolean canAssign() {
+    return false;
+  }
 }

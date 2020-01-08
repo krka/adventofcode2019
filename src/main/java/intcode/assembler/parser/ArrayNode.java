@@ -102,6 +102,11 @@ public class ArrayNode implements ExprNode {
     tempParams.forEach(TempVariable::release);
   }
 
+  @Override
+  public boolean canAssign() {
+    return true;
+  }
+
   private void arrayLookup(List<Op> operations, Variable target, Parameter arrayParam, Parameter indexParam) {
     AddOp rewriteParam = new AddOp("# todo", arrayParam, indexParam, Constant.PLACEHOLDER_POSITION);
     SetOp addOp = new SetOp("# write to variable", Constant.PLACEHOLDER_POSITION, target);
