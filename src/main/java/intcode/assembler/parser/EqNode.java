@@ -8,6 +8,7 @@ import intcode.assembler.Variable;
 
 import java.math.BigInteger;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 public class EqNode implements ExprNode {
@@ -50,9 +51,29 @@ public class EqNode implements ExprNode {
   @Override
   public Parameter toParameter(Assembler assembler, Assembler.Function function, Set<TempVariable> tempParams) {
     TempVariable target = assembler.tempSpace.getAny();
+    tempParams.add(target);
     Parameter leftParam = left.toParameter(assembler, function, tempParams);
     Parameter rightParam = right.toParameter(assembler, function, tempParams);
     function.operations.add(new EqOp(" todo", leftParam, rightParam, target));
     return target;
+  }
+
+  @Override
+  public String toString() {
+    return left + " == " + right;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    EqNode eqNode = (EqNode) o;
+    return left.equals(eqNode.left) &&
+            right.equals(eqNode.right);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(left, right);
   }
 }

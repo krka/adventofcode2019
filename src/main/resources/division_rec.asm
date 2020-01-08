@@ -20,7 +20,7 @@ ret0:
 endfunc
 
 func div(N, D)
-  if not D jump NaN
+  if ! D jump NaN
   int neg_n = 1
   int neg_d = 1
   if N >= 0 jump skip_neg_n

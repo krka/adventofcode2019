@@ -20,11 +20,11 @@ i = i + 1
 n = i + offset
 
 Q, R = div(n, 15)
-if not R jump print15
+if ! R jump print15
 Q, R = div(n, 5)
-if not R jump print5
+if ! R jump print5
 Q, R = div(n, 3)
-if not R jump print3
+if ! R jump print3
 
 outputNumber(n)
 output(10)

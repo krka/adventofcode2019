@@ -1,4 +1,4 @@
-package NegNode;
+package intcode.assembler.parser;
 
 import intcode.assembler.Assembler;
 import intcode.assembler.Constant;
@@ -6,8 +6,6 @@ import intcode.assembler.MulOp;
 import intcode.assembler.Parameter;
 import intcode.assembler.TempVariable;
 import intcode.assembler.Variable;
-import intcode.assembler.parser.ExprNode;
-import intcode.assembler.parser.IntConstant;
 
 import java.math.BigInteger;
 import java.util.HashSet;

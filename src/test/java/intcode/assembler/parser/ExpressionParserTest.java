@@ -1,6 +1,5 @@
 package intcode.assembler.parser;
 
-import NegNode.NegNode;
 import org.junit.Test;
 
 import java.math.BigInteger;
@@ -68,5 +67,12 @@ public class ExpressionParserTest {
     assertEquals(Arrays.asList(new VarNode("a"), new VarNode("b")), call.getReturnVars());
     assertEquals(Arrays.asList(IntConstant.ZERO, IntConstant.ONE, new IntConstant(BigInteger.valueOf(2))), call.getParameters());
     assertEquals("foo", call.getFuncName());
+  }
+
+  @Test
+  public void testJumpIf() {
+    JumpIfStatement statement = ExpressionParser.parseJumpIf("if a == b jump foo");
+    assertEquals("foo", statement.getLabel());
+    assertEquals(ExpressionParser.parse("a == b").optimize(), statement.getCondition());
   }
 }

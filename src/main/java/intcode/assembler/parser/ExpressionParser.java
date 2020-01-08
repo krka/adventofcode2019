@@ -1,6 +1,5 @@
 package intcode.assembler.parser;
 
-import NegNode.NegNode;
 import org.petitparser.context.Result;
 import org.petitparser.parser.Parser;
 import org.petitparser.parser.primitive.CharacterParser;
@@ -24,6 +23,8 @@ public class ExpressionParser {
   private static final Parser EXPRESSION_LIST;
   private static final Parser FUNCTION_CALL;
 
+  private static final Parser JUMP_IF;
+
   static {
     ExpressionBuilder expressionBuilder = new ExpressionBuilder();
     expressionBuilder.group()
@@ -40,7 +41,8 @@ public class ExpressionParser {
             .left(CharacterParser.of('[').and(), (List<Object> o) -> new ArrayNode((ExprNode) o.get(0), (IndexNode) o.get(2)));
 
     expressionBuilder.group()
-            .prefix(CharacterParser.of('-').trim(), (List<Object> o) -> new NegNode((ExprNode) o.get(1)));
+            .prefix(CharacterParser.of('-').trim(), (List<Object> o) -> new NegNode((ExprNode) o.get(1)))
+            .prefix(CharacterParser.of('!').trim(), (List<Object> o) -> new NotNode((ExprNode) o.get(1)));
 
     expressionBuilder.group()
             .left(CharacterParser.of('*').trim(), (List<Object> o) -> new MulNode((ExprNode) o.get(0), (ExprNode) o.get(2)));
@@ -49,13 +51,23 @@ public class ExpressionParser {
             .left(CharacterParser.of('+').trim(), (List<Object> o) -> new AddNode((ExprNode) o.get(0), (ExprNode) o.get(2)))
             .left(CharacterParser.of('-').trim(), (List<Object> o) -> new AddNode((ExprNode) o.get(0), new NegNode((ExprNode) o.get(2))));
 
+    // relational
     expressionBuilder.group()
-            .left(CharacterParser.of('-').trim(), (List<Object> o) -> new AddNode((ExprNode) o.get(0), new NegNode((ExprNode) o.get(2))));
-
-    expressionBuilder.group()
-            .left(StringParser.of("==").trim(), (List<Object> o) -> new EqNode((ExprNode) o.get(0), (ExprNode) o.get(2)))
+            .left(StringParser.of("<=").trim(), (List<Object> o) -> new NotNode(new GreaterThanNode((ExprNode) o.get(0), (ExprNode) o.get(2))))
+            .left(StringParser.of(">=").trim(), (List<Object> o) -> new NotNode(new LessThanNode((ExprNode) o.get(0), (ExprNode) o.get(2))))
             .left(StringParser.of("<").trim(), (List<Object> o) -> new LessThanNode((ExprNode) o.get(0), (ExprNode) o.get(2)))
             .left(StringParser.of(">").trim(), (List<Object> o) -> new GreaterThanNode((ExprNode) o.get(0), (ExprNode) o.get(2)));
+
+    // equality
+    expressionBuilder.group()
+            .left(StringParser.of("==").trim(), (List<Object> o) -> new EqNode((ExprNode) o.get(0), (ExprNode) o.get(2)))
+            .left(StringParser.of("!=").trim(), (List<Object> o) -> new NotNode(new EqNode((ExprNode) o.get(0), (ExprNode) o.get(2))));
+
+
+    // logical
+    expressionBuilder.group()
+            .left(StringParser.of("&&").trim(), (List<Object> o) -> new AndNode((ExprNode) o.get(0), (ExprNode) o.get(2)))
+            .left(StringParser.of("||").trim(), (List<Object> o) -> new OrNode((ExprNode) o.get(0), (ExprNode) o.get(2)));
 
     EXPRESSION = expressionBuilder.build().trim();
 
@@ -75,6 +87,12 @@ public class ExpressionParser {
     FUNCTION_CALL = assigningToSomething.optional()
             .seq(theCall)
             .map((List<Object> o) -> ((FunctionCallStatement) o.get(1)).withReturnValues(flattenExpr(o.get(0))));
+
+    JUMP_IF = StringParser.of("if").flatten().trim()
+            .seq(EXPRESSION)
+            .seq(StringParser.of("jump").flatten().trim())
+            .seq(IDENTIFIER.flatten().trim())
+            .map((List<Object> o) -> new JumpIfStatement((ExprNode) o.get(1), (String) o.get(3)));
   }
 
   public static List<ExprNode> flattenExpr(Object o) {
@@ -110,6 +128,14 @@ public class ExpressionParser {
 
   public static FunctionCallStatement parseFunctionCall(String line) {
     Result parse = FUNCTION_CALL.end().parse(line);
+    if (parse.isSuccess()) {
+      return parse.get();
+    }
+    return null;
+  }
+
+  public static JumpIfStatement parseJumpIf(String line) {
+    Result parse = JUMP_IF.end().parse(line);
     if (parse.isSuccess()) {
       return parse.get();
     }

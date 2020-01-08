@@ -15,7 +15,7 @@ if i < 64 jump setup_powtwo
 
 func div(N, D)
   q = 0
-  if not D jump nan
+  if ! D jump nan
   neg_n = 1
   neg_d = 1
   if N >= 0 jump skip_neg_n

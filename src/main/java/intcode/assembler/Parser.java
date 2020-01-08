@@ -13,16 +13,7 @@ public class Parser {
     INSTRUCTIONS.add(new DeclareString());
     INSTRUCTIONS.add(new DeclareArray());
 
-    INSTRUCTIONS.add(new JumpFalseInstruction());
-    INSTRUCTIONS.add(new JumpTrueInstruction());
     INSTRUCTIONS.add(new JumpAlwaysInstruction());
-
-    INSTRUCTIONS.add(new JumpEqInstruction());
-    INSTRUCTIONS.add(new JumpNotEqInstruction());
-    INSTRUCTIONS.add(new JumpLessThanInstruction());
-    INSTRUCTIONS.add(new JumpLessThanEqInstruction());
-    INSTRUCTIONS.add(new JumpGreaterThanInstruction());
-    INSTRUCTIONS.add(new JumpGreaterThanEqInstruction());
 
     INSTRUCTIONS.add(new FunctionDefinitionInstruction());
     INSTRUCTIONS.add(new EndFuncInstruction());

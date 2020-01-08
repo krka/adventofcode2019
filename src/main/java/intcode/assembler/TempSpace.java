@@ -6,6 +6,10 @@ import java.util.List;
 import java.util.Set;
 
 public class TempSpace {
+
+  // Only enable to figure out who is not releasing variables
+  private static final boolean DEBUG = false;
+
   private final Set<TempVariable> allVariables = new HashSet<>();
   private final List<TempVariable> ordering = new ArrayList<>();
   private final Set<TempVariable> available = new HashSet<>();
@@ -21,6 +25,9 @@ public class TempSpace {
     if (!available.isEmpty()) {
       TempVariable variable = available.iterator().next();
       available.remove(variable);
+      if (DEBUG) {
+        variable.setCreatedBy(new Throwable());
+      }
       return variable;
     }
 
@@ -28,6 +35,9 @@ public class TempSpace {
     counter++;
     allVariables.add(variable);
     ordering.add(variable);
+    if (DEBUG) {
+      variable.setCreatedBy(new Throwable());
+    }
     return variable;
   }
 
@@ -41,11 +51,18 @@ public class TempSpace {
     if (!available.add(variable)) {
       throw new RuntimeException("Already released!");
     }
+    variable.setCreatedBy(null);
   }
 
   public List<TempVariable> getAll() {
     if (available.size() != ordering.size()) {
-      throw new RuntimeException("All variables have not been released");
+      RuntimeException exception = new RuntimeException("All variables have not been released");
+      for (TempVariable tempVariable : ordering) {
+        if (tempVariable.getThrowable() != null) {
+          exception.addSuppressed(tempVariable.getThrowable());
+        }
+      }
+      throw exception;
     }
     return ordering;
   }

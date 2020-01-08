@@ -22,7 +22,7 @@ output:
 
   tempn = tempnumber[i]
   output(tempn)
-  if not i jump finish
+  if ! i jump finish
   jump output
 
 finish:

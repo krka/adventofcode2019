@@ -1,21 +1,21 @@
 package intcode.assembler.parser;
 
+import intcode.assembler.AddOp;
 import intcode.assembler.Assembler;
-import intcode.assembler.LessThanOp;
+import intcode.assembler.MulOp;
 import intcode.assembler.Parameter;
 import intcode.assembler.TempVariable;
 import intcode.assembler.Variable;
 
 import java.math.BigInteger;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
-public class LessThanNode implements ExprNode {
+public class OrNode implements ExprNode {
   private final ExprNode left;
   private final ExprNode right;
 
-  public LessThanNode(ExprNode left, ExprNode right) {
+  public OrNode(ExprNode left, ExprNode right) {
     this.left = left;
     this.right = right;
   }
@@ -24,14 +24,13 @@ public class LessThanNode implements ExprNode {
   public ExprNode optimize() {
     ExprNode left = this.left.optimize();
     ExprNode right = this.right.optimize();
-    if (left.value() != null && right.value() != null) {
-      if (left.value().compareTo(right.value()) < 0) {
-        return IntConstant.ONE;
-      } else {
-        return IntConstant.ZERO;
-      }
+    if (left.value() != null && !BigInteger.ZERO.equals(left.value())) {
+      return right;
     }
-    return new LessThanNode(left, right);
+    if (right.value() != null && !BigInteger.ZERO.equals(right.value())) {
+      return left;
+    }
+    return new OrNode(left, right);
   }
 
   @Override
@@ -42,9 +41,19 @@ public class LessThanNode implements ExprNode {
   @Override
   public void assignTo(Variable target, Assembler assembler, Assembler.Function function, String context) {
     HashSet<TempVariable> tempParams = new HashSet<>();
+
     Parameter leftParam = left.toParameter(assembler, function, tempParams);
     Parameter rightParam = right.toParameter(assembler, function, tempParams);
-    function.operations.add(new LessThanOp(context, leftParam, rightParam, target));
+
+    TempVariable temp1 = assembler.tempSpace.getAny();
+    TempVariable temp2 = assembler.tempSpace.getAny();
+    tempParams.add(temp1);
+    tempParams.add(temp2);
+
+    function.operations.add(new MulOp(context, leftParam, leftParam, temp1));
+    function.operations.add(new MulOp(context, rightParam, rightParam, temp2));
+    function.operations.add(new AddOp(context, temp1, temp2, target));
+
     tempParams.forEach(TempVariable::release);
   }
 
@@ -52,28 +61,7 @@ public class LessThanNode implements ExprNode {
   public Parameter toParameter(Assembler assembler, Assembler.Function function, Set<TempVariable> tempParams) {
     TempVariable target = assembler.tempSpace.getAny();
     tempParams.add(target);
-    Parameter leftParam = left.toParameter(assembler, function, tempParams);
-    Parameter rightParam = right.toParameter(assembler, function, tempParams);
-    function.operations.add(new LessThanOp(" todo", leftParam, rightParam, target));
+    assignTo(target, assembler, function, "# todo");
     return target;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    LessThanNode that = (LessThanNode) o;
-    return left.equals(that.left) &&
-            right.equals(that.right);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(left, right);
-  }
-
-  @Override
-  public String toString() {
-    return left + "< " + right;
   }
 }

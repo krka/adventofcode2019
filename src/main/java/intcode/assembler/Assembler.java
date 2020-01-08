@@ -2,6 +2,7 @@ package intcode.assembler;
 
 import intcode.assembler.parser.ExpressionParser;
 import intcode.assembler.parser.FunctionCallStatement;
+import intcode.assembler.parser.JumpIfStatement;
 import intcode.assembler.parser.SetStatement;
 import util.Util;
 
@@ -77,7 +78,12 @@ public class Assembler {
               if (functionCallStatement != null) {
                 functionCallStatement.apply(this, function, context);
               } else {
-                throw new RuntimeException("Unexpected line: " + line);
+                JumpIfStatement jumpIfStatement = ExpressionParser.parseJumpIf(line);
+                if (jumpIfStatement != null) {
+                  jumpIfStatement.apply(this, function, context);
+                } else {
+                  throw new RuntimeException("Unexpected line: " + line);
+                }
               }
             }
           }

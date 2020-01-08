@@ -6,7 +6,7 @@ func outputString(s)
   i = 0
 loop:
   ch = s[i]
-  if not ch jump finish
+  if ! ch jump finish
   output(ch)
   i = i + 1
   jump loop
