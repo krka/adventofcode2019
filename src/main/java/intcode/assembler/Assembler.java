@@ -411,7 +411,7 @@ public class Assembler {
       operations.add(new SetOp("# copy return address to temp", returnAddress, temp));
       operations.add(new MulOp("# negate parent stack size", parentStackSize, Constant.MINUS_ONE, parentStackSize));
       operations.add(new SetRelBase("# revert relative base").setParameter(parentStackSize));
-      operations.add(new Jump(context, false, Constant.ZERO, temp, null));
+      operations.add(Jump.toTarget(context, temp));
       tempSpace.release(temp);
 
       lastReturn = operations.size();
@@ -483,7 +483,7 @@ public class Assembler {
       operations.add(new SetOp("# save relative base revert", stackSize, new StackVariable("stack size", 1)));
 
       DeferredParameter jumpTarget = DeferredParameter.ofInt(ParameterMode.IMMEDIATE, function::getAddress);
-      Jump jump = new Jump(context, false, Constant.ZERO, jumpTarget, null);
+      Jump jump = Jump.toTarget(context, jumpTarget);
       DeferredParameter returnAddress = DeferredParameter.ofInt(ParameterMode.IMMEDIATE, () -> jump.getAddress() + jump.size());
 
       operations.add(new SetOp("# save return address", returnAddress, new StackVariable("ret addr", 0)));

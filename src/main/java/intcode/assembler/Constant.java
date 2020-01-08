@@ -6,6 +6,7 @@ public class Constant implements Parameter {
 
   public static final Constant MINUS_ONE = Constant.of(-1);
   public static final Constant ZERO = Constant.of(0);
+  public static final Constant ONE = Constant.of(1);
 
   public static final Constant PLACEHOLDER_POSITION = Constant.of(ParameterMode.POSITION, BigInteger.ZERO);
 

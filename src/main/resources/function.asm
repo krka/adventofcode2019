@@ -1,3 +1,17 @@
+#include stdlib.asm
+
+int one = 1
+int zero = 0
+assert(0 == zero && zero)
+assert(0 == one && zero)
+assert(0 == zero && one)
+assert(1 == one && one)
+
+assert(0 == zero || zero)
+assert(1 == one || zero)
+assert(1 == zero || one)
+assert(1 == one || one)
+
 int tmp = 0
 
 func foo(a, b)
@@ -48,5 +62,4 @@ implicitReturn()
 x = 100 * -x * (y + z) + 7
 
 output(x)
-
 

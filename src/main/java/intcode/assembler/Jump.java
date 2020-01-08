@@ -18,6 +18,14 @@ public class Jump extends Op {
     this.label = label;
   }
 
+  public static Jump toLabel(String context, Label label) {
+    return new Jump(context, false, Constant.ZERO, null, label);
+  }
+
+  public static Jump toTarget(String context, Parameter target) {
+    return new Jump(context, false, Constant.ZERO, target, null);
+  }
+
   @Override
   public int size() {
     return SIZE;
