@@ -3,23 +3,49 @@
 int left = 10
 int right = 20
 int zero = 0
+
+# AND with variables
 assert(0 == (zero && zero))
 assert(0 == (left && zero))
 assert(0 == (zero && right))
 assert(right == (right && right))
 
+# AND with constants
 assert(0 == (0 && 0))
-assert(0 == (0 && 1))
-assert(0 == (1 && 0))
-assert(1 == (1 && 1))
-assert(0 == (left && 0))
-assert(0 == (0 && right))
-assert(right == (1 && right))
+assert(0 == (0 && 10))
+assert(0 == (10 && 0))
+assert(20 == (10 && 20))
 
+# AND with mixed
+assert(0 == (left && 0))
+assert(2 == (left && 2))
+assert(0 == (0 && right))
+assert(right == (2 && right))
+
+# OR with variables
 assert(0 == (zero || zero))
 assert(left == (left || zero))
 assert(right == (zero || right))
 assert(left == (left || right))
+
+# OR with constants
+assert(0 == (0 || 0))
+assert(10 == (0 || 10))
+assert(10 == (10 || 0))
+assert(10 == (10 || 20))
+
+# OR with mixed
+assert(left == (left || 0))
+assert(left == (left || 2))
+assert(right == (0 || right))
+assert(2 == (2 || right))
+
+# NOT
+assert(0 == !5)
+assert(0 == !-5)
+assert(1 == !0)
+assert(0 == !left)
+assert(1 == !zero)
 
 int tmp = 0
 
