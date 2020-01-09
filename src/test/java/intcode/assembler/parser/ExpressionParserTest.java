@@ -78,8 +78,15 @@ public class ExpressionParserTest {
 
   @Test
   public void testFuncExpr() {
+    ExprNode expression = ExpressionParser.parse("foo(0, 1)");
+    ExprNode expected = new FunctionCallNode("foo", new ExpressionList(IntConstant.ZERO, IntConstant.ONE));
+    assertEquals(expected, expression);
+  }
+
+  @Test
+  public void testFuncExpr2() {
     ExprNode expression = ExpressionParser.parse("foo(0, 1) + bar()");
-    ExprNode expected = new AddNode(new FunctionCallNode("foo", new ExpressionList(IntConstant.ZERO, IntConstant.ONE)), new FunctionCallNode("bar", new ExpressionList(null, null)));
+    ExprNode expected = new AddNode(new FunctionCallNode("foo", new ExpressionList(IntConstant.ZERO, IntConstant.ONE)), new FunctionCallNode("bar", ExpressionList.empty()));
     assertEquals(expected, expression);
   }
 

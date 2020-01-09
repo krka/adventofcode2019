@@ -13,29 +13,28 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class ExpressionList implements ExprNode {
-  private static final ExpressionList EMPTY = new ExpressionList(null, null);
+  private static final ExpressionList EMPTY = new ExpressionList();
 
   public final List<ExprNode> expressions = new ArrayList<>();
 
-  public ExpressionList(ExprNode left, ExprNode right) {
-    addAll(left);
-    addAll(right);
+  public ExpressionList(ExprNode first, ExprNode second) {
+    if (first instanceof ExpressionList) {
+      expressions.addAll(((ExpressionList) first).expressions);
+    } else {
+      expressions.add(first);
+    }
+    expressions.add(second);
+  }
+
+  public ExpressionList(ExprNode element) {
+    expressions.add(element);
+  }
+
+  private ExpressionList() {
   }
 
   public static ExpressionList empty() {
     return EMPTY;
-  }
-
-  private void addAll(ExprNode node) {
-    if (node == null) {
-      return;
-    }
-    if (node instanceof ExpressionList) {
-      ExpressionList asList = (ExpressionList) node;
-      expressions.addAll(asList.expressions);
-    } else {
-      expressions.add(node);
-    }
   }
 
   @Override

@@ -15,8 +15,15 @@ public class FunctionCallNode implements ExprNode {
   private final String funcName;
   private final ExpressionList parameters;
 
-  public FunctionCallNode(VarNode funcName, ExprNode exprNode) {
-    this(funcName.getName(), new ExpressionList(exprNode, null));
+  public FunctionCallNode(VarNode funcName, ExprNode parameters) {
+    this(funcName.getName(), toExpressionList(parameters));
+  }
+
+  private static ExpressionList toExpressionList(ExprNode exprNode) {
+    if (exprNode instanceof ExpressionList) {
+      return (ExpressionList) exprNode;
+    }
+    return new ExpressionList(exprNode);
   }
 
   public FunctionCallNode(String funcName, ExpressionList parameters) {
