@@ -6,6 +6,7 @@ import intcode.assembler.TempVariable;
 import intcode.assembler.Variable;
 
 import java.math.BigInteger;
+import java.util.List;
 import java.util.Set;
 
 public interface ExprNode {
@@ -22,5 +23,9 @@ public interface ExprNode {
 
   default boolean canAssign() {
     return false;
+  }
+
+  default ExpressionList toExpressionList() {
+    return new ExpressionList(this);
   }
 }

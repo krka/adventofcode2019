@@ -1,9 +1,7 @@
 package intcode.assembler;
 
 import intcode.assembler.parser.ExpressionParser;
-import intcode.assembler.parser.FunctionCallStatement;
-import intcode.assembler.parser.JumpIfStatement;
-import intcode.assembler.parser.SetStatement;
+import intcode.assembler.parser.Statement;
 import util.Util;
 
 import java.math.BigInteger;
@@ -24,7 +22,7 @@ public class Assembler {
   public final ParamSpace paramSpace = new ParamSpace("param_");
 
   final Map<String, Function> functions = new HashMap<>();
-  final Function main;
+  public final Function main;
   private final Parameter globalRelBase;
   private final Variable stackSize;
 
@@ -69,21 +67,11 @@ public class Assembler {
         if (!line.isEmpty()) {
           String context = resource + ":" + lineNumber + "    " + line;
           if (!Parser.parse(line, this, function, context)) {
-            SetStatement setStatement = ExpressionParser.parseSetStatement(line);
-            if (setStatement != null) {
-              setStatement.apply(this, function, context);
+            Statement statement = ExpressionParser.parseStatement(line);
+            if (statement != null) {
+              statement.apply(this, function, context);
             } else {
-              FunctionCallStatement functionCallStatement = ExpressionParser.parseFunctionCall(line);
-              if (functionCallStatement != null) {
-                functionCallStatement.apply(this, function, context);
-              } else {
-                JumpIfStatement jumpIfStatement = ExpressionParser.parseJumpIf(line);
-                if (jumpIfStatement != null) {
-                  jumpIfStatement.apply(this, function, context);
-                } else {
-                  throw new RuntimeException("Unexpected line: " + line);
-                }
-              }
+              throw new RuntimeException("Unexpected line: " + line);
             }
           }
         }
@@ -210,7 +198,7 @@ public class Assembler {
 
     private final SettableConstant initialStackSize = new SettableConstant();
     private final int numParameters;
-    int numReturnValues = -1;
+    public int numReturnValues = -1;
     private int lastReturn;
 
     public Function(boolean isStack, String name, String context, List<String> parameters) {
@@ -332,7 +320,7 @@ public class Assembler {
         if (this == main) {
           addHalt("implicit halt");
         } else {
-          addReturn(Collections.emptyList(), "implicit return");
+          addReturn("implicit return", 0);
         }
       }
       List<Op> stackAllocationOperations = new ArrayList<>();
@@ -349,18 +337,17 @@ public class Assembler {
       initialStackSize.setValue(stackSize);
     }
 
-    public void addReturn(List<Parameter> returnValues, String context) {
-      if (numReturnValues == -1) {
-        numReturnValues = returnValues.size();
-      } else if (numReturnValues != returnValues.size()) {
-        throw new RuntimeException("Function " + name + " must always return the same number of values");
+    public void addReturn(String context, int numReturnValues) {
+      if (function == main) {
+        throw new RuntimeException("Can not return from main");
       }
 
-      // Copy return values to temp param space
-      List<Variable> params = paramSpace.get(returnValues.size());
-      for (int i = 0; i < returnValues.size(); i++) {
-        operations.add(new SetOp("# copy return value " + i + " to param space", returnValues.get(i), params.get(i)));
+      if (function.numReturnValues == -1) {
+        function.numReturnValues = numReturnValues;
+      } else if (function.numReturnValues != numReturnValues) {
+        throw new RuntimeException("Function " + function.name + " must always return the same number of values");
       }
+
 
       TempVariable temp = tempSpace.getAny();
       operations.add(new MulOp("# negate function relative base", stackSize, Constant.MINUS_ONE, temp));
@@ -375,7 +362,7 @@ public class Assembler {
 
       lastReturn = operations.size();
     }
-
+    
     public void declareArray(String name, String len, String context) {
       Variable pointerVar;
       if (isStack) {

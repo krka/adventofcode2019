@@ -47,11 +47,8 @@ assert(1 == !0)
 assert(0 == !left)
 assert(1 == !zero)
 
-int tmp = 0
-
 func foo(a, b)
-  tmp = a + b
-  return tmp
+  return a + b
 endfunc
 
 func bar()

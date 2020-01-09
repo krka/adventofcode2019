@@ -9,6 +9,7 @@ import org.petitparser.tools.ExpressionBuilder;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 public class ExpressionParser {
 
@@ -22,8 +23,8 @@ public class ExpressionParser {
   private static final Parser SET_STATEMENT;
   private static final Parser EXPRESSION_LIST;
   private static final Parser FUNCTION_CALL;
-
   private static final Parser JUMP_IF;
+  private static final Parser RETURN;
 
   static {
     ExpressionBuilder expressionBuilder = new ExpressionBuilder();
@@ -102,6 +103,10 @@ public class ExpressionParser {
             .seq(StringParser.of("jump").flatten().trim())
             .seq(IDENTIFIER.flatten().trim())
             .map((List<Object> o) -> new JumpIfStatement((ExprNode) o.get(1), (String) o.get(3)));
+
+    RETURN = StringParser.of("return").flatten().trim()
+            .seq(EXPRESSION.optional())
+            .map((List<Object> o) -> new ReturnStatement((ExprNode) o.get(1)));
   }
 
   public static List<ExprNode> flattenExpr(Object o) {
@@ -123,8 +128,30 @@ public class ExpressionParser {
     }
   }
 
-  public static ExprNode parse(String s) {
+  public static ExprNode parseExpr(String s) {
     return EXPRESSION.end().parse(s).get();
+  }
+
+  public static Statement parseStatement(String line) {
+    List<Callable<Statement>> statements = new ArrayList<>();
+    statements.add(() -> parseSetStatement(line));
+    statements.add(() -> parseFunctionCall(line));
+    statements.add(() -> parseJumpIf(line));
+    statements.add(() -> parseReturn(line));
+
+    for (Callable<Statement> statement : statements) {
+      try {
+        Statement call = statement.call();
+        if (call != null) {
+          return call;
+        }
+      } catch (RuntimeException e) {
+        throw e;
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+    }
+    return null;
   }
 
   public static SetStatement parseSetStatement(String line) {
@@ -148,6 +175,14 @@ public class ExpressionParser {
 
   public static JumpIfStatement parseJumpIf(String line) {
     Result parse = JUMP_IF.end().parse(line);
+    if (parse.isSuccess()) {
+      return parse.get();
+    }
+    return null;
+  }
+
+  public static ReturnStatement parseReturn(String line) {
+    Result parse = RETURN.end().parse(line);
     if (parse.isSuccess()) {
       return parse.get();
     }

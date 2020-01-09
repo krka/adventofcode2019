@@ -6,7 +6,7 @@ import intcode.assembler.TempVariable;
 
 import java.util.HashSet;
 
-public class JumpIfStatement {
+public class JumpIfStatement implements Statement {
   private final ExprNode condition;
   private final boolean isTrue;
   private final String label;
@@ -22,6 +22,7 @@ public class JumpIfStatement {
     this.label = label;
   }
 
+  @Override
   public void apply(Assembler assembler, Assembler.Function function, String context) {
     HashSet<TempVariable> tempParams = new HashSet<>();
     Parameter parameter = condition.toParameter(assembler, function, tempParams);

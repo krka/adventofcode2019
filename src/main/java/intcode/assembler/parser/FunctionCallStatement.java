@@ -8,7 +8,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
-public class FunctionCallStatement {
+public class FunctionCallStatement implements Statement {
   private final List<ExprNode> returnVars;
   private final String funcName;
   private final List<ExprNode> parameters;
@@ -36,6 +36,7 @@ public class FunctionCallStatement {
     this.returnVars = flatten(returnVars);
   }
 
+  @Override
   public void apply(Assembler assembler, Assembler.Function function, String context) {
     // Copy parameters
     List<Variable> targetParams = assembler.paramSpace.get(parameters.size());

@@ -61,6 +61,11 @@ public class ExpressionList implements ExprNode {
   }
 
   @Override
+  public ExpressionList toExpressionList() {
+    return this;
+  }
+
+  @Override
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;

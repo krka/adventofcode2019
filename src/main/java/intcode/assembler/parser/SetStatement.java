@@ -4,7 +4,7 @@ import intcode.assembler.Assembler;
 
 import java.util.Objects;
 
-public class SetStatement {
+public class SetStatement implements Statement {
   private final ExprNode target;
   private final ExprNode expr;
 
@@ -32,6 +32,7 @@ public class SetStatement {
     return Objects.hash(target, expr);
   }
 
+  @Override
   public void apply(Assembler assembler, Assembler.Function function, String context) {
     target.assignValue(assembler, function, context, expr);
   }
