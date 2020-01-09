@@ -54,7 +54,7 @@ public class EqNode implements ExprNode {
     tempParams.add(target);
     Parameter leftParam = left.toParameter(assembler, function, tempParams);
     Parameter rightParam = right.toParameter(assembler, function, tempParams);
-    function.operations.add(new EqOp(" todo", leftParam, rightParam, target));
+    function.operations.add(new EqOp(" # temp = " + toString(), leftParam, rightParam, target));
     return target;
   }
 

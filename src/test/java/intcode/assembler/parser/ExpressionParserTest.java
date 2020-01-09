@@ -82,4 +82,11 @@ public class ExpressionParserTest {
     ExprNode expected = new AddNode(new FunctionCallNode("foo", new ExpressionList(IntConstant.ZERO, IntConstant.ONE)), new FunctionCallNode("bar", new ExpressionList(null, null)));
     assertEquals(expected, expression);
   }
+
+  @Test
+  public void testPrecedence() {
+    ExprNode expression = ExpressionParser.parse("a == x || y");
+    ExprNode expected = new EqNode(new VarNode("a"), new OrNode(new VarNode("x"), new VarNode("y")));
+    assertEquals(expected, expression);
+  }
 }

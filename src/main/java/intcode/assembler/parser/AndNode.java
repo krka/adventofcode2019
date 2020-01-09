@@ -11,6 +11,7 @@ import intcode.assembler.Variable;
 
 import java.math.BigInteger;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 public class AndNode implements ExprNode {
@@ -27,10 +28,14 @@ public class AndNode implements ExprNode {
     ExprNode left = this.left.optimize();
     ExprNode right = this.right.optimize();
     if (BigInteger.ZERO.equals(left.value())) {
-      return right;
+      return IntConstant.ZERO;
     }
     if (BigInteger.ZERO.equals(right.value())) {
-      return left;
+      return IntConstant.ZERO;
+    }
+    if (left.value() != null) {
+      // left can't be zero, so we must return right
+      return right;
     }
     return new AndNode(left, right);
   }
@@ -44,16 +49,16 @@ public class AndNode implements ExprNode {
   public void assignTo(Variable target, Assembler assembler, Assembler.Function function, String context) {
     HashSet<TempVariable> tempParams = new HashSet<>();
 
-    Label leftLabel = new Label("trueleft");
-    Label doneLabel = new Label("done");
+    Label leftLabel = new Label("trueleft").setDefined();
+    Label doneLabel = new Label("done").setDefined();
 
     Parameter leftParam = left.toParameter(assembler, function, tempParams);
     function.operations.add(new Jump(context, true, leftParam, null, leftLabel));
     Parameter rightParam = right.toParameter(assembler, function, tempParams);
-    function.operations.add(new SetOp(context, target, rightParam));
+    function.operations.add(new SetOp(context, leftParam, target));
     function.operations.add(Jump.toLabel(context, doneLabel));
     function.operations.add(leftLabel);
-    function.operations.add(new SetOp(context, target, leftParam));
+    function.operations.add(new SetOp(context, rightParam, target));
     function.operations.add(doneLabel);
 
     tempParams.forEach(TempVariable::release);
@@ -63,7 +68,27 @@ public class AndNode implements ExprNode {
   public Parameter toParameter(Assembler assembler, Assembler.Function function, Set<TempVariable> tempParams) {
     TempVariable target = assembler.tempSpace.getAny();
     tempParams.add(target);
-    assignTo(target, assembler, function, "# todo");
+    assignTo(target, assembler, function, "# temp = " + toString());
     return target;
   }
+
+  @Override
+  public String toString() {
+    return left + " && " + right;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    AndNode andNode = (AndNode) o;
+    return left.equals(andNode.left) &&
+            right.equals(andNode.right);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(left, right);
+  }
+
 }
