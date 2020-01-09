@@ -54,7 +54,7 @@ public class LessThanNode implements ExprNode {
     tempParams.add(target);
     Parameter leftParam = left.toParameter(assembler, function, tempParams);
     Parameter rightParam = right.toParameter(assembler, function, tempParams);
-    function.operations.add(new LessThanOp(" todo", leftParam, rightParam, target));
+    function.operations.add(new LessThanOp("# " + target + " = " + toString(), leftParam, rightParam, target));
     return target;
   }
 
@@ -74,6 +74,6 @@ public class LessThanNode implements ExprNode {
 
   @Override
   public String toString() {
-    return left + "< " + right;
+    return left + " < " + right;
   }
 }

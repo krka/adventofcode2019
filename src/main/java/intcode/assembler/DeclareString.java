@@ -11,6 +11,6 @@ public class DeclareString extends Instruction {
   protected void apply(Matcher matcher, Assembler assembler, Assembler.Function function, String context) {
     String name = matcher.group("name");
     String value = matcher.group("value");
-    assembler.declareString(name, value, context);
+    function.declareString(name, value, context);
   }
 }

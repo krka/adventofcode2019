@@ -37,7 +37,7 @@ public class Assembler {
     setRelBase = new SetRelBase("# Initial stack offset");
     setRelBase.setAddress(0);
     globalRelBase = DeferredParameter.ofInt(ParameterMode.POSITION, () -> setRelBase.getAddress() + 1);
-    stackSize = addVariable(Variable.intVar("__stack_size", BigInteger.ZERO, "current stack size"));
+    stackSize = addGlobalVariable(Variable.intVar("__stack_size", BigInteger.ZERO, "current stack size"));
     main = new Function(false, "__main__", "# main function", Collections.emptyList());
     function = main;
   }
@@ -54,7 +54,6 @@ public class Assembler {
 
   void includeResource(String resource) {
     if (!resources.add(resource)) {
-      // TODO: check for cycles
       return;
     }
 
@@ -180,27 +179,7 @@ public class Assembler {
     return res;
   }
 
-  public void declareInt(String name, String value, String context) {
-    if (function == main) {
-      addVariable(Variable.intVar(name, new BigInteger(value), context));
-    } else {
-      function.addStackVariable(name);
-      function.operations.add(new SetOp(context, function.resolveParameter(value), function.resolveParameter(name)));
-    }
-  }
-
-  public void declareString(String name, String value, String context) {
-    if (function == main) {
-      Variable string = Variable.string(name + "__data__", value, context);
-      addVariable(string);
-      addVariable(Variable.pointer(name, string::getAddress, ""));
-    } else {
-      // TODO: add support for strings in functions
-      throw new RuntimeException();
-    }
-  }
-
-  private Variable addVariable(Variable variable) {
+  private Variable addGlobalVariable(Variable variable) {
     String key = namespace + ":" + variable.getName();
     Variable prev = variables.put(key, variable);
     if (prev != null) {
@@ -255,26 +234,6 @@ public class Assembler {
         i++;
       }
       injectStackAllocations = operations.size();
-    }
-
-    public void mul(Parameter target, Parameter a, Parameter b, String context) {
-      operations.add(new MulOp(context, a, b, target));
-    }
-
-    public void eq(String target, String a, String b, String context) {
-      eq(resolveParameter(target), a, b, context);
-    }
-
-    public void eq(Parameter target, String a, String b, String context) {
-      operations.add(new EqOp(context, resolveParameter(a), resolveParameter(b), target));
-    }
-
-    public void lessThan(String target, String a, String b, String context) {
-      lessThan(resolveParameter(target), a, b, context);
-    }
-
-    public void lessThan(Parameter target, String a, String b, String context) {
-      operations.add(new LessThanOp(context, resolveParameter(a), resolveParameter(b), target));
     }
 
     public void jump(boolean isTrue, String cmpRef, String destination, String description) {
@@ -370,7 +329,7 @@ public class Assembler {
 
     public void endFunc() {
       if (operations.size() != lastReturn) {
-        if (function == main) {
+        if (this == main) {
           addHalt("implicit halt");
         } else {
           addReturn(Collections.emptyList(), "implicit return");
@@ -422,7 +381,7 @@ public class Assembler {
       if (isStack) {
         pointerVar = addStackVariable(name);
       } else {
-        pointerVar = addVariable(Variable.pointer(name, null, context));
+        pointerVar = addGlobalVariable(Variable.pointer(name, null, context));
       }
 
       Parameter lenParam = function.resolveParameter(len);
@@ -434,6 +393,26 @@ public class Assembler {
         operations.add(new SetOp(context, globalRelBase, pointerVar));
         operations.add(new AddOp("# allocate array", globalRelBase, lenParam, globalRelBase));
         operations.add(new AddOp("# allocate array", stackSize, lenParam, stackSize));
+      }
+    }
+
+    public void declareString(String name, String value, String context) {
+      Variable data = Variable.string(name + "__data__", value, context);
+      addGlobalVariable(data);
+      if (this == main) {
+        addGlobalVariable(Variable.pointer(name, data::getAddress, ""));
+      } else {
+        StackVariable stackVariable = addStackVariable(name);
+        operations.add(new SetOp(context, DeferredParameter.ofInt(ParameterMode.IMMEDIATE, data::getAddress), stackVariable));
+      }
+    }
+
+    public void declareInt(String name, String value, String context) {
+      if (this == main) {
+        addGlobalVariable(Variable.intVar(name, new BigInteger(value), context));
+      } else {
+        addStackVariable(name);
+        operations.add(new SetOp(context, resolveParameter(value), resolveParameter(name)));
       }
     }
 

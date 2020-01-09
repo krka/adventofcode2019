@@ -53,7 +53,7 @@ public class FunctionCallNode implements ExprNode {
   public Parameter toParameter(Assembler assembler, Assembler.Function function, Set<TempVariable> tempParams) {
     TempVariable target = assembler.tempSpace.getAny();
     tempParams.add(target);
-    assignTo(target, assembler, function, " todo");
+    assignTo(target, assembler, function, "# " + target + " = " + toString());
     return target;
   }
 

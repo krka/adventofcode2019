@@ -68,7 +68,7 @@ public class ArrayNode implements ExprNode {
     Parameter arrayParam = array.toParameter(assembler, function, tempParams);
     Parameter indexParam = index.toParameter(assembler, function, tempParams);
 
-    arrayLookup(function.operations, target, arrayParam, indexParam);
+    arrayLookup(function.operations, target, arrayParam, indexParam, context);
 
     tempParams.forEach(TempVariable::release);
   }
@@ -81,7 +81,7 @@ public class ArrayNode implements ExprNode {
     TempVariable target = assembler.tempSpace.getAny();
     tempParams.add(target);
 
-    arrayLookup(function.operations, target, arrayParam, indexParam);
+    arrayLookup(function.operations, target, arrayParam, indexParam, "# " + target + " = " + toString());
 
     return target;
   }
@@ -107,8 +107,8 @@ public class ArrayNode implements ExprNode {
     return true;
   }
 
-  private void arrayLookup(List<Op> operations, Variable target, Parameter arrayParam, Parameter indexParam) {
-    AddOp rewriteParam = new AddOp("# todo", arrayParam, indexParam, Constant.PLACEHOLDER_POSITION);
+  private void arrayLookup(List<Op> operations, Variable target, Parameter arrayParam, Parameter indexParam, String context) {
+    AddOp rewriteParam = new AddOp(context, arrayParam, indexParam, Constant.PLACEHOLDER_POSITION);
     SetOp addOp = new SetOp("# write to variable", Constant.PLACEHOLDER_POSITION, target);
 
     rewriteParam.setTarget(DeferredParameter.ofInt(ParameterMode.POSITION, () -> addOp.getAddress() + 1));

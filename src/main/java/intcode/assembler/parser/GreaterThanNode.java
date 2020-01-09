@@ -54,7 +54,7 @@ public class GreaterThanNode implements ExprNode {
     tempParams.add(target);
     Parameter leftParam = left.toParameter(assembler, function, tempParams);
     Parameter rightParam = right.toParameter(assembler, function, tempParams);
-    function.operations.add(new LessThanOp(" todo", rightParam, leftParam, target));
+    function.operations.add(new LessThanOp("# " + target + " = " + toString() , rightParam, leftParam, target));
     return target;
   }
 

@@ -84,7 +84,7 @@ class MulNode implements ExprNode {
 
     TempVariable target = assembler.tempSpace.getAny();
     tempParams.add(target);
-    function.operations.add(new MulOp(" # todo", leftParam, rightParam, target));
+    function.operations.add(new MulOp("# " + target + " = " + toString(), leftParam, rightParam, target));
     return target;
   }
 

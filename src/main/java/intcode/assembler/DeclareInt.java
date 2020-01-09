@@ -9,6 +9,6 @@ public class DeclareInt extends Instruction {
 
   @Override
   protected void apply(Matcher matcher, Assembler assembler, Assembler.Function function, String context) {
-    assembler.declareInt(matcher.group("name"), matcher.group("value"), context);
+    function.declareInt(matcher.group("name"), matcher.group("value"), context);
   }
 }

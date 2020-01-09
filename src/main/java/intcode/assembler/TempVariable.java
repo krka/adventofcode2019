@@ -8,7 +8,7 @@ public class TempVariable extends Variable implements Closeable {
   private Throwable throwable;
 
   public TempVariable(String name, TempSpace tempSpace) {
-    super("int", name, 1, new BigInteger[]{BigInteger.ZERO}, null, "Temp variable ");
+    super("int", name, 1, new BigInteger[]{BigInteger.ZERO}, null, name);
     this.tempSpace = tempSpace;
   }
 
