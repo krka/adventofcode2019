@@ -49,8 +49,8 @@ public class ExpressionList implements ExprNode {
     int sourceSize = source.size();
 
     if (targetSize == sourceSize) {
-      // We can skip temp vars here
       if (targetSize == 1) {
+        // We can skip temp vars here
         expressions.get(0).assignValue(assembler, function, context, expr);
         return;
       }

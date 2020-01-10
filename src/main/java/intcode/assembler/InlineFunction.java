@@ -4,8 +4,10 @@ class InlineFunction implements Function {
   private final int numParams;
   private final int numReturnValues;
   private final InlineCode code;
+  private final String name;
 
-  public InlineFunction(int numParams, int numReturnValues, InlineCode code) {
+  public InlineFunction(String name, int numParams, int numReturnValues, InlineCode code) {
+    this.name = name;
     this.numParams = numParams;
     this.numReturnValues = numReturnValues;
     this.code = code;
@@ -28,6 +30,16 @@ class InlineFunction implements Function {
 
   @Override
   public void writeTo(AnnotatedIntCode res) {
+  }
+
+  @Override
+  public int getNumReturnValues() {
+    return numReturnValues;
+  }
+
+  @Override
+  public String getName() {
+    return name;
   }
 
   interface InlineCode {

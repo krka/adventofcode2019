@@ -8,4 +8,8 @@ public interface Function {
   int finalize(int address);
 
   void writeTo(AnnotatedIntCode res);
+
+  int getNumReturnValues();
+
+  String getName();
 }

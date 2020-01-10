@@ -38,18 +38,21 @@ public class Assembler {
     main = new IntCodeFunction(false, "__main__", "# main function", Collections.emptyList());
     function = main;
 
-    functions.put("throw", new InlineFunction(0, 0, (caller, context, returnVars) -> caller.addThrow(context)));
-    functions.put("halt", new InlineFunction(0, 0, (caller, context, returnVars) -> caller.addHalt(context)));
-    functions.put("input", new InlineFunction(0, 1, (caller, context, returnVars) -> {
+    addFunction(new InlineFunction("throw", 0, 0, (caller11, context11, returnVars11) -> caller11.addThrow(context11)));
+    addFunction(new InlineFunction("halt", 0, 0, (caller, context, returnVars) -> caller.addHalt(context)));
+    addFunction(new InlineFunction("input", 0, 1, (caller, context, returnVars) -> {
       List<Variable> param = paramSpace.get(1);
       caller.operations.add(new Input(param.get(0), context));
     }));
-
-    functions.put("output", new InlineFunction(1, 0, (caller, context, returnVars) -> {
+    addFunction(new InlineFunction("output", 1, 0, (caller, context, returnVars) -> {
       List<Variable> param = paramSpace.get(1);
       caller.operations.add(new Output(param.get(0), context));
     }));
 
+  }
+
+  private void addFunction(InlineFunction function) {
+    functions.put(function.getName(), function);
   }
 
   public static AnnotatedIntCode compileAnnotated(String name) {
@@ -306,6 +309,16 @@ public class Assembler {
       }
     }
 
+    @Override
+    public int getNumReturnValues() {
+      return numReturnValues;
+    }
+
+    @Override
+    public String getName() {
+      return name;
+    }
+
     public void addHalt(String context) {
       operations.add(new Halt(context));
 
@@ -403,6 +416,7 @@ public class Assembler {
       if (parameters != function.getNumParameters()) {
         throw new RuntimeException("Function " + funcName + " expects " + function.getNumParameters() + " but got " + parameters);
       }
+      validations.add(new ReturnValidation(this, function, returnVars, context));
 
       function.prepareCall(this, context, returnVars);
     }
@@ -423,8 +437,6 @@ public class Assembler {
 
       caller.operations.add(new SetOp("# save return address", returnAddress, new StackVariable("ret addr", 0)));
       caller.operations.add(jump);
-
-      validations.add(new ReturnValidation(caller, this, returnVars, context));
     }
   }
 
