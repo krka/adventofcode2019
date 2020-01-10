@@ -15,8 +15,28 @@ import java.util.Set;
 public class NotNode implements ExprNode {
   private final ExprNode child;
 
-  public NotNode(ExprNode child) {
+  private NotNode(ExprNode child) {
     this.child = child;
+  }
+
+  public static ExprNode create(ExprNode child) {
+    if (child instanceof IntConstant) {
+      IntConstant intChild = (IntConstant) child;
+      if (intChild.value().equals(BigInteger.ZERO)) {
+        return IntConstant.ONE;
+      } else {
+        return IntConstant.ZERO;
+      }
+    }
+
+    if (child instanceof NotNode) {
+      ExprNode grandChild = ((NotNode) child).child;
+      if (grandChild instanceof NotNode) {
+        return grandChild;
+      }
+    }
+    return new NotNode(child);
+
   }
 
   public ExprNode getChild() {
@@ -39,20 +59,6 @@ public class NotNode implements ExprNode {
   @Override
   public int hashCode() {
     return Objects.hash(child);
-  }
-
-  @Override
-  public ExprNode optimize() {
-    ExprNode newChild = child.optimize();
-    if (newChild instanceof IntConstant) {
-      IntConstant child2 = (IntConstant) newChild;
-      if (child2.value().equals(BigInteger.ZERO)) {
-        return IntConstant.ONE;
-      } else {
-        return IntConstant.ZERO;
-      }
-    }
-    return new NotNode(newChild);
   }
 
   @Override

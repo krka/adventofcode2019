@@ -15,7 +15,7 @@ class MulNode implements ExprNode {
   private final ExprNode left;
   private final ExprNode right;
 
-  public MulNode(ExprNode left, ExprNode right) {
+  private MulNode(ExprNode left, ExprNode right) {
     this.left = left;
     this.right = right;
   }
@@ -39,26 +39,23 @@ class MulNode implements ExprNode {
     return Objects.hash(left, right);
   }
 
-  @Override
-  public ExprNode optimize() {
-    ExprNode newLeft = left.optimize();
-    ExprNode newRight = right.optimize();
-    if (BigInteger.ZERO.equals(newLeft.value())) {
+  public static ExprNode create(ExprNode left, ExprNode right) {
+    if (BigInteger.ZERO.equals(left.value())) {
       return IntConstant.ZERO;
     }
-    if (BigInteger.ZERO.equals(newRight.value())) {
+    if (BigInteger.ZERO.equals(right.value())) {
       return IntConstant.ZERO;
     }
-    if (BigInteger.ONE.equals(newLeft.value())) {
-      return newRight;
+    if (BigInteger.ONE.equals(left.value())) {
+      return right;
     }
-    if (BigInteger.ONE.equals(newRight.value())) {
-      return newLeft;
+    if (BigInteger.ONE.equals(right.value())) {
+      return left;
     }
-    if (newLeft.value() != null && newRight.value() != null) {
-      return new IntConstant(newLeft.value().multiply(newRight.value()));
+    if (left.value() != null && right.value() != null) {
+      return new IntConstant(left.value().multiply(right.value()));
     }
-    return new MulNode(newLeft, newRight);
+    return new MulNode(left, right);
   }
 
   @Override

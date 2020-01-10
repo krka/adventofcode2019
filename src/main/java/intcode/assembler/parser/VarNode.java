@@ -35,8 +35,7 @@ class VarNode implements ExprNode {
     return Objects.hash(name);
   }
 
-  @Override
-  public ExprNode optimize() {
+  private ExprNode optimize() {
     return this;
   }
 

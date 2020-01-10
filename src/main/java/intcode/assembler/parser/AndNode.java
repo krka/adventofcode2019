@@ -17,15 +17,12 @@ public class AndNode implements ExprNode {
   private final ExprNode left;
   private final ExprNode right;
 
-  public AndNode(ExprNode left, ExprNode right) {
+  private AndNode(ExprNode left, ExprNode right) {
     this.left = left;
     this.right = right;
   }
 
-  @Override
-  public ExprNode optimize() {
-    ExprNode left = this.left.optimize();
-    ExprNode right = this.right.optimize();
+  public static ExprNode create(ExprNode left, ExprNode right) {
     if (BigInteger.ZERO.equals(left.value())) {
       return IntConstant.ZERO;
     }

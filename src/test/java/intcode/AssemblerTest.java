@@ -19,12 +19,10 @@ public class AssemblerTest {
     AnnotatedIntCode annotatedIntCode = Assembler.compileAnnotated("simple.asm");
     System.out.println(annotatedIntCode.toString());
 
-    List<BigInteger> compile = annotatedIntCode.getIntCode();
-    IntCode intCode = IntCode.fromResource(compile);
+    IntCode intCode = IntCode.fromResource(annotatedIntCode.getIntCode());
 
     intCode.run();
     assertEquals(IntCode.State.HALTED, intCode.getState());
-    assertEquals(Arrays.asList(BigInteger.valueOf(123)), intCode.drainStdout());
   }
 
   @Test

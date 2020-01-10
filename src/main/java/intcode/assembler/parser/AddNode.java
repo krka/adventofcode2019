@@ -15,7 +15,7 @@ class AddNode implements ExprNode {
   private final ExprNode left;
   private final ExprNode right;
 
-  public AddNode(ExprNode left, ExprNode right) {
+  private AddNode(ExprNode left, ExprNode right) {
     this.left = left;
     this.right = right;
   }
@@ -39,20 +39,17 @@ class AddNode implements ExprNode {
     return Objects.hash(left, right);
   }
 
-  @Override
-  public ExprNode optimize() {
-    ExprNode newLeft = left.optimize();
-    ExprNode newRight = right.optimize();
-    if (BigInteger.ZERO.equals(newLeft.value())) {
-      return newRight;
+  public static ExprNode create(ExprNode left, ExprNode right) {
+    if (BigInteger.ZERO.equals(left.value())) {
+      return right;
     }
-    if (BigInteger.ZERO.equals(newRight.value())) {
-      return newLeft;
+    if (BigInteger.ZERO.equals(right.value())) {
+      return left;
     }
-    if (newLeft.value() != null && newRight.value() != null) {
-      return new IntConstant(newLeft.value().add(newRight.value()));
+    if (left.value() != null && right.value() != null) {
+      return new IntConstant(left.value().add(right.value()));
     }
-    return new AddNode(newLeft, newRight);
+    return new AddNode(left, right);
   }
 
   @Override

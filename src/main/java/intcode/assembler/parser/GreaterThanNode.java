@@ -15,15 +15,12 @@ public class GreaterThanNode implements ExprNode {
   private final ExprNode left;
   private final ExprNode right;
 
-  public GreaterThanNode(ExprNode left, ExprNode right) {
+  private GreaterThanNode(ExprNode left, ExprNode right) {
     this.left = left;
     this.right = right;
   }
 
-  @Override
-  public ExprNode optimize() {
-    ExprNode left = this.left.optimize();
-    ExprNode right = this.right.optimize();
+  public static ExprNode create(ExprNode left, ExprNode right) {
     if (left.value() != null && right.value() != null) {
       if (left.value().compareTo(right.value()) > 0) {
         return IntConstant.ONE;

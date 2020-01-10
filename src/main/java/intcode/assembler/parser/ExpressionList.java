@@ -108,14 +108,6 @@ public class ExpressionList implements ExprNode {
   }
 
   @Override
-  public ExpressionList optimize() {
-    for (int i = 0; i < expressions.size(); i++) {
-      expressions.set(i, expressions.get(i).optimize());
-    }
-    return this;
-  }
-
-  @Override
   public BigInteger value() {
     return expressions.get(0).value();
   }

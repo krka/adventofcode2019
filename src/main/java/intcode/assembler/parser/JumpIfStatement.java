@@ -11,15 +11,17 @@ public class JumpIfStatement implements Statement {
   private final boolean isTrue;
   private final String label;
 
-  public JumpIfStatement(ExprNode condition, String label) {
-    if (condition instanceof NotNode) {
-      this.condition = ((NotNode) condition).getChild().optimize();
-      this.isTrue = false;
-    } else {
-      this.condition = condition.optimize();
-      this.isTrue = true;
-    }
+  private JumpIfStatement(boolean isTrue, ExprNode condition, String label) {
+    this.isTrue = isTrue;
+    this.condition = condition;
     this.label = label;
+  }
+
+  public static JumpIfStatement create(ExprNode condition, String label) {
+    if (condition instanceof NotNode) {
+      return new JumpIfStatement(false, ((NotNode) condition).getChild(), label);
+    }
+    return new JumpIfStatement(true, condition, label);
   }
 
   @Override

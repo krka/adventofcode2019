@@ -16,8 +16,7 @@ class VariableNode implements ExprNode {
     this.source = source;
   }
 
-  @Override
-  public ExprNode optimize() {
+  private ExprNode optimize() {
     return this;
   }
 

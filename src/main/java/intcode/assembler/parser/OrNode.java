@@ -17,15 +17,12 @@ public class OrNode implements ExprNode {
   private final ExprNode left;
   private final ExprNode right;
 
-  public OrNode(ExprNode left, ExprNode right) {
+  private OrNode(ExprNode left, ExprNode right) {
     this.left = left;
     this.right = right;
   }
 
-  @Override
-  public ExprNode optimize() {
-    ExprNode left = this.left.optimize();
-    ExprNode right = this.right.optimize();
+  public static ExprNode create(ExprNode left, ExprNode right) {
     if (left.value() != null) {
       if (!BigInteger.ZERO.equals(left.value())) {
         return left;

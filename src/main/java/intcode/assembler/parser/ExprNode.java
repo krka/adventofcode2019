@@ -9,7 +9,6 @@ import java.math.BigInteger;
 import java.util.Set;
 
 public interface ExprNode {
-  ExprNode optimize();
   BigInteger value();
 
   void assignTo(Variable target, Assembler assembler, Assembler.IntCodeFunction function, String context);

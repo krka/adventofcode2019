@@ -15,7 +15,7 @@ import java.util.Set;
 public class NegNode implements ExprNode {
   private final ExprNode child;
 
-  public NegNode(ExprNode child) {
+  private NegNode(ExprNode child) {
     this.child = child;
   }
 
@@ -37,14 +37,12 @@ public class NegNode implements ExprNode {
     return Objects.hash(child);
   }
 
-  @Override
-  public ExprNode optimize() {
-    ExprNode newChild = child.optimize();
-    if (newChild instanceof IntConstant) {
-      IntConstant child2 = (IntConstant) child;
-      return new IntConstant(child2.value().negate());
+  public static ExprNode create(ExprNode child) {
+    if (child instanceof IntConstant) {
+      IntConstant intChild = (IntConstant) child;
+      return new IntConstant(intChild.value().negate());
     }
-    return new NegNode(newChild);
+    return new NegNode(child);
   }
 
   @Override

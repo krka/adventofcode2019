@@ -1,10 +1,14 @@
-int a = 0
-int b = 0
-int c = 0
+#include stdlib.asm
 
-a = 10 + 20
-b = !0 + 2
-c = a + b
+int a = 10 + 20
+assert(a == 30)
+
+int b = !0 + 2
+assert(b == 3)
+
+int c = a + b
+assert(c == 33)
+
 c = c + 90 + !1
-output(c)
+assert(c == 123)
 

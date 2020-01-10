@@ -21,11 +21,6 @@ public class FunctionCallNode implements ExprNode {
   }
 
   @Override
-  public ExprNode optimize() {
-    return new FunctionCallNode(funcName, parameters.optimize());
-  }
-
-  @Override
   public BigInteger value() {
     return null;
   }

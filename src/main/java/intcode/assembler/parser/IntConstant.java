@@ -40,8 +40,7 @@ public class IntConstant implements ExprNode {
     return Objects.hash(value);
   }
 
-  @Override
-  public ExprNode optimize() {
+  private ExprNode optimize() {
     return this;
   }
 

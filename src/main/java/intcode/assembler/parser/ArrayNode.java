@@ -53,11 +53,6 @@ public class ArrayNode implements ExprNode {
   }
 
   @Override
-  public ExprNode optimize() {
-    return new ArrayNode(array.optimize(), index.optimize());
-  }
-
-  @Override
   public BigInteger value() {
     return null;
   }

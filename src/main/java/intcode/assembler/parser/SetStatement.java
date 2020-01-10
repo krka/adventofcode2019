@@ -9,8 +9,8 @@ public class SetStatement implements Statement {
   private final ExpressionList expr;
 
   public SetStatement(ExpressionList target, ExpressionList expr) {
-    this.target = target.optimize();
-    this.expr = expr.optimize();
+    this.target = target;
+    this.expr = expr;
   }
 
   @Override

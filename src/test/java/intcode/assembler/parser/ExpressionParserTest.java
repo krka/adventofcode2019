@@ -11,16 +11,16 @@ public class ExpressionParserTest {
   @Test
   public void testParser() {
     ExprNode expr = ExpressionParser.parseExpr("10 * 123 + -456 - x");
-    MulNode muls = new MulNode(new IntConstant(BigInteger.valueOf(10)), new IntConstant(BigInteger.valueOf(123)));
-    ExprNode expected = new AddNode(new AddNode(muls, new NegNode(new IntConstant(BigInteger.valueOf(456)))), new NegNode(new VarNode("x")))
+    ExprNode muls = MulNode.create(new IntConstant(BigInteger.valueOf(10)), new IntConstant(BigInteger.valueOf(123)));
+    ExprNode expected = AddNode.create(AddNode.create(muls, NegNode.create(new IntConstant(BigInteger.valueOf(456)))), NegNode.create(new VarNode("x")))
             .toExpressionList();
     assertEquals(expected, expr);
   }
 
   @Test
   public void testOptimize() {
-    ExprNode expr = ExpressionParser.parseExpr("10 * 123 + -456 - x").optimize();
-    ExprNode expected = ExpressionParser.parseExpr("774 - x").optimize();
+    ExprNode expr = ExpressionParser.parseExpr("10 * 123 + -456 - x");
+    ExprNode expected = ExpressionParser.parseExpr("774 - x");
     assertEquals(expected, expr);
   }
 
@@ -32,14 +32,14 @@ public class ExpressionParserTest {
 
   @Test
   public void testParen() {
-    ExprNode expr = ExpressionParser.parseExpr("10 * (123 + 5)").optimize();
-    ExprNode expected = ExpressionParser.parseExpr("1280").optimize();
+    ExprNode expr = ExpressionParser.parseExpr("10 * (123 + 5)");
+    ExprNode expected = ExpressionParser.parseExpr("1280");
     assertEquals(expected, expr);
   }
 
   @Test
   public void testArray() {
-    ExprNode expr = ExpressionParser.parseExpr("array[100 + 2]").optimize();
+    ExprNode expr = ExpressionParser.parseExpr("array[100 + 2]");
     ExpressionList expected = new ArrayNode(new VarNode("array"), new IndexNode(new IntConstant(BigInteger.valueOf(102)))).toExpressionList();
     assertEquals(expected, expr);
   }
@@ -102,7 +102,7 @@ public class ExpressionParserTest {
   public void testJumpIf() {
     JumpIfStatement statement = (JumpIfStatement) ExpressionParser.parseStatement("if a == b jump foo");
     assertEquals("foo", statement.getLabel());
-    assertEquals(ExpressionParser.parseExpr("a == b").optimize(), statement.getCondition().toExpressionList());
+    assertEquals(ExpressionParser.parseExpr("a == b"), statement.getCondition().toExpressionList());
   }
 
   @Test
@@ -116,7 +116,7 @@ public class ExpressionParserTest {
   @Test
   public void testFuncExpr2() {
     ExprNode expression = ExpressionParser.parseExpr("foo(0, 1) + bar()");
-    ExprNode expected = new AddNode(
+    ExprNode expected = AddNode.create(
             new FunctionCallNode("foo",
                     new ExpressionList(IntConstant.ZERO, IntConstant.ONE)),
             new FunctionCallNode("bar", ExpressionList.empty())).toExpressionList();
@@ -126,7 +126,7 @@ public class ExpressionParserTest {
   @Test
   public void testPrecedence() {
     ExprNode expression = ExpressionParser.parseExpr("a == x || y");
-    ExprNode expected = new OrNode(new EqNode(new VarNode("a"), new VarNode("x")), new VarNode("y"))
+    ExprNode expected = OrNode.create(EqNode.create(new VarNode("a"), new VarNode("x")), new VarNode("y"))
             .toExpressionList();
     assertEquals(expected, expression);
   }

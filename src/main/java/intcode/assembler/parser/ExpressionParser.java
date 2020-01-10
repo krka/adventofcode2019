@@ -46,32 +46,32 @@ public class ExpressionParser {
             .left(CharacterParser.of('[').and(), (List<Object> o) -> new ArrayNode((ExprNode) o.get(0), (IndexNode) o.get(2)));
 
     expressionBuilder.group()
-            .prefix(CharacterParser.of('-').trim(), (List<Object> o) -> new NegNode((ExprNode) o.get(1)))
-            .prefix(CharacterParser.of('!').trim(), (List<Object> o) -> new NotNode((ExprNode) o.get(1)));
+            .prefix(CharacterParser.of('-').trim(), (List<Object> o) -> NegNode.create((ExprNode) o.get(1)))
+            .prefix(CharacterParser.of('!').trim(), (List<Object> o) -> NotNode.create((ExprNode) o.get(1)));
 
     expressionBuilder.group()
-            .left(CharacterParser.of('*').trim(), (List<Object> o) -> new MulNode((ExprNode) o.get(0), (ExprNode) o.get(2)));
+            .left(CharacterParser.of('*').trim(), (List<Object> o) -> MulNode.create((ExprNode) o.get(0), (ExprNode) o.get(2)));
 
     expressionBuilder.group()
-            .left(CharacterParser.of('+').trim(), (List<Object> o) -> new AddNode((ExprNode) o.get(0), (ExprNode) o.get(2)))
-            .left(CharacterParser.of('-').trim(), (List<Object> o) -> new AddNode((ExprNode) o.get(0), new NegNode((ExprNode) o.get(2))));
+            .left(CharacterParser.of('+').trim(), (List<Object> o) -> AddNode.create((ExprNode) o.get(0), (ExprNode) o.get(2)))
+            .left(CharacterParser.of('-').trim(), (List<Object> o) -> AddNode.create((ExprNode) o.get(0), NegNode.create((ExprNode) o.get(2))));
 
     // relational
     expressionBuilder.group()
-            .left(StringParser.of("<=").trim(), (List<Object> o) -> new NotNode(new GreaterThanNode((ExprNode) o.get(0), (ExprNode) o.get(2))))
-            .left(StringParser.of(">=").trim(), (List<Object> o) -> new NotNode(new LessThanNode((ExprNode) o.get(0), (ExprNode) o.get(2))))
-            .left(StringParser.of("<").trim(), (List<Object> o) -> new LessThanNode((ExprNode) o.get(0), (ExprNode) o.get(2)))
-            .left(StringParser.of(">").trim(), (List<Object> o) -> new GreaterThanNode((ExprNode) o.get(0), (ExprNode) o.get(2)));
+            .left(StringParser.of("<=").trim(), (List<Object> o) -> NotNode.create(GreaterThanNode.create((ExprNode) o.get(0), (ExprNode) o.get(2))))
+            .left(StringParser.of(">=").trim(), (List<Object> o) -> NotNode.create(LessThanNode.create((ExprNode) o.get(0), (ExprNode) o.get(2))))
+            .left(StringParser.of("<").trim(), (List<Object> o) -> LessThanNode.create((ExprNode) o.get(0), (ExprNode) o.get(2)))
+            .left(StringParser.of(">").trim(), (List<Object> o) -> GreaterThanNode.create((ExprNode) o.get(0), (ExprNode) o.get(2)));
 
     // equality
     expressionBuilder.group()
-            .left(StringParser.of("==").trim(), (List<Object> o) -> new EqNode((ExprNode) o.get(0), (ExprNode) o.get(2)))
-            .left(StringParser.of("!=").trim(), (List<Object> o) -> new NotNode(new EqNode((ExprNode) o.get(0), (ExprNode) o.get(2))));
+            .left(StringParser.of("==").trim(), (List<Object> o) -> EqNode.create((ExprNode) o.get(0), (ExprNode) o.get(2)))
+            .left(StringParser.of("!=").trim(), (List<Object> o) -> NotNode.create(EqNode.create((ExprNode) o.get(0), (ExprNode) o.get(2))));
 
     // logical
     expressionBuilder.group()
-            .left(StringParser.of("&&").trim(), (List<Object> o) -> new AndNode((ExprNode) o.get(0), (ExprNode) o.get(2)))
-            .left(StringParser.of("||").trim(), (List<Object> o) -> new OrNode((ExprNode) o.get(0), (ExprNode) o.get(2)));
+            .left(StringParser.of("&&").trim(), (List<Object> o) -> AndNode.create((ExprNode) o.get(0), (ExprNode) o.get(2)))
+            .left(StringParser.of("||").trim(), (List<Object> o) -> OrNode.create((ExprNode) o.get(0), (ExprNode) o.get(2)));
 
     expression.set(expressionBuilder.build().trim());
 
@@ -87,7 +87,7 @@ public class ExpressionParser {
             .seq(expression)
             .seq(StringParser.of("jump").flatten().trim())
             .seq(IDENTIFIER)
-            .map((List<Object> o) -> new JumpIfStatement((ExprNode) o.get(1), (String) o.get(3)));
+            .map((List<Object> o) -> JumpIfStatement.create((ExprNode) o.get(1), (String) o.get(3)));
 
     Parser returnStatement = StringParser.of("return").flatten().trim()
             .seq(expressionList.optional())
@@ -107,7 +107,7 @@ public class ExpressionParser {
             .map((List<Object> o) -> new LabelStatement((String) o.get(0)));
 
     Parser jumpAlways = StringParser.of("jump").flatten().trim().seq(IDENTIFIER)
-            .map((List<Object> o) -> new JumpIfStatement(IntConstant.ONE, (String) o.get(1)));
+            .map((List<Object> o) -> JumpIfStatement.create(IntConstant.ONE, (String) o.get(1)));
 
     Parser declareString = StringParser.of("string").flatten().trim()
             .seq(IDENTIFIER)
