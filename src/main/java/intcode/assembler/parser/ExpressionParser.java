@@ -2,6 +2,8 @@ package intcode.assembler.parser;
 
 import org.petitparser.context.Result;
 import org.petitparser.parser.Parser;
+import org.petitparser.parser.combinators.SequenceParser;
+import org.petitparser.parser.combinators.SettableParser;
 import org.petitparser.parser.primitive.CharacterParser;
 import org.petitparser.parser.primitive.StringParser;
 import org.petitparser.tools.ExpressionBuilder;
@@ -27,10 +29,19 @@ public class ExpressionParser {
   private static final Parser RETURN;
 
   static {
+    SettableParser expression = SettableParser.undefined();
+    SettableParser expressionList = SettableParser.undefined();
+
     ExpressionBuilder expressionBuilder = new ExpressionBuilder();
+    Parser varParser = IDENTIFIER.flatten().map(VarNode::new);
+    Parser constantParser = POS_INT.flatten().map((String s) -> new IntConstant(new BigInteger(s)));
+    Parser functionCallParser = varParser.seq(CharacterParser.of('(').trim(), expressionList.optional(), CharacterParser.of(')').trim())
+        .map((List<Object> o) -> new FunctionCallNode(((VarNode) o.get(0)).getName(), (ExpressionList) o.get(2)));
+
     expressionBuilder.group()
-            .primitive(IDENTIFIER.flatten().map(VarNode::new))
-            .primitive(POS_INT.flatten().map((String s) -> new IntConstant(new BigInteger(s))));
+            .primitive(functionCallParser)
+            .primitive(varParser)
+            .primitive(constantParser);
 
     expressionBuilder.group()
             .wrapper(CharacterParser.of('(').trim(), CharacterParser.of(')').trim(), (List<Object> o) -> o.get(1));
@@ -42,18 +53,8 @@ public class ExpressionParser {
             .left(CharacterParser.of('[').and(), (List<Object> o) -> new ArrayNode((ExprNode) o.get(0), (IndexNode) o.get(2)));
 
     expressionBuilder.group()
-            .left(CharacterParser.of('(').and(), (List<Object> o) -> new FunctionCallNode((VarNode) o.get(0), (ExprNode) o.get(2)));
-
-    // Need special case for the empty expression list
-    expressionBuilder.group()
-            .postfix(CharacterParser.of('(').trim().seq(CharacterParser.of(')').trim()), (List<Object> o) -> new FunctionCallNode((VarNode) o.get(0), ExpressionList.empty()));
-
-    expressionBuilder.group()
             .prefix(CharacterParser.of('-').trim(), (List<Object> o) -> new NegNode((ExprNode) o.get(1)))
             .prefix(CharacterParser.of('!').trim(), (List<Object> o) -> new NotNode((ExprNode) o.get(1)));
-
-    expressionBuilder.group()
-            .left(CharacterParser.of(',').trim(), (List<Object> o) -> new ExpressionList((ExprNode) o.get(0), (ExprNode) o.get(2)));
 
     expressionBuilder.group()
             .left(CharacterParser.of('*').trim(), (List<Object> o) -> new MulNode((ExprNode) o.get(0), (ExprNode) o.get(2)));
@@ -79,24 +80,18 @@ public class ExpressionParser {
             .left(StringParser.of("&&").trim(), (List<Object> o) -> new AndNode((ExprNode) o.get(0), (ExprNode) o.get(2)))
             .left(StringParser.of("||").trim(), (List<Object> o) -> new OrNode((ExprNode) o.get(0), (ExprNode) o.get(2)));
 
-    EXPRESSION = expressionBuilder.build().trim();
+    expression.set(expressionBuilder.build().trim());
 
-    SET_STATEMENT = EXPRESSION.trim().seq(CharacterParser.of('=').trim()).seq(EXPRESSION.trim())
-      .map((List<Object> o) -> new SetStatement((ExprNode) o.get(0), (ExprNode) o.get(2)));
+    Parser commaAndExpression = CharacterParser.of(',').trim().seq(expression).star();
+    expressionList.set(expression.seq(commaAndExpression).map((List<Object> o) -> new ExpressionList(o)));
 
-    EXPRESSION_LIST = EXPRESSION.trim().seq(CharacterParser.of(',').trim().seq(EXPRESSION.trim()).star())
-            .map((List<Object> o) -> flattenExpr(o));
+    EXPRESSION = expression;
+    EXPRESSION_LIST = expressionList;
 
-    Parser assigningToSomething = EXPRESSION_LIST.trim().seq(CharacterParser.of('=').trim());
-    Parser theCall = IDENTIFIER.flatten().trim()
-            .seq(CharacterParser.of('(').trim())
-            .seq(EXPRESSION_LIST.optional())
-            .seq(CharacterParser.of(')').trim())
-            .map((List<Object> o) -> new FunctionCallStatement((String) o.get(0), flattenExpr(o.get(2))));
+    SET_STATEMENT = EXPRESSION_LIST.trim().seq(CharacterParser.of('=').trim()).seq(EXPRESSION_LIST.trim())
+      .map((List<Object> o) -> new SetStatement((ExpressionList) o.get(0), (ExpressionList) o.get(2)));
 
-    FUNCTION_CALL = assigningToSomething.optional()
-            .seq(theCall)
-            .map((List<Object> o) -> ((FunctionCallStatement) o.get(1)).withReturnValues(flattenExpr(o.get(0))));
+    FUNCTION_CALL = functionCallParser.map((FunctionCallNode func) -> new SetStatement(ExpressionList.empty(), func.toExpressionList()));
 
     JUMP_IF = StringParser.of("if").flatten().trim()
             .seq(EXPRESSION)
@@ -105,8 +100,8 @@ public class ExpressionParser {
             .map((List<Object> o) -> new JumpIfStatement((ExprNode) o.get(1), (String) o.get(3)));
 
     RETURN = StringParser.of("return").flatten().trim()
-            .seq(EXPRESSION.optional())
-            .map((List<Object> o) -> new ReturnStatement((ExprNode) o.get(1)));
+            .seq(EXPRESSION_LIST.optional())
+            .map((List<Object> o) -> new ReturnStatement((ExpressionList) o.get(1)));
   }
 
   public static List<ExprNode> flattenExpr(Object o) {
@@ -129,7 +124,11 @@ public class ExpressionParser {
   }
 
   public static ExprNode parseExpr(String s) {
-    return EXPRESSION.end().parse(s).get();
+    Result result = EXPRESSION.end().parse(s);
+    if (result.isSuccess()) {
+      return result.get();
+    }
+    return null;
   }
 
   public static Statement parseStatement(String line) {
@@ -165,7 +164,7 @@ public class ExpressionParser {
     return null;
   }
 
-  public static FunctionCallStatement parseFunctionCall(String line) {
+  public static SetStatement parseFunctionCall(String line) {
     Result parse = FUNCTION_CALL.end().parse(line);
     if (parse.isSuccess()) {
       return parse.get();

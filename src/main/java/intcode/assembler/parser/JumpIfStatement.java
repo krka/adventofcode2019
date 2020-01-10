@@ -23,10 +23,10 @@ public class JumpIfStatement implements Statement {
   }
 
   @Override
-  public void apply(Assembler assembler, Assembler.Function function, String context) {
+  public void apply(Assembler assembler, Assembler.IntCodeFunction caller, String context) {
     HashSet<TempVariable> tempParams = new HashSet<>();
-    Parameter parameter = condition.toParameter(assembler, function, tempParams);
-    function.jump(isTrue, parameter, label, context);
+    Parameter parameter = condition.toParameter(assembler, caller, tempParams);
+    caller.jump(isTrue, parameter, label, context);
     tempParams.forEach(TempVariable::release);
   }
 

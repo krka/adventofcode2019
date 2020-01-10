@@ -70,9 +70,7 @@ output(z)
 
 func rec(n)
   if n == 0 jump finish1
-  int r = 0
-  r = n * rec(n - 1)
-  return r
+  return n * rec(n - 1)
 finish1:
   return 1
 endfunc

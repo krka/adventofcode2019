@@ -22,12 +22,12 @@ public class Assembler {
   public final ParamSpace paramSpace = new ParamSpace("param_");
 
   final Map<String, Function> functions = new HashMap<>();
-  public final Function main;
+  public final IntCodeFunction main;
   private final Parameter globalRelBase;
   private final Variable stackSize;
 
   private String namespace = "<namespace>";
-  private Function function;
+  private IntCodeFunction function;
   private final SetRelBase setRelBase;
   private final List<ReturnValidation> validations = new ArrayList<>();
 
@@ -36,8 +36,21 @@ public class Assembler {
     setRelBase.setAddress(0);
     globalRelBase = DeferredParameter.ofInt(ParameterMode.POSITION, () -> setRelBase.getAddress() + 1);
     stackSize = addGlobalVariable(Variable.intVar("__stack_size", BigInteger.ZERO, "current stack size"));
-    main = new Function(false, "__main__", "# main function", Collections.emptyList());
+    main = new IntCodeFunction(false, "__main__", "# main function", Collections.emptyList());
     function = main;
+
+    functions.put("throw", new InlineFunction(0, 0, (caller, context, returnVars) -> caller.addThrow(context)));
+    functions.put("halt", new InlineFunction(0, 0, (caller, context, returnVars) -> caller.addHalt(context)));
+    functions.put("input", new InlineFunction(0, 1, (caller, context, returnVars) -> {
+      List<Variable> param = paramSpace.get(1);
+      caller.operations.add(new Input(param.get(0), context));
+    }));
+
+    functions.put("output", new InlineFunction(1, 0, (caller, context, returnVars) -> {
+      List<Variable> param = paramSpace.get(1);
+      caller.operations.add(new Output(param.get(0), context));
+    }));
+
   }
 
   public static AnnotatedIntCode compileAnnotated(String name) {
@@ -177,11 +190,11 @@ public class Assembler {
     return variable;
   }
 
-  public void setFunction(Function function) {
+  public void setFunction(IntCodeFunction function) {
     this.function = function;
   }
 
-  public class Function {
+  public class IntCodeFunction implements Function {
     private final Map<String, StackVariable> stackVariables = new HashMap<>();
     private final StackVariable returnAddress;
     private final StackVariable parentStackSize;
@@ -201,7 +214,7 @@ public class Assembler {
     public int numReturnValues = -1;
     private int lastReturn;
 
-    public Function(boolean isStack, String name, String context, List<String> parameters) {
+    public IntCodeFunction(boolean isStack, String name, String context, List<String> parameters) {
       this.isStack = isStack;
       this.name = name;
 
@@ -338,14 +351,14 @@ public class Assembler {
     }
 
     public void addReturn(String context, int numReturnValues) {
-      if (function == main) {
+      if (this == main) {
         throw new RuntimeException("Can not return from main");
       }
 
-      if (function.numReturnValues == -1) {
-        function.numReturnValues = numReturnValues;
-      } else if (function.numReturnValues != numReturnValues) {
-        throw new RuntimeException("Function " + function.name + " must always return the same number of values");
+      if (this.numReturnValues == -1) {
+        this.numReturnValues = numReturnValues;
+      } else if (this.numReturnValues != numReturnValues) {
+        throw new RuntimeException("Function " + this.name + " must always return the same number of values");
       }
 
 
@@ -362,7 +375,7 @@ public class Assembler {
 
       lastReturn = operations.size();
     }
-    
+
     public void declareArray(String name, String len, String context) {
       Variable pointerVar;
       if (isStack) {
@@ -371,7 +384,7 @@ public class Assembler {
         pointerVar = addGlobalVariable(Variable.pointer(name, null, context));
       }
 
-      Parameter lenParam = function.resolveParameter(len);
+      Parameter lenParam = resolveParameter(len);
 
       if (isStack && lenParam instanceof Constant) {
         int arraySize = lenParam.value().intValueExact();
@@ -404,58 +417,42 @@ public class Assembler {
     }
 
     public void addFunctionCall(String funcName, int parameters, int returnVars, String context) {
-      if (funcName.equals("output")) {
-        if (parameters == 1 && returnVars == 0) {
-          List<Variable> param = paramSpace.get(1);
-          operations.add(new Output(param.get(0), context));
-        } else {
-          throw new RuntimeException("output() requires only one parameter and zero return values");
-        }
-      } else if (funcName.equals("input")) {
-        if (parameters == 0 && returnVars == 1) {
-          List<Variable> param = paramSpace.get(1);
-          operations.add(new Input(param.get(0), context));
-        } else {
-          throw new RuntimeException("input() requires only one return value and zero parameters");
-        }
-      } else if (funcName.equals("halt")) {
-        if (parameters == 0 && returnVars == 0) {
-          addHalt(context);
-        } else {
-          throw new RuntimeException("halt() requires only zero return values and zero parameters");
-        }
-      } else if (funcName.equals("throw")) {
-        if (parameters == 0 && returnVars == 0) {
-          addThrow(context);
-        } else {
-          throw new RuntimeException("throw() requires only zero return values and zero parameters");
-        }
-      } else {
-        addFunctionCall2(funcName, parameters, returnVars, context);
+      Function function = resolveFunction(funcName);
+
+      if (parameters != function.getNumParameters()) {
+        throw new RuntimeException("Function " + funcName + " expects " + function.getNumParameters() + " but got " + parameters);
       }
+
+      function.prepareCall(this, context, returnVars);
     }
 
-    private void addFunctionCall2(String funcName, int parameters, int returnVars, String context) {
-      Function function = functions.get(funcName);
-      if (function == null) {
-        throw new RuntimeException("Could not find function " + funcName);
-      }
+    @Override
+    public int getNumParameters() {
+      return numParameters;
+    }
 
-      if (parameters != function.numParameters) {
-        throw new RuntimeException("Function " + funcName + " expects " + function.numParameters + " but got " + parameters);
-      }
+    @Override
+    public void prepareCall(IntCodeFunction caller, String context, int returnVars) {
+      caller.operations.add(new SetRelBase("# set rel base").setParameter(stackSize));
+      caller.operations.add(new SetOp("# save relative base revert", stackSize, new StackVariable("stack size", 1)));
 
-      operations.add(new SetRelBase("# set rel base").setParameter(stackSize));
-      operations.add(new SetOp("# save relative base revert", stackSize, new StackVariable("stack size", 1)));
-
-      DeferredParameter jumpTarget = DeferredParameter.ofInt(ParameterMode.IMMEDIATE, function::getAddress);
+      DeferredParameter jumpTarget = DeferredParameter.ofInt(ParameterMode.IMMEDIATE, this::getAddress);
       Jump jump = Jump.toTarget(context, jumpTarget);
       DeferredParameter returnAddress = DeferredParameter.ofInt(ParameterMode.IMMEDIATE, () -> jump.getAddress() + jump.size());
 
-      operations.add(new SetOp("# save return address", returnAddress, new StackVariable("ret addr", 0)));
-      operations.add(jump);
+      caller.operations.add(new SetOp("# save return address", returnAddress, new StackVariable("ret addr", 0)));
+      caller.operations.add(jump);
 
-      validations.add(new ReturnValidation(function, returnVars));
+      validations.add(new ReturnValidation(caller, this, returnVars, context));
     }
   }
+
+  public Function resolveFunction(String funcName) {
+    Function function = functions.get(funcName);
+    if (function == null) {
+      throw new RuntimeException("Could not find function " + funcName);
+    }
+    return function;
+  }
+
 }

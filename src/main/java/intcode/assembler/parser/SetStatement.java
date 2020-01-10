@@ -1,14 +1,15 @@
 package intcode.assembler.parser;
 
 import intcode.assembler.Assembler;
+import intcode.assembler.Function;
 
 import java.util.Objects;
 
 public class SetStatement implements Statement {
-  private final ExprNode target;
-  private final ExprNode expr;
+  private final ExpressionList target;
+  private final ExpressionList expr;
 
-  public SetStatement(ExprNode target, ExprNode expr) {
+  public SetStatement(ExpressionList target, ExpressionList expr) {
     this.target = target.optimize();
     this.expr = expr.optimize();
   }
@@ -33,11 +34,19 @@ public class SetStatement implements Statement {
   }
 
   @Override
-  public void apply(Assembler assembler, Assembler.Function function, String context) {
-    target.assignValue(assembler, function, context, expr);
+  public void apply(Assembler assembler, Assembler.IntCodeFunction caller, String context) {
+    target.assignValue(assembler, caller, context, expr);
   }
 
   public boolean valid() {
     return target.canAssign();
+  }
+
+  public ExpressionList getTarget() {
+    return target;
+  }
+
+  public ExpressionList getExpr() {
+    return expr;
   }
 }

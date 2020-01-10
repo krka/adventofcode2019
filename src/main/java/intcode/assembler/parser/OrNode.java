@@ -26,11 +26,13 @@ public class OrNode implements ExprNode {
   public ExprNode optimize() {
     ExprNode left = this.left.optimize();
     ExprNode right = this.right.optimize();
-    if (left.value() != null && !BigInteger.ZERO.equals(left.value())) {
-      return right;
-    }
-    if (right.value() != null && !BigInteger.ZERO.equals(right.value())) {
-      return left;
+    if (left.value() != null) {
+      if (!BigInteger.ZERO.equals(left.value())) {
+        return left;
+      }
+      if (right.value() != null && !BigInteger.ZERO.equals(right.value())) {
+        return right;
+      }
     }
     return new OrNode(left, right);
   }
@@ -41,7 +43,7 @@ public class OrNode implements ExprNode {
   }
 
   @Override
-  public void assignTo(Variable target, Assembler assembler, Assembler.Function function, String context) {
+  public void assignTo(Variable target, Assembler assembler, Assembler.IntCodeFunction function, String context) {
     HashSet<TempVariable> tempParams = new HashSet<>();
 
     Label leftLabel = new Label("trueleft").setDefined();
@@ -60,7 +62,7 @@ public class OrNode implements ExprNode {
   }
 
   @Override
-  public Parameter toParameter(Assembler assembler, Assembler.Function function, Set<TempVariable> tempParams) {
+  public Parameter toParameter(Assembler assembler, Assembler.IntCodeFunction function, Set<TempVariable> tempParams) {
     TempVariable target = assembler.tempSpace.getAny();
     tempParams.add(target);
     assignTo(target, assembler, function, "# temp = " + toString());

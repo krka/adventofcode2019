@@ -8,7 +8,7 @@ public class IncludeResource extends Instruction {
   }
 
   @Override
-  protected void apply(Matcher matcher, Assembler assembler, Assembler.Function function, String context) {
+  protected void apply(Matcher matcher, Assembler assembler, Assembler.IntCodeFunction function, String context) {
     assembler.includeResource(matcher.group("name"));
   }
 }

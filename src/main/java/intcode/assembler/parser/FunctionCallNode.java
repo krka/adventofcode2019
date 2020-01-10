@@ -15,20 +15,9 @@ public class FunctionCallNode implements ExprNode {
   private final String funcName;
   private final ExpressionList parameters;
 
-  public FunctionCallNode(VarNode funcName, ExprNode parameters) {
-    this(funcName.getName(), toExpressionList(parameters));
-  }
-
-  private static ExpressionList toExpressionList(ExprNode exprNode) {
-    if (exprNode instanceof ExpressionList) {
-      return (ExpressionList) exprNode;
-    }
-    return new ExpressionList(exprNode);
-  }
-
   public FunctionCallNode(String funcName, ExpressionList parameters) {
     this.funcName = funcName;
-    this.parameters = parameters;
+    this.parameters = parameters != null ? parameters : ExpressionList.empty();
   }
 
   @Override
@@ -42,7 +31,7 @@ public class FunctionCallNode implements ExprNode {
   }
 
   @Override
-  public void assignTo(Variable target, Assembler assembler, Assembler.Function function, String context) {
+  public void assignTo(Variable target, Assembler assembler, Assembler.IntCodeFunction function, String context) {
     List<ExprNode> returnVars = new ArrayList<>();
     returnVars.add(new VariableNode(target));
     FunctionCallStatement functionCallStatement = new FunctionCallStatement(funcName, parameters.expressions, returnVars);
@@ -50,7 +39,7 @@ public class FunctionCallNode implements ExprNode {
   }
 
   @Override
-  public Parameter toParameter(Assembler assembler, Assembler.Function function, Set<TempVariable> tempParams) {
+  public Parameter toParameter(Assembler assembler, Assembler.IntCodeFunction function, Set<TempVariable> tempParams) {
     TempVariable target = assembler.tempSpace.getAny();
     tempParams.add(target);
     assignTo(target, assembler, function, "# " + target + " = " + toString());
@@ -74,5 +63,13 @@ public class FunctionCallNode implements ExprNode {
   @Override
   public int hashCode() {
     return Objects.hash(funcName, parameters);
+  }
+
+  public String getFuncName() {
+    return funcName;
+  }
+
+  public ExpressionList getParameters() {
+    return parameters;
   }
 }

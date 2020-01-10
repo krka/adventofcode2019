@@ -27,17 +27,17 @@ class VariableNode implements ExprNode {
   }
 
   @Override
-  public void assignTo(Variable target, Assembler assembler, Assembler.Function function, String context) {
+  public void assignTo(Variable target, Assembler assembler, Assembler.IntCodeFunction function, String context) {
     function.operations.add(new SetOp(context, source, target));
   }
 
   @Override
-  public Parameter toParameter(Assembler assembler, Assembler.Function function, Set<TempVariable> tempParams) {
+  public Parameter toParameter(Assembler assembler, Assembler.IntCodeFunction function, Set<TempVariable> tempParams) {
     return source;
   }
 
   @Override
-  public void assignValue(Assembler assembler, Assembler.Function function, String context, ExprNode expr) {
+  public void assignValue(Assembler assembler, Assembler.IntCodeFunction function, String context, ExprNode expr) {
     expr.assignTo(source, assembler, function, context);
   }
 

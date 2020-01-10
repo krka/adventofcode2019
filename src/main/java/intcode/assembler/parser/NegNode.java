@@ -53,7 +53,7 @@ public class NegNode implements ExprNode {
   }
 
   @Override
-  public void assignTo(Variable target, Assembler assembler, Assembler.Function function, String context) {
+  public void assignTo(Variable target, Assembler assembler, Assembler.IntCodeFunction function, String context) {
     Set<TempVariable> tempParams = new HashSet<>();
     Parameter parameter = child.toParameter(assembler, function, tempParams);
     function.operations.add(new MulOp(context, parameter, Constant.MINUS_ONE, target));
@@ -61,7 +61,7 @@ public class NegNode implements ExprNode {
   }
 
   @Override
-  public Parameter toParameter(Assembler assembler, Assembler.Function function, Set<TempVariable> tempParams) {
+  public Parameter toParameter(Assembler assembler, Assembler.IntCodeFunction function, Set<TempVariable> tempParams) {
     TempVariable target = assembler.tempSpace.getAny();
     tempParams.add(target);
     Parameter parameter = child.toParameter(assembler, function, tempParams);

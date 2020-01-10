@@ -46,18 +46,18 @@ class VarNode implements ExprNode {
   }
 
   @Override
-  public void assignTo(Variable target, Assembler assembler, Assembler.Function function, String context) {
+  public void assignTo(Variable target, Assembler assembler, Assembler.IntCodeFunction function, String context) {
     Variable variable = function.resolveVariable(name);
     function.operations.add(new SetOp(context, variable, target));
   }
 
   @Override
-  public Parameter toParameter(Assembler assembler, Assembler.Function function, Set<TempVariable> tempParams) {
+  public Parameter toParameter(Assembler assembler, Assembler.IntCodeFunction function, Set<TempVariable> tempParams) {
     return function.resolveVariable(name);
   }
 
   @Override
-  public void assignValue(Assembler assembler, Assembler.Function function, String context, ExprNode expr) {
+  public void assignValue(Assembler assembler, Assembler.IntCodeFunction function, String context, ExprNode expr) {
     Variable variable = function.resolveVariable(name);
     expr.assignTo(variable, assembler, function, context);
   }

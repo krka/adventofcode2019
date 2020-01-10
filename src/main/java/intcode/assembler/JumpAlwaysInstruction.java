@@ -8,7 +8,7 @@ public class JumpAlwaysInstruction extends Instruction {
   }
 
   @Override
-  protected void apply(Matcher matcher, Assembler assembler, Assembler.Function function, String context) {
+  protected void apply(Matcher matcher, Assembler assembler, Assembler.IntCodeFunction function, String context) {
     String label = matcher.group("label");
     function.jump(false, "0", label, context);
   }

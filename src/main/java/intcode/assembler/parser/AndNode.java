@@ -1,7 +1,6 @@
 package intcode.assembler.parser;
 
 import intcode.assembler.Assembler;
-import intcode.assembler.Constant;
 import intcode.assembler.Jump;
 import intcode.assembler.Label;
 import intcode.assembler.Parameter;
@@ -46,7 +45,7 @@ public class AndNode implements ExprNode {
   }
 
   @Override
-  public void assignTo(Variable target, Assembler assembler, Assembler.Function function, String context) {
+  public void assignTo(Variable target, Assembler assembler, Assembler.IntCodeFunction function, String context) {
     HashSet<TempVariable> tempParams = new HashSet<>();
 
     Label leftLabel = new Label("trueleft").setDefined();
@@ -65,7 +64,7 @@ public class AndNode implements ExprNode {
   }
 
   @Override
-  public Parameter toParameter(Assembler assembler, Assembler.Function function, Set<TempVariable> tempParams) {
+  public Parameter toParameter(Assembler assembler, Assembler.IntCodeFunction function, Set<TempVariable> tempParams) {
     TempVariable target = assembler.tempSpace.getAny();
     tempParams.add(target);
     assignTo(target, assembler, function, "# temp = " + toString());

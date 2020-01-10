@@ -18,7 +18,7 @@ public abstract class Instruction extends ParserRegexps {
     return Pattern.compile(sb.toString());
   }
 
-  public boolean apply(String line, Assembler assembler, Assembler.Function function, String context) {
+  public boolean apply(String line, Assembler assembler, Assembler.IntCodeFunction function, String context) {
     Matcher matcher = applyMatch(line);
     if (matcher.matches()) {
       apply(matcher, assembler, function, context);
@@ -31,5 +31,5 @@ public abstract class Instruction extends ParserRegexps {
     return pattern.matcher(line);
   }
 
-  protected abstract void apply(Matcher matcher, Assembler assembler, Assembler.Function function, String context);
+  protected abstract void apply(Matcher matcher, Assembler assembler, Assembler.IntCodeFunction function, String context);
 }

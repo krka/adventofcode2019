@@ -14,6 +14,7 @@ import java.util.Set;
 public class IntConstant implements ExprNode {
   public static final ExprNode ZERO = new IntConstant(BigInteger.ZERO);
   public static final ExprNode ONE = new IntConstant(BigInteger.ONE);
+  public static final IntConstant TWO = new IntConstant(BigInteger.valueOf(2));
 
   private final BigInteger value;
 
@@ -50,12 +51,12 @@ public class IntConstant implements ExprNode {
   }
 
   @Override
-  public void assignTo(Variable target, Assembler assembler, Assembler.Function function, String context) {
+  public void assignTo(Variable target, Assembler assembler, Assembler.IntCodeFunction function, String context) {
     function.operations.add(new SetOp(context, Constant.of(value), target));
   }
 
   @Override
-  public Parameter toParameter(Assembler assembler, Assembler.Function function, Set<TempVariable> tempParams) {
+  public Parameter toParameter(Assembler assembler, Assembler.IntCodeFunction function, Set<TempVariable> tempParams) {
     return Constant.of(value);
   }
 

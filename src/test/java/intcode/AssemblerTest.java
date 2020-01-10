@@ -65,7 +65,9 @@ public class AssemblerTest {
 
   @Test
   public void testOutputs() {
-    IntCode intCode = IntCode.fromResource(Assembler.compile("test_outputs.asm"));
+    AnnotatedIntCode annotatedIntCode = Assembler.compileAnnotated("test_outputs.asm");
+    System.out.println(annotatedIntCode);
+    IntCode intCode = IntCode.fromResource(annotatedIntCode.getIntCode());
     intCode.run();
     assertEquals(IntCode.State.HALTED, intCode.getState());
     List<String> lines = intCode.readAllASCIILines();

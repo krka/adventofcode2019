@@ -47,26 +47,48 @@ public class ExpressionParserTest {
 
   @Test
   public void testFunctionCall() {
-    FunctionCallStatement call = ExpressionParser.parseFunctionCall("foo()");
-    assertEquals(Collections.emptyList(), call.getReturnVars());
-    assertEquals(Collections.emptyList(), call.getParameters());
-    assertEquals("foo", call.getFuncName());
+    SetStatement call = ExpressionParser.parseFunctionCall("foo()");
+    assertEquals(ExpressionList.empty(), call.getTarget());
+    assertEquals(new ExpressionList(new FunctionCallNode("foo", ExpressionList.empty())), call.getExpr());
+  }
+
+  @Test
+  public void testParseExpressionWithFunctionCall() {
+    ExprNode exprNode = ExpressionParser.parseExpr("foo()");
+    assertEquals(new FunctionCallNode("foo", ExpressionList.empty()), exprNode);
+  }
+
+  @Test
+  public void testParseExpressionWithFunctionCallWithParameter1() {
+    ExprNode exprNode = ExpressionParser.parseExpr("foo(1)");
+    assertEquals(new FunctionCallNode("foo", new ExpressionList(IntConstant.ONE)), exprNode);
+    System.out.println(exprNode);
+  }
+
+  @Test
+  public void testParseExpressionWithFunctionCallWithParameter2() {
+    ExprNode exprNode = ExpressionParser.parseExpr("foo(1, 2)");
+    assertEquals(new FunctionCallNode("foo", new ExpressionList(IntConstant.ONE, new IntConstant(BigInteger.TWO))), exprNode);
+  }
+
+  @Test
+  public void testParseExpressionWithFunctionCallWithParameter3() {
+    ExprNode exprNode = ExpressionParser.parseExpr("foo(1, 2, 0)");
+    assertEquals(new FunctionCallNode("foo", new ExpressionList(IntConstant.ONE, new IntConstant(BigInteger.TWO), IntConstant.ZERO)), exprNode);
   }
 
   @Test
   public void testFunctionCallWithParameters() {
-    FunctionCallStatement call = ExpressionParser.parseFunctionCall("foo(0, 1, 2)");
-    assertEquals(Collections.emptyList(), call.getReturnVars());
-    assertEquals(Arrays.asList(IntConstant.ZERO, IntConstant.ONE, new IntConstant(BigInteger.valueOf(2))), call.getParameters());
-    assertEquals("foo", call.getFuncName());
+    SetStatement call = ExpressionParser.parseFunctionCall("foo(0, 1, 2)");
+    assertEquals(ExpressionList.empty(), call.getTarget());
+    assertEquals(new ExpressionList(new FunctionCallNode("foo", new ExpressionList(IntConstant.ZERO, IntConstant.ONE, IntConstant.TWO))), call.getExpr());
   }
 
   @Test
   public void testFunctionCallWithReturnValues() {
-    FunctionCallStatement call = ExpressionParser.parseFunctionCall("a, b = foo(0, 1, 2)");
-    assertEquals(Arrays.asList(new VarNode("a"), new VarNode("b")), call.getReturnVars());
-    assertEquals(Arrays.asList(IntConstant.ZERO, IntConstant.ONE, new IntConstant(BigInteger.valueOf(2))), call.getParameters());
-    assertEquals("foo", call.getFuncName());
+    SetStatement call = ExpressionParser.parseSetStatement("a, b = foo(0, 1, 2)");
+    assertEquals(new ExpressionList(new VarNode("a"), new VarNode("b")), call.getTarget());
+    assertEquals(new ExpressionList(new FunctionCallNode("foo", new ExpressionList(IntConstant.ZERO, IntConstant.ONE, IntConstant.TWO))), call.getExpr());
   }
 
   @Test

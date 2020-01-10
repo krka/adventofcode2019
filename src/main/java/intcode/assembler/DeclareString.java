@@ -8,7 +8,7 @@ public class DeclareString extends Instruction {
   }
 
   @Override
-  protected void apply(Matcher matcher, Assembler assembler, Assembler.Function function, String context) {
+  protected void apply(Matcher matcher, Assembler assembler, Assembler.IntCodeFunction function, String context) {
     String name = matcher.group("name");
     String value = matcher.group("value");
     function.declareString(name, value, context);

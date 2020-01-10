@@ -19,7 +19,7 @@ public class Parser {
     INSTRUCTIONS.add(new EndFuncInstruction());
   }
 
-  public static boolean parse(String line, Assembler assembler, Assembler.Function function, String context) {
+  public static boolean parse(String line, Assembler assembler, Assembler.IntCodeFunction function, String context) {
     for (Instruction instruction : INSTRUCTIONS) {
       if (instruction.apply(line, assembler, function, context)) {
         return true;

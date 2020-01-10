@@ -1,20 +1,24 @@
 package intcode.assembler;
 
 public class ReturnValidation {
-  private final Assembler.Function function;
+  private final Assembler.IntCodeFunction caller;
+  private final Assembler.IntCodeFunction target;
   private final int wantedReturnValues;
+  private final String context;
 
-  public ReturnValidation(Assembler.Function function, int wantedReturnValues) {
-    this.function = function;
+  public ReturnValidation(Assembler.IntCodeFunction caller, Assembler.IntCodeFunction target, int wantedReturnValues, String context) {
+    this.caller = caller;
+    this.target = target;
     this.wantedReturnValues = wantedReturnValues;
+    this.context = context;
   }
 
   void validate() {
-    if (function.numReturnValues == -1) {
-      throw new RuntimeException("Function " + function.name + " has not been fully parsed");
+    if (target.numReturnValues == -1) {
+      throw new RuntimeException("Function " + target.name + " has not been fully parsed");
     }
-    if (function.numReturnValues < wantedReturnValues) {
-      throw new RuntimeException("Function " + function.name + " returns " + function.numReturnValues + " but caller wants " + wantedReturnValues);
+    if (target.numReturnValues < wantedReturnValues) {
+      throw new RuntimeException(context + ": function " + target.name + " returns " + target.numReturnValues + " but caller wants " + wantedReturnValues);
     }
   }
 }

@@ -8,7 +8,7 @@ public class EndFuncInstruction extends Instruction {
   }
 
   @Override
-  protected void apply(Matcher matcher, Assembler assembler, Assembler.Function function, String context) {
+  protected void apply(Matcher matcher, Assembler assembler, Assembler.IntCodeFunction function, String context) {
     if (function == assembler.main) {
       throw new RuntimeException("Can not return from main");
     }

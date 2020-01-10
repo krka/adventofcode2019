@@ -63,7 +63,7 @@ public class ArrayNode implements ExprNode {
   }
 
   @Override
-  public void assignTo(Variable target, Assembler assembler, Assembler.Function function, String context) {
+  public void assignTo(Variable target, Assembler assembler, Assembler.IntCodeFunction function, String context) {
     Set<TempVariable> tempParams = new HashSet<>();
     Parameter arrayParam = array.toParameter(assembler, function, tempParams);
     Parameter indexParam = index.toParameter(assembler, function, tempParams);
@@ -74,7 +74,7 @@ public class ArrayNode implements ExprNode {
   }
 
   @Override
-  public Parameter toParameter(Assembler assembler, Assembler.Function function, Set<TempVariable> tempParams) {
+  public Parameter toParameter(Assembler assembler, Assembler.IntCodeFunction function, Set<TempVariable> tempParams) {
     Parameter arrayParam = array.toParameter(assembler, function, tempParams);
     Parameter indexParam = index.toParameter(assembler, function, tempParams);
 
@@ -87,7 +87,7 @@ public class ArrayNode implements ExprNode {
   }
 
   @Override
-  public void assignValue(Assembler assembler, Assembler.Function function, String context, ExprNode expr) {
+  public void assignValue(Assembler assembler, Assembler.IntCodeFunction function, String context, ExprNode expr) {
     Set<TempVariable> tempParams = new HashSet<>();
     Parameter arrayParam = array.toParameter(assembler, function, tempParams);
     Parameter indexParam = index.toParameter(assembler, function, tempParams);

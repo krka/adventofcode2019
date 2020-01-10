@@ -11,7 +11,7 @@ public class FunctionDefinitionInstruction extends Instruction {
   }
 
   @Override
-  protected void apply(Matcher matcher, Assembler assembler, Assembler.Function function, String context) {
+  protected void apply(Matcher matcher, Assembler assembler, Assembler.IntCodeFunction function, String context) {
     String funcName = matcher.group("functionname");
     String[] parameters = matcher.group("parameters").split(",");
 
@@ -28,7 +28,7 @@ public class FunctionDefinitionInstruction extends Instruction {
       }
     }
 
-    function = assembler.new Function(true, funcName, context, params);
+    function = assembler.new IntCodeFunction(true, funcName, context, params);
     if (assembler.functions.put(funcName, function) != null) {
       throw new RuntimeException("Function already defined: " + funcName);
     }
