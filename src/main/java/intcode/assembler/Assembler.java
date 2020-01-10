@@ -1,7 +1,6 @@
 package intcode.assembler;
 
 import intcode.assembler.parser.ExpressionParser;
-import intcode.assembler.parser.Statement;
 import util.Util;
 
 import java.math.BigInteger;
@@ -11,7 +10,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 public class Assembler {
@@ -22,7 +20,7 @@ public class Assembler {
   public final TempSpace tempSpace = new TempSpace("temp_");
   public final ParamSpace paramSpace = new ParamSpace("param_");
 
-  final Map<String, Function> functions = new HashMap<>();
+  public final Map<String, Function> functions = new HashMap<>();
   public final IntCodeFunction main;
   private final Parameter globalRelBase;
   private final Variable stackSize;
@@ -80,10 +78,7 @@ public class Assembler {
         line = line.trim();
         if (!line.isEmpty()) {
           String context = resource + ":" + lineNumber + "    " + line;
-          if (!Parser.parse(line, this, function, context)) {
-            Statement statement = ExpressionParser.parseStatement(line);
-            statement.apply(this, function, context);
-          }
+          ExpressionParser.parseStatement(line).apply(this, function, context);
         }
       }
     } catch (RuntimeException e) {
@@ -373,7 +368,7 @@ public class Assembler {
       lastReturn = operations.size();
     }
 
-    public void declareArray(String name, String len, String context) {
+    public void declareArray(String name, Parameter len, String context) {
       Variable pointerVar;
       if (isStack) {
         pointerVar = addStackVariable(name);
@@ -381,15 +376,13 @@ public class Assembler {
         pointerVar = addGlobalVariable(Variable.pointer(name, null, context));
       }
 
-      Parameter lenParam = resolveParameter(len);
-
-      if (isStack && lenParam instanceof Constant) {
-        int arraySize = lenParam.value().intValueExact();
+      if (isStack && len instanceof Constant) {
+        int arraySize = len.value().intValueExact();
         allocations.add(new StaticAllocation(pointerVar, arraySize));
       } else {
         operations.add(new SetOp(context, globalRelBase, pointerVar));
-        operations.add(new AddOp("# allocate array", globalRelBase, lenParam, globalRelBase));
-        operations.add(new AddOp("# allocate array", stackSize, lenParam, stackSize));
+        operations.add(new AddOp("# allocate array", globalRelBase, len, globalRelBase));
+        operations.add(new AddOp("# allocate array", stackSize, len, stackSize));
       }
     }
 

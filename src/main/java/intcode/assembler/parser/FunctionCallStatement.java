@@ -1,22 +1,14 @@
 package intcode.assembler.parser;
 
 import intcode.assembler.Assembler;
-import intcode.assembler.Function;
 import intcode.assembler.Variable;
 
-import java.util.Collections;
 import java.util.List;
 
 public class FunctionCallStatement implements Statement {
   private final List<ExprNode> returnVars;
   private final String funcName;
   private final List<ExprNode> parameters;
-
-  public FunctionCallStatement(String funcName, List<ExprNode> parameters) {
-    this.funcName = funcName;
-    this.parameters = flatten(parameters);
-    this.returnVars = Collections.emptyList();
-  }
 
   private List<ExprNode> flatten(List<ExprNode> parameters) {
     if (parameters.size() != 1) {
@@ -57,15 +49,4 @@ public class FunctionCallStatement implements Statement {
     }
   }
 
-  public List<ExprNode> getReturnVars() {
-    return returnVars;
-  }
-
-  public String getFuncName() {
-    return funcName;
-  }
-
-  public List<ExprNode> getParameters() {
-    return parameters;
-  }
 }
