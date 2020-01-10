@@ -103,11 +103,6 @@ public class ExpressionList implements ExprNode {
     }
   }
 
-  @Override
-  public boolean canAssign() {
-    return expressions.stream().allMatch(ExprNode::canAssign);
-  }
-
   public static ExpressionList empty() {
     return EMPTY;
   }

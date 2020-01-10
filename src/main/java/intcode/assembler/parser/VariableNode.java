@@ -41,8 +41,4 @@ class VariableNode implements ExprNode {
     expr.assignTo(source, assembler, function, context);
   }
 
-  @Override
-  public boolean canAssign() {
-    return true;
-  }
 }

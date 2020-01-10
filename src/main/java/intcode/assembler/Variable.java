@@ -39,14 +39,6 @@ public class Variable implements Parameter {
     return new Variable("string", name,len + 1, values, null, context);
   }
 
-  public static Variable array(String name, int len, String context) {
-    BigInteger[] values = new BigInteger[len];
-    for (int i = 0; i < len; i++) {
-      values[i] = BigInteger.ZERO;
-    }
-    return new Variable("array", name, len, values, null, context);
-  }
-
   public int getLen() {
     return len;
   }

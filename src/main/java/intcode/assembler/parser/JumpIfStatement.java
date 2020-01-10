@@ -43,10 +43,6 @@ public class JumpIfStatement implements Statement {
     return condition;
   }
 
-  public boolean isTrue() {
-    return isTrue;
-  }
-
   public String getLabel() {
     return label;
   }

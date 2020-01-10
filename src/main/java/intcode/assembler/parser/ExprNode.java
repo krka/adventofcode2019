@@ -20,10 +20,6 @@ public interface ExprNode {
     throw new RuntimeException("Can't assign a value to " + this.getClass().getSimpleName());
   }
 
-  default boolean canAssign() {
-    return false;
-  }
-
   default ExpressionList toExpressionList() {
     return new ExpressionList(this);
   }

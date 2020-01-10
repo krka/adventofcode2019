@@ -23,7 +23,6 @@ public class FunctionDefinitionStatement implements Statement {
     }
 
     List<String> params = new ArrayList<>();
-    int i = 0;
     for (ExprNode parameter : parameters.expressions) {
       if (parameter instanceof VarNode) {
         params.add(((VarNode) parameter).getName());

@@ -10,21 +10,10 @@ public class FunctionCallStatement implements Statement {
   private final String funcName;
   private final List<ExprNode> parameters;
 
-  private List<ExprNode> flatten(List<ExprNode> parameters) {
-    if (parameters.size() != 1) {
-      return parameters;
-    }
-    ExprNode exprNode = parameters.get(0);
-    if (exprNode instanceof ExpressionList) {
-      return ((ExpressionList) exprNode).expressions;
-    }
-    return parameters;
-  }
-
   public FunctionCallStatement(String funcName, List<ExprNode> parameters, List<ExprNode> returnVars) {
     this.funcName = funcName;
-    this.parameters = flatten(parameters);
-    this.returnVars = flatten(returnVars);
+    this.parameters = parameters;
+    this.returnVars = returnVars;
   }
 
   @Override

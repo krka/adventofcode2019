@@ -1,7 +1,6 @@
 package intcode.assembler.parser;
 
 import intcode.assembler.Assembler;
-import intcode.assembler.Function;
 
 import java.util.Objects;
 
@@ -36,10 +35,6 @@ public class SetStatement implements Statement {
   @Override
   public void apply(Assembler assembler, Assembler.IntCodeFunction caller, String context) {
     target.assignValue(assembler, caller, context, expr);
-  }
-
-  public boolean valid() {
-    return target.canAssign();
   }
 
   public ExpressionList getTarget() {

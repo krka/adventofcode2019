@@ -62,11 +62,6 @@ class VarNode implements ExprNode {
     expr.assignTo(variable, assembler, function, context);
   }
 
-  @Override
-  public boolean canAssign() {
-    return true;
-  }
-
   public String getName() {
     return name;
   }
