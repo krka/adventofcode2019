@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 public class Assembler {
@@ -63,7 +64,7 @@ public class Assembler {
     return compileAnnotated(name).getIntCode();
   }
 
-  void includeResource(String resource) {
+  public void includeResource(String resource) {
     if (!resources.add(resource)) {
       return;
     }
@@ -81,11 +82,7 @@ public class Assembler {
           String context = resource + ":" + lineNumber + "    " + line;
           if (!Parser.parse(line, this, function, context)) {
             Statement statement = ExpressionParser.parseStatement(line);
-            if (statement != null) {
-              statement.apply(this, function, context);
-            } else {
-              throw new RuntimeException("Unexpected line: " + line);
-            }
+            statement.apply(this, function, context);
           }
         }
       }
@@ -180,7 +177,7 @@ public class Assembler {
     return res;
   }
 
-  private Variable addGlobalVariable(Variable variable) {
+  public Variable addGlobalVariable(Variable variable) {
     String key = namespace + ":" + variable.getName();
     Variable prev = variables.put(key, variable);
     if (prev != null) {
@@ -404,15 +401,6 @@ public class Assembler {
       } else {
         StackVariable stackVariable = addStackVariable(name);
         operations.add(new SetOp(context, DeferredParameter.ofInt(ParameterMode.IMMEDIATE, data::getAddress), stackVariable));
-      }
-    }
-
-    public void declareInt(String name, String value, String context) {
-      if (this == main) {
-        addGlobalVariable(Variable.intVar(name, new BigInteger(value), context));
-      } else {
-        addStackVariable(name);
-        operations.add(new SetOp(context, resolveParameter(value), resolveParameter(name)));
       }
     }
 

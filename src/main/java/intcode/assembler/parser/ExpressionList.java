@@ -1,7 +1,6 @@
 package intcode.assembler.parser;
 
 import intcode.assembler.Assembler;
-import intcode.assembler.Function;
 import intcode.assembler.Parameter;
 import intcode.assembler.TempVariable;
 import intcode.assembler.Variable;
@@ -19,14 +18,19 @@ public class ExpressionList implements ExprNode {
 
   public final List<ExprNode> expressions = new ArrayList<>();
 
+  public ExpressionList(List<ExprNode> nodes) {
+    expressions.addAll(nodes);
+  }
+
   public ExpressionList(ExprNode... nodes) {
-    expressions.addAll(Arrays.asList(nodes));
+    this(Arrays.asList(nodes));
   }
 
   private ExpressionList() {
   }
 
-  public ExpressionList(List<Object> objects) {
+  public static ExpressionList parse(List<Object> objects) {
+    ArrayList<ExprNode> expressions = new ArrayList<>();
     ExprNode head = (ExprNode) objects.get(0);
     expressions.add(head);
 
@@ -34,6 +38,7 @@ public class ExpressionList implements ExprNode {
     for (Object tailNode : tail) {
       expressions.add((ExprNode) ((List<Object>) tailNode).get(1));
     }
+    return new ExpressionList(expressions);
   }
 
   @Override
