@@ -5,6 +5,7 @@ import intcode.assembler.Variable;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 public class ReturnStatement implements Statement {
 
@@ -27,5 +28,23 @@ public class ReturnStatement implements Statement {
     }
 
     caller.addReturn(context, returnValues.size());
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    ReturnStatement that = (ReturnStatement) o;
+    return returnValues.equals(that.returnValues);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(returnValues);
+  }
+
+  @Override
+  public String toString() {
+    return "return " + returnValues;
   }
 }

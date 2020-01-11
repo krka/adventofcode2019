@@ -18,10 +18,8 @@ populate:
   if tempn jump populate
 
 output:
-  i = i + -1
-
-  tempn = tempnumber[i]
-  output(tempn)
+  i = i - 1
+  output(tempnumber[i])
   if ! i jump finish
   jump output
 

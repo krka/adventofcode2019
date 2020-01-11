@@ -1,8 +1,11 @@
 package intcode.assembler.parser;
 
 import org.junit.Test;
+import org.petitparser.parser.Parser;
+import org.petitparser.parser.primitive.StringParser;
 
 import java.math.BigInteger;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
@@ -129,5 +132,17 @@ public class ExpressionParserTest {
     ExprNode expected = OrNode.create(EqNode.create(new VarNode("a"), new VarNode("x")), new VarNode("y"))
             .toExpressionList();
     assertEquals(expected, expression);
+  }
+
+  @Test
+  public void testReturn() {
+    Statement expression = ExpressionParser.parseStatement("return");
+    assertEquals(new ReturnStatement(ExpressionList.empty()), expression);
+  }
+
+  @Test
+  public void testReturnValues() {
+    Statement expression = ExpressionParser.parseStatement("return 1,2");
+    assertEquals(new ReturnStatement(new ExpressionList(IntConstant.ONE, IntConstant.TWO)), expression);
   }
 }

@@ -81,7 +81,8 @@ public class ExpressionParser {
     Parser setStatement = expressionList.trim().seq(CharacterParser.of('=').trim()).seq(expressionList.trim())
       .map((List<Object> o) -> new SetStatement((ExpressionList) o.get(0), (ExpressionList) o.get(2)));
 
-    Parser functionCall = functionCallParser.map((FunctionCallNode func) -> new SetStatement(ExpressionList.empty(), func.toExpressionList()));
+    Parser functionCall = functionCallParser
+            .map((FunctionCallNode func) -> new SetStatement(ExpressionList.empty(), func.toExpressionList()));
 
     Parser jumpIfStatement = StringParser.of("if").flatten().trim()
             .seq(expression)
@@ -89,9 +90,12 @@ public class ExpressionParser {
             .seq(IDENTIFIER)
             .map((List<Object> o) -> JumpIfStatement.create((ExprNode) o.get(1), (String) o.get(3)));
 
-    Parser returnStatement = StringParser.of("return").flatten().trim()
-            .seq(expressionList.optional())
+    Parser returnStatement = StringParser.of("return ").trim()
+            .seq(expressionList)
             .map((List<Object> o) -> new ReturnStatement((ExpressionList) o.get(1)));
+
+    Parser returnNoneStatement = StringParser.of("return").trim().end()
+            .map(o -> new ReturnStatement(ExpressionList.empty()));
 
     Parser declareInt = StringParser.of("int").trim().seq(setStatement)
             .map((List<Object> o) -> new DeclareIntStatement((SetStatement) o.get(1)));
@@ -101,7 +105,8 @@ public class ExpressionParser {
             .map((List<Object> o) -> new IncludeResourceStatement((String) o.get(1)));
 
 
-    Parser comment = CharacterParser.of('#').trim().seq(CharacterParser.any()).map(o -> new CommentStatement());
+    Parser comment = CharacterParser.of('#').trim().seq(CharacterParser.any().star())
+            .map(o -> new CommentStatement());
 
     Parser label = IDENTIFIER.seq(CharacterParser.of(':'))
             .map((List<Object> o) -> new LabelStatement((String) o.get(0)));
@@ -136,10 +141,12 @@ public class ExpressionParser {
 
 
     STATEMENT = functionCall.or(
-            setStatement, jumpIfStatement, returnStatement,
+            includeResource, comment,
+            returnStatement, returnNoneStatement,
+            setStatement, jumpIfStatement,
             declareInt, declareString, declareArray,
             functionDefinition, endFunc,
-            includeResource, comment, label, jumpAlways);
+            label, jumpAlways);
     EXPRESSION = expressionList;
   }
 
@@ -156,7 +163,7 @@ public class ExpressionParser {
   }
 
   public static Statement parseStatement(String line) {
-    Result parse = STATEMENT.parse(line);
+    Result parse = STATEMENT.end().parse(line);
     if (parse.isSuccess()) {
       return parse.get();
     }

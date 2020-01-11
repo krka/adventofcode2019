@@ -1,35 +1,24 @@
 #include division.asm
 
 func mergeSortInner(low, high, array, tempArray)
-  int len = 0
-  int halfLen = 0
-
-  int midpoint = 0
-
-  int leftVal = 0
-  int rightVal = 0
-  int left = 0
-  int right = 0
-
   int temp = 0
 
-  len = high - low
+  int len = high - low
   if len <= 1 jump finish
 
-  halfLen = div(len, 2)
-  midpoint = low + halfLen
+  int midpoint = low + div(len, 2)
 
   mergeSortInner(low, midpoint, array, tempArray)
   mergeSortInner(midpoint, high, array, tempArray)
 
-  left = low
-  right = midpoint
+  int left = low
+  int right = midpoint
 joinloop:
   if left == midpoint jump push_all_right
   if right == high jump push_all_left
 
-  leftVal = array[left]
-  rightVal = array[right]
+  int leftVal = array[left]
+  int rightVal = array[right]
 
   if leftVal > rightVal jump push_right
 push_left:

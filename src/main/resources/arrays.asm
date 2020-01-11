@@ -1,5 +1,3 @@
-int x = 0
-
 array[10] arr
 
 arr[0] = 10
