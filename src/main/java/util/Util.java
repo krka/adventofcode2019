@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 
 public class Util {
   private static final ClassLoader CLASS_LOADER = Util.class.getClassLoader();
-  private static final BigInteger THREE = BigInteger.valueOf(3);
 
   public static Reader fromResource(String name) {
     InputStream stream = CLASS_LOADER.getResourceAsStream(name);

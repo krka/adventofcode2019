@@ -14,7 +14,20 @@ public class AnnotatedIntCode {
     for (AnnotatedOperation operation : operations) {
       res.addAll(operation.getIntCode());
     }
+
+    removeTrailingZeros(res);
     return res;
+  }
+
+  private void removeTrailingZeros(ArrayList<BigInteger> res) {
+    if (res.isEmpty()) {
+      return;
+    }
+    int i = res.size() - 1;
+    while (res.get(i).equals(BigInteger.ZERO)) {
+      res.remove(i);
+      i--;
+    }
   }
 
   public int pc() {

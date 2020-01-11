@@ -1,4 +1,5 @@
 #include outputstring.asm
+#include stdlib.asm
 
 string helloworld = "Hello World!"
 
@@ -11,4 +12,10 @@ func teststring()
 endfunc
 
 outputString(teststring())
+output(10)
+
+array[strlen(helloworld) + 1] copy
+memcpy(strlen(helloworld) + 1, helloworld, copy)
+
+outputString(copy)
 output(10)

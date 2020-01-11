@@ -29,3 +29,12 @@ loop:
 doreturn:
   return diff
 endfunc
+
+func memcpy(n, src, dest)
+  if n <= 0 jump finish
+loop:
+  n = n - 1
+  dest[n] = src[n]
+  if n > 0 jump loop
+finish:
+endfunc

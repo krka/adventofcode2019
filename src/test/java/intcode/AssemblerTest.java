@@ -69,7 +69,7 @@ public class AssemblerTest {
     intCode.run();
     assertEquals(IntCode.State.HALTED, intCode.getState());
     List<String> lines = intCode.readAllASCIILines();
-    assertEquals(Arrays.asList("Hello World!", "Goodbye world"), lines);
+    assertEquals(Arrays.asList("Hello World!", "Goodbye world", "Hello World!"), lines);
   }
 
   @Test
