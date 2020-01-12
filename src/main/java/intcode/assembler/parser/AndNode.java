@@ -49,12 +49,12 @@ public class AndNode implements ExprNode {
     Label doneLabel = new Label("done").setDefined();
 
     Parameter leftParam = left.toParameter(assembler, function, tempParams);
-    function.operations.add(new Jump(context, true, leftParam, null, leftLabel));
+    function.operations.add(new Jump(context + " (jump if left)", true, leftParam, null, leftLabel));
     Parameter rightParam = right.toParameter(assembler, function, tempParams);
-    function.operations.add(new SetOp(context, leftParam, target));
-    function.operations.add(Jump.toLabel(context, doneLabel));
+    function.operations.add(new SetOp(context + " (set to left)", leftParam, target));
+    function.operations.add(Jump.toLabel(context + " (jump to done)", doneLabel));
     function.operations.add(leftLabel);
-    function.operations.add(new SetOp(context, rightParam, target));
+    function.operations.add(new SetOp(context + " (set to right)", rightParam, target));
     function.operations.add(doneLabel);
 
     tempParams.forEach(TempVariable::release);
@@ -64,7 +64,7 @@ public class AndNode implements ExprNode {
   public Parameter toParameter(Assembler assembler, Assembler.IntCodeFunction function, Set<TempVariable> tempParams) {
     TempVariable target = assembler.tempSpace.getAny();
     tempParams.add(target);
-    assignTo(target, assembler, function, "# temp = " + toString());
+    assignTo(target, assembler, function, "# " + target + " = " + toString());
     return target;
   }
 

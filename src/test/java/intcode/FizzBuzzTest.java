@@ -12,6 +12,7 @@ public class FizzBuzzTest {
   public void testPart1() {
     AnnotatedIntCode annotatedIntCode = Assembler.compileAnnotated("fizzbuzz.asm");
     System.out.println(annotatedIntCode.toString());
+    System.out.println(annotatedIntCode.toProgram());
     IntCode intCode = IntCode.fromResource(annotatedIntCode.getIntCode());
     intCode.run();
 

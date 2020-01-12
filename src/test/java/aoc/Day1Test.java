@@ -28,8 +28,7 @@ public class Day1Test {
     assertEquals(3404722, vm.drainStdout().get(0).intValueExact());
 
     System.out.println(annotatedIntCode);
-    String program = annotatedIntCode.getIntCode().stream().map(Object::toString).collect(Collectors.joining(","));
-    System.out.println(program);
+    System.out.println(annotatedIntCode.toProgram());
   }
 
   @Test
@@ -47,7 +46,6 @@ public class Day1Test {
     assertEquals(5104215, vm.drainStdout().get(0).intValueExact());
 
     System.out.println(annotatedIntCode);
-    String program = annotatedIntCode.getIntCode().stream().map(Object::toString).collect(Collectors.joining(","));
-    System.out.println(program);
+    System.out.println(annotatedIntCode.toProgram());
   }
 }

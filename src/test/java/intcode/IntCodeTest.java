@@ -1,6 +1,7 @@
 package intcode;
 
 import org.junit.Test;
+import util.Util;
 
 import java.util.stream.Collectors;
 
@@ -12,7 +13,7 @@ public class IntCodeTest {
     String input = "109,1,204,-1,1001,100,1,100,1008,100,16,101,1006,101,0,99";
     IntCode intCode = IntCode.fromString(input);
     intCode.run();
-    String output = intCode.drainStdout().stream().map(Object::toString).collect(Collectors.joining(","));
+    String output = Util.toString(intCode.drainStdout());
     assertEquals(input, output);
   }
 

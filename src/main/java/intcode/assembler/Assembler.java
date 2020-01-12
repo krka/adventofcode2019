@@ -7,6 +7,7 @@ import util.Util;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -18,6 +19,7 @@ public class Assembler {
   private final Set<String> resources = new HashSet<>();
   private final Map<String, Variable> variables = new HashMap<>();
   private final List<Variable> variableOrdering = new ArrayList<>();
+  private final List<Variable> strings = new ArrayList<>();
 
   public final TempSpace tempSpace = new TempSpace("temp_");
   public final ParamSpace paramSpace = new ParamSpace("param_");
@@ -116,6 +118,14 @@ public class Assembler {
       pc = func.finalize(pc);
     }
 
+    for (Variable variable : strings) {
+      variable.setAddress(pc);
+      pc += variable.getLen();
+    }
+
+    // Put zeros last to reduce output size
+    variableOrdering.sort(Comparator.comparingInt(Variable::zeroLast));
+
     for (Variable variable : variableOrdering) {
       variable.setAddress(pc);
       pc += variable.getLen();
@@ -138,6 +148,15 @@ public class Assembler {
       func.writeTo(res);
     }
 
+    for (Variable variable : strings) {
+      int len = variable.getLen();
+      for (int i = 0; i < len; i++) {
+        String description = i == 0 ? "String data: " + variable.context : "";
+        BigInteger value = variable.values[i];
+        res.addOperation(AnnotatedOperation.variable(description, value));
+      }
+    }
+
     for (Variable variable : variableOrdering) {
       int len = variable.getLen();
       if (variable.reference != null) {
@@ -151,9 +170,9 @@ public class Assembler {
         }
       } else {
         for (int i = 0; i < len; i++) {
-          String description = i == 0 ? variable.context : "";
+          String description = i == 0 ? "Variable: " + variable.context : "";
           BigInteger value = variable.values != null ? variable.values[i] : BigInteger.ZERO;
-          res.addOperation(AnnotatedOperation.variable("Variable: " + description, value));
+          res.addOperation(AnnotatedOperation.variable(description, value));
         }
       }
     }
@@ -177,14 +196,24 @@ public class Assembler {
     return res;
   }
 
+  public Variable addString(Variable variable) {
+    addGlobalVar(variable);
+    strings.add(variable);
+    return variable;
+  }
+
   public Variable addGlobalVariable(Variable variable) {
+    addGlobalVar(variable);
+    variableOrdering.add(variable);
+    return variable;
+  }
+
+  private void addGlobalVar(Variable variable) {
     String key = namespace + ":" + variable.getName();
     Variable prev = variables.put(key, variable);
     if (prev != null) {
       throw new RuntimeException("Variable " + key + " already defined");
     }
-    variableOrdering.add(variable);
-    return variable;
   }
 
   public void setFunction(IntCodeFunction function) {
@@ -417,7 +446,7 @@ public class Assembler {
 
     public void declareString(String name, String value, String context) {
       Variable data = Variable.string(name + "__data__", value, context);
-      addGlobalVariable(data);
+      addString(data);
       if (this == main && !hasBlocks()) {
         addGlobalVariable(Variable.pointer(name, data::getAddress, ""));
       } else {

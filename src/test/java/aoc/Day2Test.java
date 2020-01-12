@@ -36,7 +36,7 @@ public class Day2Test {
     assertEquals(IntCode.State.HALTED, vm.getState());
     assertEquals(5110675, vm.drainStdout().get(0).intValueExact());
 
-    String program = annotatedIntCode.getIntCode().stream().map(Object::toString).collect(Collectors.joining(","));
+    String program = annotatedIntCode.toProgram();
     System.out.println(program);
   }
 
@@ -62,7 +62,8 @@ public class Day2Test {
     assertEquals(IntCode.State.HALTED, vm.getState());
     assertEquals(4847, vm.drainStdout().get(0).intValueExact());
 
-    String program = annotatedIntCode.getIntCode().stream().map(Object::toString).collect(Collectors.joining(","));
+    String program = annotatedIntCode.toProgram();
     System.out.println(program);
   }
+
 }

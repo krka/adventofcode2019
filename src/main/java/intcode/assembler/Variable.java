@@ -72,4 +72,19 @@ public class Variable implements Parameter {
   public String toString() {
     return name;
   }
+
+  public int zeroLast() {
+    if (reference != null) {
+      return 0;
+    }
+    if (values == null) {
+      return 1;
+    }
+    for (BigInteger value : values) {
+      if (!value.equals(BigInteger.ZERO)) {
+        return 0;
+      }
+    }
+    return 1;
+  }
 }

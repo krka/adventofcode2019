@@ -53,4 +53,8 @@ public class Util {
       list.remove(list.size() - 1);
     }
   }
+
+  public static String toString(List<BigInteger> intCode) {
+    return intCode.stream().map(Object::toString).collect(Collectors.joining(","));
+  }
 }

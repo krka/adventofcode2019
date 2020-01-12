@@ -1,5 +1,7 @@
 package intcode.assembler;
 
+import util.Util;
+
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -57,4 +59,9 @@ public class AnnotatedIntCode {
     }
     return sb.toString();
   }
+
+  public String toProgram() {
+    return Util.toString(getIntCode());
+  }
+
 }

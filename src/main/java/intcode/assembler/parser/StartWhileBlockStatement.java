@@ -56,11 +56,8 @@ public class StartWhileBlockStatement implements Statement, Block {
         caller.operations.add(Jump.toLabel(context, startLabel));
       } else {
         caller.operations.add(testLabel);
-        HashSet<TempVariable> tempParams = new HashSet<>();
-        condition.toParameter(assembler, caller, tempParams);
         JumpIfStatement jumpIfStatement = JumpIfStatement.create(condition, startLabel, null);
         jumpIfStatement.apply(assembler, caller, context);
-        tempParams.forEach(TempVariable::release);
       }
     }
     caller.operations.add(endLabel);
