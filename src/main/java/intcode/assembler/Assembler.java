@@ -1,5 +1,6 @@
 package intcode.assembler;
 
+import intcode.assembler.parser.Block;
 import intcode.assembler.parser.ExpressionParser;
 import util.Util;
 
@@ -11,6 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 
 public class Assembler {
   private final Set<String> resources = new HashSet<>();
@@ -196,6 +198,7 @@ public class Assembler {
 
     public final List<Op> operations = new ArrayList<>();
     final List<StaticAllocation> allocations = new ArrayList<>();
+    final Stack<Block> blocks = new Stack<>();
 
     private final Map<String, Label> labels = new HashMap<>();
     private final boolean isStack;
@@ -232,15 +235,15 @@ public class Assembler {
       injectStackAllocations = operations.size();
     }
 
-    public void jump(boolean isTrue, String cmpRef, String destination, String description) {
+    public void jump(boolean isTrue, String cmpRef, Label destination, String description) {
       jump(isTrue, resolveParameter(cmpRef), destination, description);
     }
 
-    public void jump(boolean isTrue, Parameter parameter, String destination, String context) {
-      operations.add(new Jump(context, isTrue, parameter, null, resolveLabel(destination)));
+    public void jump(boolean isTrue, Parameter parameter, Label destination, String context) {
+      operations.add(new Jump(context, isTrue, parameter, null, destination));
     }
 
-    private Label resolveLabel(String label) {
+    public Label resolveLabel(String label) {
       return labels.computeIfAbsent(namespace + ":" + label, ignore -> new Label(label));
     }
 
@@ -334,6 +337,9 @@ public class Assembler {
     }
 
     public void endFunc() {
+      if (!blocks.isEmpty()) {
+        throw new RuntimeException("Can't end function before all blocks are closed");
+      }
       if (operations.size() != lastReturn) {
         if (this == main) {
           addHalt("implicit halt");
@@ -437,6 +443,14 @@ public class Assembler {
 
       caller.operations.add(new SetOp("# save return address", returnAddress, new StackVariable("ret addr", 0)));
       caller.operations.add(jump);
+    }
+
+    public void pushBlock(Block block) {
+      blocks.push(block);
+    }
+
+    public Block popBlock() {
+      return blocks.pop();
     }
   }
 

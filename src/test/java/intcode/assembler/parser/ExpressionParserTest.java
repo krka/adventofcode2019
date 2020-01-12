@@ -104,7 +104,7 @@ public class ExpressionParserTest {
   @Test
   public void testJumpIf() {
     JumpIfStatement statement = (JumpIfStatement) ExpressionParser.parseStatement("if a == b jump foo");
-    assertEquals("foo", statement.getLabel());
+    assertEquals("foo", statement.getLabelString());
     assertEquals(ExpressionParser.parseExpr("a == b"), statement.getCondition().toExpressionList());
   }
 

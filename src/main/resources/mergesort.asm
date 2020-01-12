@@ -20,17 +20,16 @@ joinloop:
   int leftVal = array[left]
   int rightVal = array[right]
 
-  if leftVal > rightVal jump push_right
-push_left:
-  tempArray[temp] = leftVal
-  temp = temp + 1
-  left = left + 1
-  jump joinloop
+  if leftVal > rightVal then
+    tempArray[temp] = rightVal
+    temp = temp + 1
+    right = right + 1
+  else
+    tempArray[temp] = leftVal
+    temp = temp + 1
+    left = left + 1
+  endif
 
-push_right:
-  tempArray[temp] = rightVal
-  temp = temp + 1
-  right = right + 1
   jump joinloop
 
 push_all_left:

@@ -69,10 +69,13 @@ z = bar()
 output(z)
 
 func rec(n)
-  if n == 0 jump finish1
-  return n * rec(n - 1)
-finish1:
-  return 1
+  if n == 0 then
+    return 1
+  else
+    return n * rec(n - 1)
+  endif
+  # unreachable, but compiler can't detect that
+  throw()
 endfunc
 
 z = rec(5) + 0

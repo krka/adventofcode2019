@@ -18,26 +18,29 @@ func compute(a, b)
   int i = 0
 loop:
   int opcode = program[i]
-  if opcode == 1 jump perform_add
-  if opcode == 2 jump perform_mul
-  if opcode == 99 jump finish
-  throw()
-perform_add:
-  program[program[i + 3]] = program[program[i + 1]] + program[program[i + 2]]
+  if opcode == 1 then
+     program[program[i + 3]] = program[program[i + 1]] + program[program[i + 2]]
+  else
+    if opcode == 2 then
+      program[program[i + 3]] = program[program[i + 1]] * program[program[i + 2]]
+    else
+      if opcode == 99 then
+        return program[0]
+      else
+        throw()
+      end
+    endif
+  endif
   i = i + 4
   jump loop
-perform_mul:
-  program[program[i + 3]] = program[program[i + 1]] * program[program[i + 2]]
-  i = i + 4
-  jump loop
-finish:
-  return program[0]
 endfunc
 
 func find()
   int i, j = 0, 0
 loop:
-  if compute(i, j) == 19690720 jump finish
+  if compute(i, j) == 19690720 then
+    return 100*i + j
+  endif
   j = j + 1
   if j < 100 jump loop
   j = 0
@@ -45,7 +48,6 @@ loop:
   if i < 100 jump loop
   throw()
 finish:
-  return 100*i + j
 endfunc
 
 int ans = find()

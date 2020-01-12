@@ -2,11 +2,11 @@
 
 func rec(n, acc)
   int n2 = div(n, 3) - 2
-  if n2 <= 0 jump return_acc
+  if n2 <= 0 then
+    return acc
+  endif
   int res = rec(n2, acc + n2)
   return res
-return_acc:
-  return acc
 endfunc
 
 int N = input()

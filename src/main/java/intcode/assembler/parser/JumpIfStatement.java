@@ -1,34 +1,37 @@
 package intcode.assembler.parser;
 
 import intcode.assembler.Assembler;
+import intcode.assembler.Label;
 import intcode.assembler.Parameter;
 import intcode.assembler.TempVariable;
 
 import java.util.HashSet;
 
 public class JumpIfStatement implements Statement {
+  private static String labelString;
   private final ExprNode condition;
   private final boolean isTrue;
-  private final String label;
+  private final Label label;
 
-  private JumpIfStatement(boolean isTrue, ExprNode condition, String label) {
+  private JumpIfStatement(boolean isTrue, ExprNode condition, Label label, String labelString) {
     this.isTrue = isTrue;
     this.condition = condition;
     this.label = label;
+    this.labelString = labelString;
   }
 
-  public static JumpIfStatement create(ExprNode condition, String label) {
+  public static JumpIfStatement create(ExprNode condition, Label label, String labelString) {
     if (condition instanceof NotNode) {
-      return new JumpIfStatement(false, ((NotNode) condition).getChild(), label);
+      return new JumpIfStatement(false, ((NotNode) condition).getChild(), label, labelString);
     }
-    return new JumpIfStatement(true, condition, label);
+    return new JumpIfStatement(true, condition, label, labelString);
   }
 
   @Override
   public void apply(Assembler assembler, Assembler.IntCodeFunction caller, String context) {
     HashSet<TempVariable> tempParams = new HashSet<>();
     Parameter parameter = condition.toParameter(assembler, caller, tempParams);
-    caller.jump(isTrue, parameter, label, context);
+    caller.jump(isTrue, parameter, getLabel(caller), context);
     tempParams.forEach(TempVariable::release);
   }
 
@@ -45,7 +48,14 @@ public class JumpIfStatement implements Statement {
     return condition;
   }
 
-  public String getLabel() {
-    return label;
+  Label getLabel(Assembler.IntCodeFunction function) {
+    if (label != null) {
+      return label;
+    }
+    return function.resolveLabel(labelString);
+  }
+
+  public String getLabelString() {
+    return labelString;
   }
 }

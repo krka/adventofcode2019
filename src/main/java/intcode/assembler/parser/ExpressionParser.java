@@ -2,6 +2,7 @@ package intcode.assembler.parser;
 
 import org.petitparser.context.Result;
 import org.petitparser.parser.Parser;
+import org.petitparser.parser.combinators.SequenceParser;
 import org.petitparser.parser.combinators.SettableParser;
 import org.petitparser.parser.primitive.CharacterParser;
 import org.petitparser.parser.primitive.StringParser;
@@ -88,7 +89,7 @@ public class ExpressionParser {
             .seq(expression)
             .seq(StringParser.of("jump").flatten().trim())
             .seq(IDENTIFIER)
-            .map((List<Object> o) -> JumpIfStatement.create((ExprNode) o.get(1), (String) o.get(3)));
+            .map((List<Object> o) -> JumpIfStatement.create((ExprNode) o.get(1), null, (String) o.get(3)));
 
     Parser returnStatement = StringParser.of("return ").trim()
             .seq(expressionList)
@@ -112,7 +113,7 @@ public class ExpressionParser {
             .map((List<Object> o) -> new LabelStatement((String) o.get(0)));
 
     Parser jumpAlways = StringParser.of("jump").flatten().trim().seq(IDENTIFIER)
-            .map((List<Object> o) -> JumpIfStatement.create(IntConstant.ONE, (String) o.get(1)));
+            .map((List<Object> o) -> JumpIfStatement.create(IntConstant.ONE, null, (String) o.get(1)));
 
     Parser declareString = StringParser.of("string").flatten().trim()
             .seq(IDENTIFIER)
@@ -139,6 +140,17 @@ public class ExpressionParser {
     Parser endFunc = StringParser.of("endfunc").trim()
             .map(o -> new EndFuncStatement());
 
+    Parser endIf = StringParser.of("endif").trim()
+            .map(o -> new EndIfStatement());
+
+    Parser elseBlock = StringParser.of("else").trim()
+            .map(o -> new ElseStatement());
+
+    Parser startIfBlock = StringParser.of("if").trim()
+            .seq(expression)
+            .seq(StringParser.of("then").trim())
+            .map(((List<Object> o) -> new StartIfBlockStatement((ExprNode) o.get(1))));
+
 
     STATEMENT = functionCall.or(
             includeResource, comment,
@@ -146,7 +158,9 @@ public class ExpressionParser {
             setStatement, jumpIfStatement,
             declareInt, declareString, declareArray,
             functionDefinition, endFunc,
-            label, jumpAlways);
+            label, jumpAlways,
+            startIfBlock, elseBlock, endIf
+            );
     EXPRESSION = expressionList;
   }
 

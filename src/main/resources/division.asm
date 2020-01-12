@@ -15,17 +15,22 @@ if i < 64 jump setup_powtwo
 
 func div(N, D)
   q = 0
-  if ! D jump nan
+  if ! D then
+    throw()
+  endif
+
   neg_n = 1
   neg_d = 1
-  if N >= 0 jump skip_neg_n
-  neg_n = -1
-  N = N * -1
-skip_neg_n:
-  if D >= 0 jump skip_neg_d
-  neg_d = -1
-  D = D * -1
-skip_neg_d:
+  if N < 0 then
+    neg_n = -1
+    N = -N
+  endif
+
+  if D < 0 then
+    neg_d = -1
+    D = -D
+  endif
+
   i = 0
   kd = D
   k = 1
