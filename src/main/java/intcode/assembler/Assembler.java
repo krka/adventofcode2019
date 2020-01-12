@@ -112,16 +112,6 @@ public class Assembler {
 
     pc = main.finalize(pc);
 
-    for (Variable variable : tempSpace.getAll()) {
-      variable.setAddress(pc);
-      pc += variable.getLen();
-    }
-
-    for (Variable variable : paramSpace.getAll()) {
-      variable.setAddress(pc);
-      pc += variable.getLen();
-    }
-
     for (Function func : functions.values()) {
       pc = func.finalize(pc);
     }
@@ -131,24 +121,18 @@ public class Assembler {
       pc += variable.getLen();
     }
 
-    setRelBase.setParameter(Constant.of(pc));
-    main.writeTo(res);
-
     for (Variable variable : tempSpace.getAll()) {
-      int len = variable.getLen();
-      for (int i = 0; i < len; i++) {
-        String description = variable.context;
-        res.addOperation(AnnotatedOperation.variable(description, variable.values[i]));
-      }
+      variable.setAddress(pc);
+      pc += variable.getLen();
     }
 
     for (Variable variable : paramSpace.getAll()) {
-      int len = variable.getLen();
-      for (int i = 0; i < len; i++) {
-        String description = variable.context;
-        res.addOperation(AnnotatedOperation.variable(description, variable.values[i]));
-      }
+      variable.setAddress(pc);
+      pc += variable.getLen();
     }
+
+    setRelBase.setParameter(Constant.of(pc));
+    main.writeTo(res);
 
     for (Function func : functions.values()) {
       func.writeTo(res);
@@ -169,8 +153,24 @@ public class Assembler {
         for (int i = 0; i < len; i++) {
           String description = i == 0 ? variable.context : "";
           BigInteger value = variable.values != null ? variable.values[i] : BigInteger.ZERO;
-          res.addOperation(AnnotatedOperation.variable(description, value));
+          res.addOperation(AnnotatedOperation.variable("Variable: " + description, value));
         }
+      }
+    }
+
+    for (Variable variable : tempSpace.getAll()) {
+      int len = variable.getLen();
+      for (int i = 0; i < len; i++) {
+        String description = variable.context;
+        res.addOperation(AnnotatedOperation.variable("Variable: " + description, variable.values[i]));
+      }
+    }
+
+    for (Variable variable : paramSpace.getAll()) {
+      int len = variable.getLen();
+      for (int i = 0; i < len; i++) {
+        String description = variable.context;
+        res.addOperation(AnnotatedOperation.variable("Variable: " + description, variable.values[i]));
       }
     }
 
