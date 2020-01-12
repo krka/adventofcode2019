@@ -17,19 +17,19 @@ func div(N, D)
   q = 0
   if ! D then
     throw()
-  endif
+  end
 
   neg_n = 1
   neg_d = 1
   if N < 0 then
     neg_n = -1
     N = -N
-  endif
+  end
 
   if D < 0 then
     neg_d = -1
     D = -D
-  endif
+  end
 
   i = 0
   kd = D
@@ -79,4 +79,4 @@ next_iter:
   return q, N
 nan:
   throw()
-endfunc
+end

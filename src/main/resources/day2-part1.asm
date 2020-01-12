@@ -2,11 +2,12 @@
 
 int N = input()
 array[N] source
+
 int i = 0
-loop:
+while i < N
   source[i] = input()
   i = i + 1
-if i < N jump loop
+end
 
 func compute(a, b)
   array[N] program
@@ -16,22 +17,21 @@ func compute(a, b)
   program[2] = b
 
   int i = 0
-loop:
-  int opcode = program[i]
-  if opcode == 1 jump perform_add
-  if opcode == 2 jump perform_mul
-  if opcode == 99 jump finish
+  while 1
+    int opcode = program[i]
+    if opcode == 1 then
+      program[program[i + 3]] = program[program[i + 1]] + program[program[i + 2]]
+    elseif opcode == 2 then
+      program[program[i + 3]] = program[program[i + 1]] * program[program[i + 2]]
+    elseif opcode == 99 then
+      return program[0]
+    else
+      throw()
+    end
+    i = i + 4
+  end
+  # unreachable
   throw()
-perform_add:
-  program[program[i + 3]] = program[program[i + 1]] + program[program[i + 2]]
-  i = i + 4
-  jump loop
-perform_mul:
-  program[program[i + 3]] = program[program[i + 1]] * program[program[i + 2]]
-  i = i + 4
-  jump loop
-finish:
-  return program[0]
-endfunc
+end
 
 output(compute(12, 2))

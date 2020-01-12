@@ -4,9 +4,9 @@ int N = input()
 int i = 0
 int sum = 0
 
-loop:
+while i < N
   int n = input()
   sum = sum + div(n, 3) - 2
   i = i + 1
-if i < N jump loop
+end
 output(sum)

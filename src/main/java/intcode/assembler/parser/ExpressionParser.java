@@ -2,7 +2,6 @@ package intcode.assembler.parser;
 
 import org.petitparser.context.Result;
 import org.petitparser.parser.Parser;
-import org.petitparser.parser.combinators.SequenceParser;
 import org.petitparser.parser.combinators.SettableParser;
 import org.petitparser.parser.primitive.CharacterParser;
 import org.petitparser.parser.primitive.StringParser;
@@ -80,39 +79,49 @@ public class ExpressionParser {
     expressionList.set(expression.seq(commaAndExpression).map(ExpressionList::parse));
 
     Parser setStatement = expressionList.trim().seq(CharacterParser.of('=').trim()).seq(expressionList.trim())
+            .end()
       .map((List<Object> o) -> new SetStatement((ExpressionList) o.get(0), (ExpressionList) o.get(2)));
 
     Parser functionCall = functionCallParser
+            .end()
             .map((FunctionCallNode func) -> new SetStatement(ExpressionList.empty(), func.toExpressionList()));
 
     Parser jumpIfStatement = StringParser.of("if").flatten().trim()
             .seq(expression)
             .seq(StringParser.of("jump").flatten().trim())
             .seq(IDENTIFIER)
+            .end()
             .map((List<Object> o) -> JumpIfStatement.create((ExprNode) o.get(1), null, (String) o.get(3)));
 
     Parser returnStatement = StringParser.of("return ").trim()
             .seq(expressionList)
+            .end()
             .map((List<Object> o) -> new ReturnStatement((ExpressionList) o.get(1)));
 
     Parser returnNoneStatement = StringParser.of("return").trim().end()
+            .end()
             .map(o -> new ReturnStatement(ExpressionList.empty()));
 
     Parser declareInt = StringParser.of("int").trim().seq(setStatement)
+            .end()
             .map((List<Object> o) -> new DeclareIntStatement((SetStatement) o.get(1)));
 
     Parser filename = CharacterParser.letter().or(CharacterParser.of('.')).plus().flatten().trim();
     Parser includeResource = StringParser.of("#include").trim().seq(filename)
+            .end()
             .map((List<Object> o) -> new IncludeResourceStatement((String) o.get(1)));
 
 
     Parser comment = CharacterParser.of('#').trim().seq(CharacterParser.any().star())
+            .end()
             .map(o -> new CommentStatement());
 
     Parser label = IDENTIFIER.seq(CharacterParser.of(':'))
+            .end()
             .map((List<Object> o) -> new LabelStatement((String) o.get(0)));
 
     Parser jumpAlways = StringParser.of("jump").flatten().trim().seq(IDENTIFIER)
+            .end()
             .map((List<Object> o) -> JumpIfStatement.create(IntConstant.ONE, null, (String) o.get(1)));
 
     Parser declareString = StringParser.of("string").flatten().trim()
@@ -121,6 +130,7 @@ public class ExpressionParser {
             .seq(CharacterParser.of('"'))
             .seq(CharacterParser.noneOf("\"").star().flatten())
             .seq(CharacterParser.of('"'))
+            .end()
             .map((List<Object> o) -> new DeclareStringStatement((String) list(o.get(0)).get(1), (String) o.get(2)));
 
     Parser declareArray = StringParser.of("array").flatten().trim()
@@ -128,6 +138,7 @@ public class ExpressionParser {
             .seq(expression)
             .seq(CharacterParser.of(']').trim())
             .seq(IDENTIFIER)
+            .end()
             .map((List<Object> o) -> new DeclareArrayStatement((ExprNode) o.get(2), (String) o.get(4)));
 
     Parser functionDefinition = StringParser.of("func").trim()
@@ -135,31 +146,44 @@ public class ExpressionParser {
             .seq(CharacterParser.of('(').trim())
             .seq(expressionList.optional())
             .seq(CharacterParser.of(')').trim())
+            .end()
             .map((List<Object> o) -> new FunctionDefinitionStatement((String) o.get(1), (ExpressionList) o.get(3)));
 
-    Parser endFunc = StringParser.of("endfunc").trim()
-            .map(o -> new EndFuncStatement());
+    Parser endBlock = StringParser.of("end").trim().end()
+            .map(o -> new EndBlockStatement());
 
-    Parser endIf = StringParser.of("endif").trim()
-            .map(o -> new EndIfStatement());
+    Parser breakBlock = StringParser.of("break").trim().end()
+            .map(o -> new BreakBlockStatement());
 
-    Parser elseBlock = StringParser.of("else").trim()
+    Parser elseBlock = StringParser.of("else").trim().end()
             .map(o -> new ElseStatement());
 
     Parser startIfBlock = StringParser.of("if").trim()
             .seq(expression)
             .seq(StringParser.of("then").trim())
+            .end()
             .map(((List<Object> o) -> new StartIfBlockStatement((ExprNode) o.get(1))));
 
+    Parser elseIfBlock = StringParser.of("elseif").trim()
+            .seq(expression)
+            .seq(StringParser.of("then").trim())
+            .end()
+            .map(((List<Object> o) -> new ElseIfBlockStatement((ExprNode) o.get(1))));
+
+    Parser startWhileBlock = StringParser.of("while").trim()
+            .seq(expression)
+            .end()
+            .map(((List<Object> o) -> new StartWhileBlockStatement((ExprNode) o.get(1))));
 
     STATEMENT = functionCall.or(
             includeResource, comment,
             returnStatement, returnNoneStatement,
             setStatement, jumpIfStatement,
             declareInt, declareString, declareArray,
-            functionDefinition, endFunc,
+            functionDefinition, endBlock,
             label, jumpAlways,
-            startIfBlock, elseBlock, endIf
+            startIfBlock, elseBlock, elseIfBlock,
+            startWhileBlock, breakBlock
             );
     EXPRESSION = expressionList;
   }

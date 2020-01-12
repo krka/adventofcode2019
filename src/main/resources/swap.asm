@@ -2,7 +2,7 @@
 
 func swap(a, b)
   return b, a
-endfunc
+end
 
 int x = 0
 int y = 0

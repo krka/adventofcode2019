@@ -2,11 +2,12 @@
 
 int N = input()
 array[N] source
+
 int i = 0
-loop:
+while i < N
   source[i] = input()
   i = i + 1
-if i < N jump loop
+end
 
 func compute(a, b)
   array[N] program
@@ -16,40 +17,37 @@ func compute(a, b)
   program[2] = b
 
   int i = 0
-loop:
-  int opcode = program[i]
-  if opcode == 1 then
-     program[program[i + 3]] = program[program[i + 1]] + program[program[i + 2]]
-  else
-    if opcode == 2 then
+  while 1
+    int opcode = program[i]
+    if opcode == 1 then
+      program[program[i + 3]] = program[program[i + 1]] + program[program[i + 2]]
+    elseif opcode == 2 then
       program[program[i + 3]] = program[program[i + 1]] * program[program[i + 2]]
+    elseif opcode == 99 then
+      return program[0]
     else
-      if opcode == 99 then
-        return program[0]
-      else
-        throw()
-      end
-    endif
-  endif
-  i = i + 4
-  jump loop
-endfunc
+      throw()
+    end
+    i = i + 4
+  end
+  # unreachable
+  throw()
+end
 
 func find()
   int i, j = 0, 0
-loop:
-  if compute(i, j) == 19690720 then
-    return 100*i + j
-  endif
-  j = j + 1
-  if j < 100 jump loop
-  j = 0
-  i = i + 1
-  if i < 100 jump loop
+  while i < 100
+    j = 0
+    while j < 100
+      if compute(i, j) == 19690720 then
+        return 100*i + j
+      end
+      j = j + 1
+    end
+    i = i + 1
+  end
   throw()
-finish:
-endfunc
+end
 
-int ans = find()
-output(ans)
+output(find())
 

@@ -5,10 +5,10 @@ int D = 0
 int Q = 0
 int R = 0
 
-loop:
-N = input()
-D = input()
-Q, R = div(N, D)
-output(Q)
-output(R)
-jump loop
+while 1
+  N = input()
+  D = input()
+  Q, R = div(N, D)
+  output(Q)
+  output(R)
+end

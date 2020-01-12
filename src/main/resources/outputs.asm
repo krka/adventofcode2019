@@ -26,5 +26,5 @@ output:
 finish:
   return
 
-endfunc
+end
 

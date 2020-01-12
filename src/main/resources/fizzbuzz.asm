@@ -1,45 +1,32 @@
 #include division.asm
 #include outputs.asm
 
-int i = 0
-int N = 0
-int Q = 0
-int R = 0
 string fizz = "Fizz"
 string buzz = "Buzz"
 string fizzbuzz = "FizzBuzz"
 
-N = input()
+int N = input()
 
-loop:
-i = i + 1
+func remainder(n, d)
+  int q, r = div(n, d)
+  return r
+end
 
-Q, R = div(i, 15)
-if ! R jump print15
-Q, R = div(i, 5)
-if ! R jump print5
-Q, R = div(i, 3)
-if ! R jump print3
-
-outputNumber(i)
-output(10)
-jump endloop
-
-print15:
-outputString(fizzbuzz)
-output(10)
-jump endloop
-
-print5:
-outputString(buzz)
-output(10)
-jump endloop
-
-print3:
-outputString(fizz)
-output(10)
-
-endloop:
-if i != N jump loop
+int i = 0
+while i < N
+  i = i + 1
+  int r3 = 0 == remainder(i, 3)
+  int r5 = 0 == remainder(i, 5)
+  if r3 && r5 then
+    outputString(fizzbuzz)
+  elseif r3 then
+    outputString(fizz)
+  elseif r5 then
+    outputString(buzz)
+  else
+    outputNumber(i)
+  end
+  output(10)
+end
 
 

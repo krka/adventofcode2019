@@ -6,7 +6,7 @@ int r = 0
 func divInner(N, D, k)
   if N < D then
    return 0, N
-  endif
+  end
 
   D2 = 2 * D
   k2 = 2 * k
@@ -15,24 +15,24 @@ func divInner(N, D, k)
   if D <= r then
     q = q + k
     r = r - D
-  endif
+  end
   return q, r
-endfunc
+end
 
 func div(N, D)
   if ! D then
     throw()
-  endif
+  end
   int neg_n = 1
   int neg_d = 1
   if N < 0 then
     neg_n = -1
     N = -N
-  endif
+  end
   if D < 0 then
     neg_d = -1
     D = -D
-  endif
+  end
   D, N = divInner(N, D, 1)
   return D * neg_d * neg_n, N * neg_n
-endfunc
+end

@@ -49,11 +49,11 @@ assert(1 == !zero)
 
 func foo(a, b)
   return a + b
-endfunc
+end
 
 func bar()
   return 1234
-endfunc
+end
 
 int x = 0
 int y = 0
@@ -73,10 +73,10 @@ func rec(n)
     return 1
   else
     return n * rec(n - 1)
-  endif
+  end
   # unreachable, but compiler can't detect that
   throw()
-endfunc
+end
 
 z = rec(5) + 0
 output(z)
@@ -85,7 +85,7 @@ z = 10 + rec(6) - 10
 output(z)
 
 func implicitReturn()
-endfunc
+end
 
 implicitReturn()
 

@@ -1,5 +1,7 @@
 package util;
 
+import intcode.assembler.Op;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,5 +46,11 @@ public class Util {
       throw new RuntimeException(e);
     }
     return list;
+  }
+
+  public static void deleteFromEnd(List<Op> list, int index) {
+    while (list.size() > index) {
+      list.remove(list.size() - 1);
+    }
   }
 }

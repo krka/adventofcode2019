@@ -452,6 +452,22 @@ public class Assembler {
     public Block popBlock() {
       return blocks.pop();
     }
+
+    public boolean hasBlocks() {
+      return !blocks.isEmpty();
+    }
+
+    public void breakOutOfBlock(Assembler assembler, IntCodeFunction caller, String context) {
+      int i = blocks.size() - 1;
+      while (i >= 0) {
+        Block block = blocks.get(i);
+        if (block.breakBlock(assembler, caller, context)) {
+          return;
+        }
+        i--;
+      }
+      throw new RuntimeException("Nothing to break out from");
+    }
   }
 
   public Function resolveFunction(String funcName) {
