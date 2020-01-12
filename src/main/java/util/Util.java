@@ -48,7 +48,7 @@ public class Util {
     return list;
   }
 
-  public static void deleteFromEnd(List<Op> list, int index) {
+  public static void deleteFromEnd(List<?> list, int index) {
     while (list.size() > index) {
       list.remove(list.size() - 1);
     }

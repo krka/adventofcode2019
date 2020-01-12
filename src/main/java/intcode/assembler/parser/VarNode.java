@@ -35,10 +35,6 @@ class VarNode implements ExprNode {
     return Objects.hash(name);
   }
 
-  private ExprNode optimize() {
-    return this;
-  }
-
   @Override
   public BigInteger value() {
     return null;

@@ -2,7 +2,7 @@ package intcode.assembler;
 
 import java.math.BigInteger;
 
-class StackVariable extends Variable {
+public class StackVariable extends Variable {
   private final String name;
   private final int index;
 

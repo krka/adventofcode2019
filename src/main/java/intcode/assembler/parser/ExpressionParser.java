@@ -96,7 +96,8 @@ public class ExpressionParser {
     Parser returnStatement = StringParser.of("return ").trim()
             .seq(expressionList)
             .end()
-            .map((List<Object> o) -> new ReturnStatement((ExpressionList) o.get(1)));
+            .pick(1)
+            .map(o -> new ReturnStatement((ExpressionList) o));
 
     Parser returnNoneStatement = StringParser.of("return").trim().end()
             .end()
@@ -162,18 +163,32 @@ public class ExpressionParser {
             .seq(expression)
             .seq(StringParser.of("then").trim())
             .end()
-            .map(((List<Object> o) -> new StartIfBlockStatement((ExprNode) o.get(1))));
+            .pick(1)
+            .map(o -> new StartIfBlockStatement((ExprNode) o));
 
     Parser elseIfBlock = StringParser.of("elseif").trim()
             .seq(expression)
             .seq(StringParser.of("then").trim())
             .end()
-            .map(((List<Object> o) -> new ElseIfBlockStatement((ExprNode) o.get(1))));
+            .pick(1)
+            .map((o -> new ElseIfBlockStatement((ExprNode) o)));
 
     Parser startWhileBlock = StringParser.of("while").trim()
             .seq(expression)
             .end()
-            .map(((List<Object> o) -> new StartWhileBlockStatement((ExprNode) o.get(1))));
+            .pick(1)
+            .map((o -> new StartWhileBlockStatement((ExprNode) o)));
+
+    Parser startForLoop = StringParser.of("for").trim()
+            .seq(varParser)
+            .seq(CharacterParser.of('=').trim())
+            .seq(expression)
+            .seq(StringParser.of("while"))
+            .seq(expression)
+            .seq(StringParser.of("step"))
+            .seq(expression)
+            .seq(StringParser.of("do"))
+            .map(((List<Object> o) -> new StartForLoopBlockStatement((VarNode) o.get(1), (ExprNode) o.get(3), (ExprNode) o.get(5), (ExprNode) o.get(7))));
 
     STATEMENT = functionCall.or(
             includeResource, comment,
@@ -183,7 +198,7 @@ public class ExpressionParser {
             functionDefinition, endBlock,
             label, jumpAlways,
             startIfBlock, elseBlock, elseIfBlock,
-            startWhileBlock, breakBlock
+            startWhileBlock, breakBlock, startForLoop
             );
     EXPRESSION = expressionList;
   }

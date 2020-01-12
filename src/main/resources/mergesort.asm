@@ -52,8 +52,7 @@ func mergeSortInner(low, high, array, tempArray)
   left = low
   temp = 0
   while left < high
-    leftVal = tempArray[temp]
-    array[left] = leftVal
+    array[left] = tempArray[temp]
     left = left + 1
     temp = temp + 1
   end

@@ -192,13 +192,14 @@ public class Assembler {
   }
 
   public class IntCodeFunction implements Function {
-    private final Map<String, StackVariable> stackVariables = new HashMap<>();
+    private final List<StackVariable> stackVariables = new Stack<>();
     private final StackVariable returnAddress;
     private final StackVariable parentStackSize;
 
     public final List<Op> operations = new ArrayList<>();
     final List<StaticAllocation> allocations = new ArrayList<>();
     final Stack<Block> blocks = new Stack<>();
+    final Stack<Integer> stackVarIndices = new Stack<>();
 
     private final Map<String, Label> labels = new HashMap<>();
     private final boolean isStack;
@@ -211,6 +212,7 @@ public class Assembler {
     private final int numParameters;
     public int numReturnValues = -1;
     private int lastReturn;
+    private int numStackVars = 0;
 
     public IntCodeFunction(boolean isStack, String name, String context, List<String> parameters) {
       this.isStack = isStack;
@@ -248,7 +250,7 @@ public class Assembler {
     }
 
     public Variable resolveVariable(String variableName) {
-      StackVariable stackVariable = stackVariables.get(variableName);
+      Variable stackVariable = resolveStackVariable(variableName);
       if (stackVariable != null) {
         return stackVariable;
       }
@@ -259,6 +261,15 @@ public class Assembler {
         throw new RuntimeException("No such variable: " + key);
       }
       return variable;
+    }
+
+    private Variable resolveStackVariable(String variableName) {
+      for (StackVariable stackVariable : stackVariables) {
+        if (stackVariable.getName().equals(variableName)) {
+          return stackVariable;
+        }
+      }
+      return null;
     }
 
     Parameter resolveParameter(String expression) {
@@ -274,20 +285,13 @@ public class Assembler {
     }
 
     public StackVariable addStackVariable(String variableName) {
-      if (stackVariables.containsKey(variableName)) {
+      if (resolveStackVariable(variableName) != null) {
         throw new RuntimeException("Stack variable already defined: " + variableName);
       }
       StackVariable variable = new StackVariable(variableName, stackVariables.size());
-      stackVariables.put(variableName, variable);
+      stackVariables.add(variable);
+      numStackVars = Math.max(numStackVars, stackVariables.size());
       return variable;
-    }
-
-    public void addInput(String token, String context) {
-      operations.add(new Input(resolveVariable(token), context));
-    }
-
-    public void addOutput(String token, String context) {
-      operations.add(new Output(resolveParameter(token), context));
     }
 
     public int finalize(int pc) {
@@ -349,7 +353,7 @@ public class Assembler {
       }
       List<Op> stackAllocationOperations = new ArrayList<>();
 
-      int stackSize = stackVariables.size();
+      int stackSize = numStackVars;
       TempVariable temp = tempSpace.getAny();
       for (StaticAllocation allocation : allocations) {
         stackAllocationOperations.add(new AddOp("", globalRelBase, Constant.of(stackSize), temp));
@@ -447,9 +451,16 @@ public class Assembler {
 
     public void pushBlock(Block block) {
       blocks.push(block);
+      stackVarIndices.push(stackVariables.size());
+    }
+
+    public Block peekBlock() {
+      return blocks.peek();
     }
 
     public Block popBlock() {
+      int stackSize = stackVarIndices.pop();
+      Util.deleteFromEnd(stackVariables, stackSize);
       return blocks.pop();
     }
 
