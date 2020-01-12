@@ -3,10 +3,8 @@
 int N = input()
 array[N] source
 
-int i = 0
-while i < N
+for i = 0, i < N do
   source[i] = input()
-  i = i + 1
 end
 
 func compute(a, b)
@@ -16,8 +14,7 @@ func compute(a, b)
   program[1] = a
   program[2] = b
 
-  int i = 0
-  while 1
+  for i = 0, 1, 4 do
     int opcode = program[i]
     if opcode == 1 then
       program[program[i + 3]] = program[program[i + 1]] + program[program[i + 2]]
@@ -28,23 +25,18 @@ func compute(a, b)
     else
       throw()
     end
-    i = i + 4
   end
   # unreachable
   throw()
 end
 
 func find()
-  int i, j = 0, 0
-  while i < 100
-    j = 0
-    while j < 100
+  for i = 0, i < 100 do
+    for j = 0, j < 100 do
       if compute(i, j) == 19690720 then
         return 100*i + j
       end
-      j = j + 1
     end
-    i = i + 1
   end
   throw()
 end

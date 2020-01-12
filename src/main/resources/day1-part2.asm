@@ -10,12 +10,10 @@ func rec(n, acc)
 end
 
 int N = input()
-int i = 0
 int sum = 0
 
-while i < N
+for i = 0, i < N do
   int n = input()
   sum = sum + rec(n, 0)
-  i = i + 1
 end
 output(sum)

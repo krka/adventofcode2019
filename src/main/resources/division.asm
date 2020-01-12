@@ -1,4 +1,3 @@
-int i = 0
 int k = 1
 int kd = 0
 int q = 0
@@ -7,10 +6,9 @@ int neg_d = 0
 int extra = 0
 array[64] powtwo
 
-while i < 64
+for i = 0, i < 64 do
   powtwo[i] = k
   k = k * 2
-  i = i + 1
 end
 
 func div(N, D)
@@ -31,11 +29,10 @@ func div(N, D)
     D = -D
   end
 
-  i = 0
+  int i = 0
   kd = D
   k = 1
-  while N >= kd
-    i = i + 1
+  for i = 0, N >= kd do
     k = k * 2
     kd = kd * 2
   end
@@ -43,13 +40,11 @@ func div(N, D)
   extra = i - 64
   if extra > 0 then
     array[extra] powtwo_extra
-    i = 0
     k = powtwo[63]
 
-    while i < extra
+    for i = 0, i < extra do
       k = k * 2
       powtwo_extra[i] = k
-      i = i + 1
     end
 
     while i > 0

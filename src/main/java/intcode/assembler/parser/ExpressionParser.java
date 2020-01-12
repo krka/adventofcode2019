@@ -183,12 +183,15 @@ public class ExpressionParser {
             .seq(varParser)
             .seq(CharacterParser.of('=').trim())
             .seq(expression)
-            .seq(StringParser.of("while"))
+            .seq(CharacterParser.of(',').trim())
             .seq(expression)
-            .seq(StringParser.of("step"))
-            .seq(expression)
+            .seq(CharacterParser.of(',').trim().seq(expression).pick(1).optional())
             .seq(StringParser.of("do"))
-            .map(((List<Object> o) -> new StartForLoopBlockStatement((VarNode) o.get(1), (ExprNode) o.get(3), (ExprNode) o.get(5), (ExprNode) o.get(7))));
+            .map(((List<Object> o) -> new StartForLoopBlockStatement(
+                    (VarNode) o.get(1),
+                    (ExprNode) o.get(3),
+                    (ExprNode) o.get(5),
+                    (ExprNode) o.get(6))));
 
     STATEMENT = functionCall.or(
             includeResource, comment,

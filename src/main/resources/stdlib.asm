@@ -17,15 +17,13 @@ func strlen(s)
 end
 
 func strcmp(s1, s2)
-  int i = 0
-  while 1
+  for i = 0, 1 do
     int c1 = s1[i]
     int c2 = s2[i]
     int diff = c1 - c2
     if diff || c1 == 0 || c2 == 0 then
       return diff
     end
-    i = i + 1
   end
   # unreachable
   throw()

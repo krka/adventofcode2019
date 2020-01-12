@@ -35,13 +35,13 @@ public class StartWhileBlockStatement implements Statement, Block {
 
   @Override
   public void apply(Assembler assembler, Assembler.IntCodeFunction caller, String context) {
+    caller.pushBlock(this);
     beforeLoop(assembler, caller, context);
     startIndex = caller.operations.size();
     if (!isConstant) {
       caller.operations.add(Jump.toLabel(context, testLabel));
     }
     caller.operations.add(startLabel);
-    caller.pushBlock(this);
   }
 
   protected void beforeLoop(Assembler assembler, Assembler.IntCodeFunction caller, String context) {

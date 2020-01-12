@@ -30,7 +30,7 @@ public class DeclareIntStatement implements Statement {
 
       String name = ((VarNode) target).getName();
 
-      if (caller == assembler.main) {
+      if (caller == assembler.main && !caller.hasBlocks()) {
         BigInteger constantValue = null;
         if (i < sources.size()) {
           constantValue = sources.get(i).value();

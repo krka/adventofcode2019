@@ -12,9 +12,7 @@ func remainder(n, d)
   return r
 end
 
-int i = 0
-while i < N
-  i = i + 1
+for i = 0, i < N do
   int r3 = 0 == remainder(i, 3)
   int r5 = 0 == remainder(i, 5)
   if r3 && r5 then

@@ -3,17 +3,13 @@
 int N = input()
 array[N] array
 
-int i = 0
-while i < N
+for i = 0, i < N do
   array[i] = input()
-  i = i + 1
 end
 
 mergeSort(N, array)
 
-i = 0
-while i < N
+for i = 0, i < N do
   output(array[i])
-  i = i + 1
 end
 

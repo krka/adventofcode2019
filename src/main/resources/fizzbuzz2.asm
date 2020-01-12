@@ -7,7 +7,6 @@ string fizzbuzz = "FizzBuzz"
 
 int offset = input()
 int N = input()
-int i = 0
 int n = 0
 
 func remainder(n, d)
@@ -15,8 +14,7 @@ func remainder(n, d)
   return r
 end
 
-while i < N
-  i = i + 1
+for i = 0, i < N do
   n = i + offset
   int r3 = 0 == remainder(n, 3)
   int r5 = 0 == remainder(n, 5)
@@ -27,7 +25,7 @@ while i < N
   elseif r5 then
     outputString(buzz)
   else
-    outputNumber(i)
+    outputNumber(n)
   end
   output(10)
 end

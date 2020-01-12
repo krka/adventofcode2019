@@ -249,7 +249,7 @@ public class Assembler {
       return labels.computeIfAbsent(namespace + ":" + label, ignore -> new Label(label));
     }
 
-    public Variable resolveVariable(String variableName) {
+    public Variable resolveVariableOpt(String variableName) {
       Variable stackVariable = resolveStackVariable(variableName);
       if (stackVariable != null) {
         return stackVariable;
@@ -257,13 +257,19 @@ public class Assembler {
 
       String key = namespace + ":" + variableName;
       Variable variable = variables.get(key);
+      return variable;
+    }
+
+    public Variable resolveVariable(String variableName) {
+      Variable variable = resolveVariableOpt(variableName);
       if (variable == null) {
+        String key = namespace + ":" + variableName;
         throw new RuntimeException("No such variable: " + key);
       }
       return variable;
     }
 
-    private Variable resolveStackVariable(String variableName) {
+      public Variable resolveStackVariable(String variableName) {
       for (StackVariable stackVariable : stackVariables) {
         if (stackVariable.getName().equals(variableName)) {
           return stackVariable;
@@ -393,7 +399,7 @@ public class Assembler {
 
     public void declareArray(String name, Parameter len, String context) {
       Variable pointerVar;
-      if (isStack) {
+      if (isStack && !hasBlocks()) {
         pointerVar = addStackVariable(name);
       } else {
         pointerVar = addGlobalVariable(Variable.pointer(name, null, context));
@@ -412,7 +418,7 @@ public class Assembler {
     public void declareString(String name, String value, String context) {
       Variable data = Variable.string(name + "__data__", value, context);
       addGlobalVariable(data);
-      if (this == main) {
+      if (this == main && !hasBlocks()) {
         addGlobalVariable(Variable.pointer(name, data::getAddress, ""));
       } else {
         StackVariable stackVariable = addStackVariable(name);
