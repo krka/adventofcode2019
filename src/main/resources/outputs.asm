@@ -9,22 +9,16 @@ int remainder = 0
 func outputNumber(n)
   i = 0
   tempn = n
+  while tempn
+    tempn, remainder = div(tempn, 10)
+    remainder = remainder + 48
+    tempnumber[i] = remainder
+    i = i + 1
+  end
 
-populate:
-  tempn, remainder = div(tempn, 10)
-  remainder = remainder + 48
-  tempnumber[i] = remainder
-  i = i + 1
-  if tempn jump populate
-
-output:
-  i = i - 1
-  output(tempnumber[i])
-  if ! i jump finish
-  jump output
-
-finish:
-  return
-
+  while i
+    i = i - 1
+    output(tempnumber[i])
+  end
 end
 

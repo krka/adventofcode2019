@@ -80,26 +80,6 @@ public class AssemblerTest {
   }
 
   @Test
-  public void testSort() {
-    IntCode intCode = IntCode.fromResource(Assembler.compile("test_sort.asm"));
-    Random random = new Random(1234L);
-
-    ArrayList<BigInteger> input = new ArrayList<>();
-    for (int i = 0; i < 100; i++) {
-      BigInteger value = BigInteger.valueOf(random.nextLong());
-      input.add(value);
-      intCode.writeStdin(value);
-    }
-
-    input.sort(BigInteger::compareTo);
-    intCode.run();
-    assertEquals(IntCode.State.HALTED, intCode.getState());
-    List<BigInteger> output = intCode.drainStdout();
-    assertEquals(input, output);
-
-  }
-
-  @Test
   public void testMergeSort() {
     AnnotatedIntCode annotatedIntCode = Assembler.compileAnnotated("test_mergesort.asm");
     System.out.println(annotatedIntCode.toString());

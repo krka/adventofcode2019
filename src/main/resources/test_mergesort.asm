@@ -1,22 +1,19 @@
 #include mergesort.asm
 
-int i = 0
-int N = 0
-
-N = input()
+int N = input()
 array[N] array
 
-read_input:
-array[i] = input()
-i = i + 1
-if i < N jump read_input
+int i = 0
+while i < N
+  array[i] = input()
+  i = i + 1
+end
 
 mergeSort(N, array)
 
 i = 0
-emit:
-output(array[i])
-i = i + 1
-if i < N jump emit
-
+while i < N
+  output(array[i])
+  i = i + 1
+end
 
