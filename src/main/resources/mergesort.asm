@@ -4,7 +4,9 @@ func mergeSortInner(low, high, array, tempArray)
   int temp = 0
 
   int len = high - low
-  if len <= 1 jump finish
+  if len <= 1 then
+    return
+  endif
 
   int midpoint = low + div(len, 2)
 
@@ -57,13 +59,9 @@ copy_back_loop:
   left = left + 1
   temp = temp + 1
   if left < high jump copy_back_loop
-
-finish:
-  return
 endfunc
 
 func mergeSort(N, array)
   array[N] tempArray
   mergeSortInner(0, N, array, tempArray)
-  return
 endfunc
