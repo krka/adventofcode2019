@@ -63,7 +63,7 @@ public class NegNode implements ExprNode {
     TempVariable target = assembler.tempSpace.getAny();
     tempParams.add(target);
     Parameter parameter = child.toParameter(assembler, function, tempParams);
-    function.operations.add(new MulOp("todo", parameter, Constant.MINUS_ONE, target));
+    function.operations.add(new MulOp("# " + target + " = " + toString(), parameter, Constant.MINUS_ONE, target));
     return target;
   }
 

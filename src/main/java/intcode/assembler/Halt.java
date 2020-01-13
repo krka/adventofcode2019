@@ -15,6 +15,11 @@ public class Halt extends Op {
 
   @Override
   public void writeTo(AnnotatedIntCode res) {
-    res.addOperation(new AnnotatedOperation(context, 99));
+    res.addOperation(new AnnotatedOperation(toString(), context, 99));
+  }
+
+  @Override
+  public String toString() {
+    return "HALT";
   }
 }

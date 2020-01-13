@@ -2,11 +2,11 @@ package intcode.assembler.parser;
 
 import intcode.assembler.AddOp;
 import intcode.assembler.Assembler;
-import intcode.assembler.Constant;
 import intcode.assembler.DeferredParameter;
 import intcode.assembler.Op;
 import intcode.assembler.Parameter;
 import intcode.assembler.ParameterMode;
+import intcode.assembler.Placeholder;
 import intcode.assembler.SetOp;
 import intcode.assembler.TempVariable;
 import intcode.assembler.Variable;
@@ -88,8 +88,8 @@ public class ArrayNode implements ExprNode {
     Parameter indexParam = index.toParameter(assembler, function, tempParams);
     Parameter valueParam = expr.toParameter(assembler, function, tempParams);
 
-    AddOp rewriteParam = new AddOp(context, arrayParam, indexParam, Constant.PLACEHOLDER_POSITION);
-    SetOp addOp = new SetOp("# write to array from value", valueParam, Constant.PLACEHOLDER_POSITION);
+    AddOp rewriteParam = new AddOp(context, arrayParam, indexParam, Placeholder.get());
+    SetOp addOp = new SetOp("# write to array from value", valueParam, Placeholder.get());
 
     rewriteParam.setTarget(DeferredParameter.ofInt(ParameterMode.POSITION, () -> addOp.getAddress() + 3));
     function.operations.add(rewriteParam);
@@ -98,8 +98,8 @@ public class ArrayNode implements ExprNode {
   }
 
   private void arrayLookup(List<Op> operations, Variable target, Parameter arrayParam, Parameter indexParam, String context) {
-    AddOp rewriteParam = new AddOp(context, arrayParam, indexParam, Constant.PLACEHOLDER_POSITION);
-    SetOp addOp = new SetOp("# write to variable", Constant.PLACEHOLDER_POSITION, target);
+    AddOp rewriteParam = new AddOp(context, arrayParam, indexParam, Placeholder.get());
+    SetOp addOp = new SetOp("# write to variable", Placeholder.get(), target);
 
     rewriteParam.setTarget(DeferredParameter.ofInt(ParameterMode.POSITION, () -> addOp.getAddress() + 1));
     operations.add(rewriteParam);

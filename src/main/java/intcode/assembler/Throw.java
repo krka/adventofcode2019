@@ -14,6 +14,11 @@ public class Throw extends Op {
 
   @Override
   protected void writeTo(AnnotatedIntCode res) {
-    res.addOperation(new AnnotatedOperation(context, 98));
+    res.addOperation(new AnnotatedOperation(toString(), context, 98));
+  }
+
+  @Override
+  public String toString() {
+    return "THROW";
   }
 }

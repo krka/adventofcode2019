@@ -38,12 +38,8 @@ public class StartIfBlockStatement implements Statement, Block {
   public void apply(Assembler assembler, Assembler.IntCodeFunction caller, String context) {
     startIndex = caller.operations.size();
     if (!isConstant) {
-      HashSet<TempVariable> tempParams = new HashSet<>();
-      condition.toParameter(assembler, caller, tempParams);
-
       JumpIfStatement jumpIfStatement = JumpIfStatement.create(NotNode.create(condition), elseblock, null);
       jumpIfStatement.apply(assembler, caller, context);
-      tempParams.forEach(TempVariable::release);
     }
     caller.pushBlock(this);
   }

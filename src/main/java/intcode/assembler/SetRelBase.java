@@ -24,6 +24,11 @@ public class SetRelBase extends Op {
   @Override
   public void writeTo(AnnotatedIntCode res) {
     int op = 9 + 100 * parameter.mode().ordinal();
-    res.addOperation(new AnnotatedOperation(context, BigInteger.valueOf(op), parameter.value()));
+    res.addOperation(new AnnotatedOperation(toString(), context, BigInteger.valueOf(op), parameter.value()));
+  }
+
+  @Override
+  public String toString() {
+    return "ARB " + parameter;
   }
 }

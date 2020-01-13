@@ -5,10 +5,10 @@ import java.math.BigInteger;
 abstract class MathOp extends Op {
   static final int SIZE = 4;
   private final String context;
-  private final Parameter first;
+  protected final Parameter first;
   private final Parameter second;
   private final int opCode;
-  private Parameter target;
+  protected Parameter target;
 
 
   public MathOp(int opCode, String context, Parameter first, Parameter second, Parameter target) {
@@ -33,6 +33,13 @@ abstract class MathOp extends Op {
   @Override
   public void writeTo(AnnotatedIntCode res) {
     int opcode = opCode + 100 * first.mode().ordinal() + 1000 * second.mode().ordinal() + 10000 * target.mode().ordinal();
-    res.addOperation(new AnnotatedOperation(context, BigInteger.valueOf(opcode), first.value(), second.value(), target.value()));
+    res.addOperation(new AnnotatedOperation(toString(), context, BigInteger.valueOf(opcode), first.value(), second.value(), target.value()));
   }
+
+  @Override
+  public String toString() {
+    return opname() + " " + first + " " + second + " -> " + target;
+  }
+
+  protected abstract String opname();
 }

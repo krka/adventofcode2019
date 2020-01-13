@@ -32,4 +32,9 @@ public class Label extends Op {
     }
     return Constant.of(getAddress());
   }
+
+  @Override
+  public String toString() {
+    return label;
+  }
 }

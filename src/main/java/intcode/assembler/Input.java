@@ -20,7 +20,11 @@ public class Input extends Op {
   @Override
   public void writeTo(AnnotatedIntCode res) {
     int opcode = 3 + 100 * variable.mode().ordinal();
-    res.addOperation(new AnnotatedOperation(context, BigInteger.valueOf(opcode), variable.value()));
+    res.addOperation(new AnnotatedOperation(toString(), context, BigInteger.valueOf(opcode), variable.value()));
   }
 
+  @Override
+  public String toString() {
+    return "INPUT -> " + variable;
+  }
 }

@@ -19,7 +19,11 @@ public class Output extends Op {
   @Override
   public void writeTo(AnnotatedIntCode res) {
     int opcode = 4 + 100 * parameter.mode().ordinal();
-    res.addOperation(new AnnotatedOperation(context, BigInteger.valueOf(opcode), parameter.value()));
+    res.addOperation(new AnnotatedOperation(toString(), context, BigInteger.valueOf(opcode), parameter.value()));
   }
 
+  @Override
+  public String toString() {
+    return "OUTPUT <- " + parameter;
+  }
 }

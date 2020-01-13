@@ -151,7 +151,7 @@ public class Assembler {
     for (Variable variable : strings) {
       int len = variable.getLen();
       for (int i = 0; i < len; i++) {
-        String description = i == 0 ? "String data: " + variable.context : "";
+        String description = i == 0 ? variable.context : "";
         BigInteger value = variable.values[i];
         res.addOperation(AnnotatedOperation.variable(description, value));
       }
@@ -164,13 +164,13 @@ public class Assembler {
           throw new RuntimeException();
         }
         try {
-          res.addOperation(AnnotatedOperation.variable("Pointer: " + variable.getName(), BigInteger.valueOf(variable.reference.call())));
+          res.addOperation(AnnotatedOperation.variable(variable.getName(), BigInteger.valueOf(variable.reference.call())));
         } catch (Exception e) {
           throw new RuntimeException(e);
         }
       } else {
         for (int i = 0; i < len; i++) {
-          String description = i == 0 ? "Variable: " + variable.context : "";
+          String description = i == 0 ? variable.context : "";
           BigInteger value = variable.values != null ? variable.values[i] : BigInteger.ZERO;
           res.addOperation(AnnotatedOperation.variable(description, value));
         }
@@ -181,7 +181,7 @@ public class Assembler {
       int len = variable.getLen();
       for (int i = 0; i < len; i++) {
         String description = variable.context;
-        res.addOperation(AnnotatedOperation.variable("Variable: " + description, variable.values[i]));
+        res.addOperation(AnnotatedOperation.variable(description, variable.values[i]));
       }
     }
 
@@ -189,7 +189,7 @@ public class Assembler {
       int len = variable.getLen();
       for (int i = 0; i < len; i++) {
         String description = variable.context;
-        res.addOperation(AnnotatedOperation.variable("Variable: " + description, variable.values[i]));
+        res.addOperation(AnnotatedOperation.variable(description, variable.values[i]));
       }
     }
 

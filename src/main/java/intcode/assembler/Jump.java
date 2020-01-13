@@ -36,7 +36,12 @@ public class Jump extends Op {
     int opcode = isTrue ? 5 : 6;
     Parameter targetAddress = target == null ? label.getLabelAddress() : target;
     opcode += 100 * parameter.mode().ordinal() + 1000 * targetAddress.mode().ordinal();
-    res.addOperation(new AnnotatedOperation(context, BigInteger.valueOf(opcode), parameter.value(), targetAddress.value()));
+    res.addOperation(new AnnotatedOperation(toString(), context, BigInteger.valueOf(opcode), parameter.value(), targetAddress.value()));
   }
 
+  @Override
+  public String toString() {
+    String jumpTarget = target == null ? label.toString() : target.toString();
+    return "JMP" + (isTrue ? "T" : "F") + " " + parameter + " -> " + jumpTarget;
+  }
 }
