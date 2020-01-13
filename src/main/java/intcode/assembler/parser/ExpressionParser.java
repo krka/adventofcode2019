@@ -88,13 +88,6 @@ public class ExpressionParser {
             .end()
             .map((FunctionCallNode func) -> new SetStatement(ExpressionList.empty(), func.toExpressionList()));
 
-    Parser jumpIfStatement = StringParser.of("if").flatten().trim()
-            .seq(expression)
-            .seq(StringParser.of("jump").flatten().trim())
-            .seq(IDENTIFIER)
-            .end()
-            .map((List<Object> o) -> JumpIfStatement.create((ExprNode) o.get(1), null, (String) o.get(3)));
-
     Parser returnStatement = StringParser.of("return ").trim()
             .seq(expressionList)
             .end()
@@ -118,14 +111,6 @@ public class ExpressionParser {
     Parser comment = CharacterParser.of('#').trim().seq(CharacterParser.any().star())
             .end()
             .map(o -> new CommentStatement());
-
-    Parser label = IDENTIFIER.seq(CharacterParser.of(':'))
-            .end()
-            .map((List<Object> o) -> new LabelStatement((String) o.get(0)));
-
-    Parser jumpAlways = StringParser.of("jump").flatten().trim().seq(IDENTIFIER)
-            .end()
-            .map((List<Object> o) -> JumpIfStatement.create(IntConstant.ONE, null, (String) o.get(1)));
 
     Parser declareString = StringParser.of("string").flatten().trim()
             .seq(IDENTIFIER)
@@ -199,10 +184,9 @@ public class ExpressionParser {
     STATEMENT = functionCall.or(
             includeResource, comment,
             returnStatement, returnNoneStatement,
-            setStatement, jumpIfStatement,
+            setStatement,
             declareInt, declareString, declareArray,
             functionDefinition, endBlock,
-            label, jumpAlways,
             startIfBlock, elseBlock, elseIfBlock,
             startWhileBlock, breakBlock, startForLoop
             );

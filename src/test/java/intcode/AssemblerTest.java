@@ -39,7 +39,9 @@ public class AssemblerTest {
 
   @Test
   public void testJumps() {
-    IntCode intCode = IntCode.fromResource(Assembler.compile("test_jumps.asm"));
+    AnnotatedIntCode annotatedIntCode = Assembler.compileAnnotated("test_jumps.asm");
+    System.out.println(annotatedIntCode);
+    IntCode intCode = IntCode.fromResource(annotatedIntCode.getIntCode());
 
     intCode.run();
     assertEquals(IntCode.State.HALTED, intCode.getState());

@@ -102,13 +102,6 @@ public class ExpressionParserTest {
   }
 
   @Test
-  public void testJumpIf() {
-    JumpIfStatement statement = (JumpIfStatement) ExpressionParser.parseStatement("if a == b jump foo");
-    assertEquals("foo", statement.getLabelString());
-    assertEquals(ExpressionParser.parseExpr("a == b"), statement.getCondition().toExpressionList());
-  }
-
-  @Test
   public void testFuncExpr() {
     ExprNode expression = ExpressionParser.parseExpr("foo(0, 1)");
     ExprNode expected = new FunctionCallNode("foo", new ExpressionList(IntConstant.ZERO, IntConstant.ONE))
