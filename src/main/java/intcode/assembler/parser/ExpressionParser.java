@@ -51,7 +51,8 @@ public class ExpressionParser {
 
     expressionBuilder.group()
             .left(CharacterParser.of('*').trim(), (List<Object> o) -> MulNode.create((ExprNode) o.get(0), (ExprNode) o.get(2)))
-            .left(CharacterParser.of('/').trim(), (List<Object> o) -> DivNode.create((ExprNode) o.get(0), (ExprNode) o.get(2)));
+            .left(CharacterParser.of('/').trim(), (List<Object> o) -> DivNode.create((ExprNode) o.get(0), (ExprNode) o.get(2)))
+            .left(CharacterParser.of('%').trim(), (List<Object> o) -> ModNode.create((ExprNode) o.get(0), (ExprNode) o.get(2)));
 
     expressionBuilder.group()
             .left(CharacterParser.of('+').trim(), (List<Object> o) -> AddNode.create((ExprNode) o.get(0), (ExprNode) o.get(2)))

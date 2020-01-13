@@ -8,7 +8,7 @@ func mergeSortInner(low, high, array, tempArray)
     return
   end
 
-  int midpoint = low + div(len, 2)
+  int midpoint = low + len / 2
 
   mergeSortInner(low, midpoint, array, tempArray)
   mergeSortInner(midpoint, high, array, tempArray)

@@ -70,3 +70,8 @@ func div(N, D)
   end
   return q * neg_d * neg_n, N * neg_n
 end
+
+func mod(N, D)
+  int q, r = div(N, D)
+  return r
+end

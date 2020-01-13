@@ -1,7 +1,7 @@
 #include division.asm
 
 func rec(n, acc)
-  int n2 = div(n, 3) - 2
+  int n2 = n / 3 - 2
   if n2 <= 0 then
     return acc
   end
