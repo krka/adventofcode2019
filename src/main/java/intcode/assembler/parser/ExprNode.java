@@ -13,7 +13,12 @@ public interface ExprNode {
 
   void assignTo(Variable target, Assembler assembler, Assembler.IntCodeFunction function, String context);
 
-  Parameter toParameter(Assembler assembler, Assembler.IntCodeFunction function, Set<TempVariable> tempParams);
+  default Parameter toParameter(Assembler assembler, Assembler.IntCodeFunction function, Set<TempVariable> tempParams) {
+    TempVariable target = assembler.tempSpace.getAny();
+    tempParams.add(target);
+    assignTo(target, assembler, function, "# " + target + " = " + toString());
+    return target;
+  }
 
   default void assignValue(Assembler assembler, Assembler.IntCodeFunction function, String context, ExprNode expr) {
     throw new RuntimeException("Can't assign a value to " + this.getClass().getSimpleName());

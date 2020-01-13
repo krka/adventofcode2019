@@ -70,12 +70,4 @@ class DivNode implements ExprNode {
     div.assignTo(target, assembler, function, context);
   }
 
-  @Override
-  public Parameter toParameter(Assembler assembler, Assembler.IntCodeFunction function, Set<TempVariable> tempParams) {
-    TempVariable target = assembler.tempSpace.getAny();
-    tempParams.add(target);
-    assignTo(target, assembler, function, toString());
-    return target;
-  }
-
 }

@@ -46,16 +46,6 @@ public class EqNode implements ExprNode {
   }
 
   @Override
-  public Parameter toParameter(Assembler assembler, Assembler.IntCodeFunction function, Set<TempVariable> tempParams) {
-    TempVariable target = assembler.tempSpace.getAny();
-    tempParams.add(target);
-    Parameter leftParam = left.toParameter(assembler, function, tempParams);
-    Parameter rightParam = right.toParameter(assembler, function, tempParams);
-    function.operations.add(new EqOp("# " + target + " = " + toString(), leftParam, rightParam, target));
-    return target;
-  }
-
-  @Override
   public String toString() {
     return left + " == " + right;
   }

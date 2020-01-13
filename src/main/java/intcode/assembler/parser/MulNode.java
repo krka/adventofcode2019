@@ -72,12 +72,4 @@ class MulNode implements ExprNode {
     tempParams.forEach(TempVariable::release);
   }
 
-  @Override
-  public Parameter toParameter(Assembler assembler, Assembler.IntCodeFunction function, Set<TempVariable> tempParams) {
-    TempVariable target = assembler.tempSpace.getAny();
-    tempParams.add(target);
-    assignTo(target, assembler, function, toString());
-    return target;
-  }
-
 }

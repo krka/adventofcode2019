@@ -46,16 +46,6 @@ public class LessThanNode implements ExprNode {
   }
 
   @Override
-  public Parameter toParameter(Assembler assembler, Assembler.IntCodeFunction function, Set<TempVariable> tempParams) {
-    TempVariable target = assembler.tempSpace.getAny();
-    tempParams.add(target);
-    Parameter leftParam = left.toParameter(assembler, function, tempParams);
-    Parameter rightParam = right.toParameter(assembler, function, tempParams);
-    function.operations.add(new LessThanOp("# " + target + " = " + toString(), leftParam, rightParam, target));
-    return target;
-  }
-
-  @Override
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;

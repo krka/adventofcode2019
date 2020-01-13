@@ -69,19 +69,6 @@ public class ArrayNode implements ExprNode {
   }
 
   @Override
-  public Parameter toParameter(Assembler assembler, Assembler.IntCodeFunction function, Set<TempVariable> tempParams) {
-    Parameter arrayParam = array.toParameter(assembler, function, tempParams);
-    Parameter indexParam = index.toParameter(assembler, function, tempParams);
-
-    TempVariable target = assembler.tempSpace.getAny();
-    tempParams.add(target);
-
-    arrayLookup(function.operations, target, arrayParam, indexParam, "# " + target + " = " + toString());
-
-    return target;
-  }
-
-  @Override
   public void assignValue(Assembler assembler, Assembler.IntCodeFunction function, String context, ExprNode expr) {
     Set<TempVariable> tempParams = new HashSet<>();
     Parameter arrayParam = array.toParameter(assembler, function, tempParams);

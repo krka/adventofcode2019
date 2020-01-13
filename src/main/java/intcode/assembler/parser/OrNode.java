@@ -59,14 +59,6 @@ public class OrNode implements ExprNode {
   }
 
   @Override
-  public Parameter toParameter(Assembler assembler, Assembler.IntCodeFunction function, Set<TempVariable> tempParams) {
-    TempVariable target = assembler.tempSpace.getAny();
-    tempParams.add(target);
-    assignTo(target, assembler, function, "# " + target + " = " + toString());
-    return target;
-  }
-
-  @Override
   public String toString() {
     return left + " || " + right;
   }

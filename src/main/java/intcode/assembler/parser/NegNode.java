@@ -58,13 +58,4 @@ public class NegNode implements ExprNode {
     tempParams.forEach(TempVariable::release);
   }
 
-  @Override
-  public Parameter toParameter(Assembler assembler, Assembler.IntCodeFunction function, Set<TempVariable> tempParams) {
-    TempVariable target = assembler.tempSpace.getAny();
-    tempParams.add(target);
-    Parameter parameter = child.toParameter(assembler, function, tempParams);
-    function.operations.add(new MulOp("# " + target + " = " + toString(), parameter, Constant.MINUS_ONE, target));
-    return target;
-  }
-
 }
