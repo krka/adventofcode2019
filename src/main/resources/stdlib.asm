@@ -6,7 +6,7 @@ end
 
 func strlen(s)
   int i = 0
-  while 1
+  while 1 do
     if s[i] == 0 then
        return i
     end
@@ -30,7 +30,7 @@ func strcmp(s1, s2)
 end
 
 func memcpy(n, src, dest)
-  while n > 0
+  while n > 0 do
     n = n - 1
     dest[n] = src[n]
   end

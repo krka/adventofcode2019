@@ -16,12 +16,12 @@ func mergeSortInner(low, high, array, tempArray)
   int left = low
   int right = midpoint
 
-  while temp < high
+  while temp < high do
     int leftVal = array[left]
     int rightVal = array[right]
 
     if left == midpoint then
-      while right < high
+      while right < high do
         rightVal = array[right]
         tempArray[temp] = rightVal
         temp = temp + 1
@@ -29,7 +29,7 @@ func mergeSortInner(low, high, array, tempArray)
       end
       break
     elseif right == high then
-      while left < midpoint
+      while left < midpoint do
         leftVal = array[left]
         tempArray[temp] = leftVal
         temp = temp + 1
@@ -51,7 +51,7 @@ func mergeSortInner(low, high, array, tempArray)
 
   left = low
   temp = 0
-  while left < high
+  while left < high do
     array[left] = tempArray[temp]
     left = left + 1
     temp = temp + 1

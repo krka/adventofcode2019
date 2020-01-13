@@ -47,7 +47,7 @@ func div(N, D)
       powtwo_extra[i] = k
     end
 
-    while i > 0
+    while i > 0 do
       i = i - 1
       k = powtwo_extra[i]
       kd = k * D
@@ -59,7 +59,7 @@ func div(N, D)
     i = 64
   end
 
-  while i > 0
+  while i > 0 do
     i = i - 1
     k = powtwo[i]
     kd = k * D

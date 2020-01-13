@@ -9,14 +9,14 @@ int remainder = 0
 func outputNumber(n)
   i = 0
   tempn = n
-  while tempn
+  while tempn do
     tempn, remainder = div(tempn, 10)
     remainder = remainder + 48
     tempnumber[i] = remainder
     i = i + 1
   end
 
-  while i
+  while i do
     i = i - 1
     output(tempnumber[i])
   end

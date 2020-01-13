@@ -177,6 +177,7 @@ public class ExpressionParser {
 
     Parser startWhileBlock = StringParser.of("while").trim()
             .seq(expression)
+            .seq(StringParser.of("do").trim())
             .end()
             .pick(1)
             .map((o -> new StartWhileBlockStatement((ExprNode) o)));
