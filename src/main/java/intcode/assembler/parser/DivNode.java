@@ -11,25 +11,25 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-class MulNode implements ExprNode {
+class DivNode implements ExprNode {
   private final ExprNode left;
   private final ExprNode right;
 
-  private MulNode(ExprNode left, ExprNode right) {
+  private DivNode(ExprNode left, ExprNode right) {
     this.left = left;
     this.right = right;
   }
 
   @Override
   public String toString() {
-    return left + " * " + right;
+    return left + " / " + right;
   }
 
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    MulNode mulNode = (MulNode) o;
+    DivNode mulNode = (DivNode) o;
     return left.equals(mulNode.left) &&
             right.equals(mulNode.right);
   }
@@ -40,22 +40,22 @@ class MulNode implements ExprNode {
   }
 
   public static ExprNode create(ExprNode left, ExprNode right) {
+    if (BigInteger.ZERO.equals(right.value())) {
+      throw new RuntimeException("Can not divide by zero");
+    }
     if (BigInteger.ZERO.equals(left.value())) {
       return IntConstant.ZERO;
-    }
-    if (BigInteger.ZERO.equals(right.value())) {
-      return IntConstant.ZERO;
-    }
-    if (BigInteger.ONE.equals(left.value())) {
-      return right;
     }
     if (BigInteger.ONE.equals(right.value())) {
       return left;
     }
-    if (left.value() != null && right.value() != null) {
-      return new IntConstant(left.value().multiply(right.value()));
+    if (BigInteger.valueOf(-1).equals(right.value())) {
+      return NegNode.create(left);
     }
-    return new MulNode(left, right);
+    if (left.value() != null && right.value() != null) {
+      return new IntConstant(left.value().divide(right.value()));
+    }
+    return new DivNode(left, right);
   }
 
   @Override
@@ -65,11 +65,9 @@ class MulNode implements ExprNode {
 
   @Override
   public void assignTo(Variable target, Assembler assembler, Assembler.IntCodeFunction function, String context) {
-    Set<TempVariable> tempParams = new HashSet<>();
-    Parameter leftParam = left.toParameter(assembler, function, tempParams);
-    Parameter rightParam = right.toParameter(assembler, function, tempParams);
-    function.operations.add(new MulOp(context, leftParam, rightParam, target));
-    tempParams.forEach(TempVariable::release);
+    assembler.includeResource("division.asm");
+    FunctionCallNode div = new FunctionCallNode("div", new ExpressionList(left, right));
+    div.assignTo(target, assembler, function, context);
   }
 
   @Override

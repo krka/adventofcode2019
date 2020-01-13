@@ -91,4 +91,7 @@ implicitReturn()
 
 x = 100 * -x * (y + z) + 7
 
+assert(5 == 11 / 2)
+
 output(x)
+
