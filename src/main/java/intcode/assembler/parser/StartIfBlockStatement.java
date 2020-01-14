@@ -65,6 +65,10 @@ public class StartIfBlockStatement implements Statement, Block {
         if (hasElse) {
           Util.deleteFromEnd(caller.operations, startIndex);
         }
+      } else if (neverRun) {
+        if (!hasElse) {
+          Util.deleteFromEnd(caller.operations, startIndex);
+        }
       }
     } else {
       if (!hasElse) {
