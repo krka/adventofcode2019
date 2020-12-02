@@ -5,6 +5,7 @@ import util.Util;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.Stack;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -39,5 +40,27 @@ public class Day1 {
       }
     }
     throw new RuntimeException();
+  }
+
+  public int solvePart2Rec() {
+    List<Integer> set = input.stream().map(Integer::parseInt).collect(Collectors.toList());
+    return rec(set, 0, 3, 2020, 1);
+  }
+
+  private int rec(List<Integer> values, int index, int remaining, int target, int product) {
+    if (remaining == 0) {
+      if (target == 0) {
+        return product;
+      }
+      return -1;
+    }
+    for (int i = index; i < values.size(); i++) {
+      int v = values.get(i);
+      int ans = rec(values, i + 1, remaining - 1, target - v, product * v);
+      if (ans != -1) {
+        return ans;
+      }
+    }
+    return -1;
   }
 }

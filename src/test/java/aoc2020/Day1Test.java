@@ -15,5 +15,10 @@ public class Day1Test {
     assertEquals(261342720, new Day1("2020/day1.in").solvePart2());
   }
 
+  @Test
+  public void testPart2Rec() {
+    assertEquals(261342720, new Day1("2020/day1.in").solvePart2Rec());
+  }
+
 
 }
