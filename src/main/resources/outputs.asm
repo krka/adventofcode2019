@@ -21,4 +21,3 @@ func outputNumber(n)
     output(tempnumber[i])
   end
 end
-

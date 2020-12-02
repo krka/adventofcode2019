@@ -50,10 +50,10 @@ public class AndNode implements ExprNode {
 
     Parameter leftParam = left.toParameter(assembler, function, tempParams);
     function.operations.add(new Jump(context + " (jump if left)", true, leftParam, null, leftLabel));
-    Parameter rightParam = right.toParameter(assembler, function, tempParams);
     function.operations.add(new SetOp(context + " (set to left)", leftParam, target));
     function.operations.add(Jump.toLabel(context + " (jump to done)", doneLabel));
     function.operations.add(leftLabel);
+    Parameter rightParam = right.toParameter(assembler, function, tempParams);
     function.operations.add(new SetOp(context + " (set to right)", rightParam, target));
     function.operations.add(doneLabel);
 

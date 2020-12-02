@@ -77,8 +77,13 @@ public class AssemblerTest {
   @Test
   public void testStdlib() {
     IntCode intCode = IntCode.fromResource(Assembler.compile("test_stdlib.asm"));
-    intCode.run();
-    assertEquals(IntCode.State.HALTED, intCode.getState());
+    intCode.writeASCIILine("1234 hello");
+    try {
+      intCode.run();
+      assertEquals(IntCode.State.HALTED, intCode.getState());
+    } finally {
+      System.err.println(intCode.drainStdout());
+    }
   }
 
   @Test

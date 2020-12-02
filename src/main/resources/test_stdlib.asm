@@ -26,3 +26,12 @@ assert(d == 4)
 a = ' '
 b = 32
 assert(a == b)
+
+int value = read_int()
+output(value)
+assert(value == 1234)
+
+array[10] str
+skip_non_chars()
+read_chars(str)
+assert(strcmp(hello, str) == 0)

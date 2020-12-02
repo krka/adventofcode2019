@@ -12,3 +12,16 @@ assert(c == 33)
 c = c + 90 + !1
 assert(c == 123)
 
+assert(a > b)
+assert(a >= b)
+assert(!(a == b))
+assert(!(a < b))
+assert(!(a <= b))
+
+assert(a > b || a > c)
+
+assert(a >= a)
+assert(a <= c)
+assert(a >= a && a <= c)
+
+assert(a >= b && a <= c)
