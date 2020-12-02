@@ -1,5 +1,3 @@
-int x = 'a'
-
 #include outputs.asm
 #include stdlib.asm
 int num_entries = read_int()
