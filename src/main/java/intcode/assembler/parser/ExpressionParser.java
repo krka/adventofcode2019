@@ -17,6 +17,9 @@ public class ExpressionParser {
   private static final Parser IDENTIFIER = CharacterParser.letter().seq(IDENTIFIER_TAIL).flatten().trim();
 
   private static final Parser POS_INT = CharacterParser.digit().plus().flatten().trim();
+  private static final Parser CONSTANT_CHAR = CharacterParser.of('\'')
+          .seq(CharacterParser.noneOf("\'").flatten())
+          .seq(CharacterParser.of('\'')).trim();
 
   private static final Parser STATEMENT;
   private static final Parser EXPRESSION;
@@ -27,14 +30,16 @@ public class ExpressionParser {
 
     ExpressionBuilder expressionBuilder = new ExpressionBuilder();
     Parser varParser = IDENTIFIER.map(VarNode::new);
-    Parser constantParser = POS_INT.map((String s) -> new IntConstant(new BigInteger(s)));
+    Parser constIntParser = POS_INT.map((String s) -> new IntConstant(new BigInteger(s)));
+    Parser constCharParser = CONSTANT_CHAR.map((List<Object> o) -> new IntConstant(BigInteger.valueOf(((String) o.get(1)).charAt(0))));
     Parser functionCallParser = varParser.seq(CharacterParser.of('(').trim(), expressionList.optional(), CharacterParser.of(')').trim())
         .map((List<Object> o) -> new FunctionCallNode(((VarNode) o.get(0)).getName(), (ExpressionList) o.get(2)));
 
     expressionBuilder.group()
             .primitive(functionCallParser)
             .primitive(varParser)
-            .primitive(constantParser);
+            .primitive(constCharParser)
+            .primitive(constIntParser);
 
     expressionBuilder.group()
             .wrapper(CharacterParser.of('(').trim(), CharacterParser.of(')').trim(), (List<Object> o) -> o.get(1));

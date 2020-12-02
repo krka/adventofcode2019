@@ -22,3 +22,7 @@ assert(a == 1)
 assert(b == 2)
 assert(c == 3)
 assert(d == 4)
+
+a = ' '
+b = 32
+assert(a == b)
