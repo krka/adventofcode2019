@@ -2,6 +2,7 @@ package aoc2020;
 
 import util.Util;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
