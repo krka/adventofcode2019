@@ -38,36 +38,40 @@ end
 
 int peek = -1
 
-func skip_non_int()
+func read()
   if peek != -1 then
-    if peek >= '0' && peek <= '9' then
-      return
-    end
+    int x = peek
+    peek = -1
+    return peek
   end
+  return input()
+end
 
+func peek()
+  if peek == -1 then
+    peek = input()
+  end
+  return peek
+end
+
+func skip_non_int()
   while 1 do
-    int x = input()
+    int x = peek()
     if x >= '0' && x <= '9' then
-      peek = x
       return
     end
+    read()
   end
   return
 end
 
 func skip_non_chars()
-  if peek != -1 then
-    if peek >= 'a' && peek <= 'z' then
-      return
-    end
-  end
-
   while 1 do
-    int x = input()
+    int x = peek()
     if x >= 'a' && x <= 'z' then
-      peek = x
       return
     end
+    read()
   end
   return
 end
@@ -75,21 +79,12 @@ end
 func read_int()
   int res = 0
 
-  if peek != -1 then
-    if peek < '0' || peek > '9' then
-      return -1
-    else
-      res = res * 10 + (peek - '0')
-      peek = -1
-    end
-  end
-
   while 1 do
-    int x = input()
+    int x = peek()
     if x < '0' || x > '9' then
-      peek = x
       return res
     else
+      read()
       res = res * 10 + (x - '0')
     end
   end
@@ -99,24 +94,42 @@ end
 func read_chars(buf)
   int i = 0
 
-  if peek != -1 then
-    if peek < 'a' || peek > 'z' then
+  while 1 do
+    int x = peek()
+    if x < 'a' || x > 'z' then
       buf[i] = 0
       return
     else
-      buf[i] = peek
+      read()
+      buf[i] = x
       i = i + 1
-      peek = -1
     end
   end
+  buf[i] = 0
+  return
+end
+
+func skip_until(c)
+  while 1 do
+    int x = peek()
+    if x != c then
+      return
+    else
+      read()
+    end
+  end
+end
+
+func read_until(buf, c)
+  int i = 0
 
   while 1 do
-    int x = input()
-    if x < 'a' || x > 'z' then
-      peek = x
+    int x = peek()
+    if x == c then
       buf[i] = 0
       return
     else
+      read()
       buf[i] = x
       i = i + 1
     end

@@ -7,6 +7,11 @@ int tempn = 0
 int remainder = 0
 
 func outputNumber(n)
+  if n == 0 then
+    output('0')
+    return
+  end
+
   i = 0
   tempn = n
   while tempn do
