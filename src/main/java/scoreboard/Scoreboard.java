@@ -62,7 +62,9 @@ public class Scoreboard {
     members.sort(Comparator.comparingDouble(Member::getScore).reversed());
     System.out.println(header());
     for (Member member : members) {
-      System.out.println(member.toString());
+      if (member.getScore() > 0) {
+        System.out.println(member.toString());
+      }
     }
   }
 
@@ -95,7 +97,7 @@ public class Scoreboard {
     }
 
     private double partScore(long bestTime, long memberTime) {
-      return 1000.0 / (Math.sqrt(2 + (memberTime - bestTime) * 0.001) / Math.sqrt(2));
+      return 1000.0 / (Math.log(2 + (memberTime - bestTime) * 0.0001) / Math.log(2));
     }
 
     @Override
@@ -121,7 +123,7 @@ public class Scoreboard {
   }
 
   public String header() {
-    return String.format(Locale.ROOT, "%-30s Score  %s", "Name", dayHeaders());
+    return String.format(Locale.ROOT, "%-30s Total  %s", "Name", dayHeaders());
   }
 
   private String dayHeaders() {
