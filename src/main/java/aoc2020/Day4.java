@@ -41,15 +41,15 @@ public class Day4 {
       return false;
     }
     String byr = passport.get("byr");
-    if (byr.length() != 4 || notInRange(byr, 1920, 2002)) {
+    if (byr.length() != 4 || !inRange(byr, 1920, 2002)) {
       return false;
     }
     String iyr = passport.get("iyr");
-    if (iyr.length() != 4 || notInRange(iyr, 2010, 2020)) {
+    if (iyr.length() != 4 || !inRange(iyr, 2010, 2020)) {
       return false;
     }
     String eyr = passport.get("eyr");
-    if (eyr.length() != 4 || notInRange(eyr, 2020,2030)) {
+    if (eyr.length() != 4 || !inRange(eyr, 2020,2030)) {
       return false;
     }
     String hgt = passport.get("hgt");
@@ -101,9 +101,9 @@ public class Day4 {
     res.add(passport);
     return res;
   }
-  private boolean notInRange(String s, int min, int max) {
+  private boolean inRange(String s, int min, int max) {
     int val = Integer.parseInt(s);
-    return val < min || val > max;
+    return val >= min && val <= max;
   }
 
 }
