@@ -29,8 +29,8 @@ public class Day5 {
             .sorted()
             .collect(Collectors.toList());
     for (int i = 0; i < list.size() - 1; i++) {
-      Integer a = list.get(i);
-      Integer b = list.get(i + 1);
+      int a = list.get(i);
+      int b = list.get(i + 1);
       if (a + 2 == b) {
         return a + 1;
       }
