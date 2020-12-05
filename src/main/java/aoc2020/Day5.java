@@ -18,24 +18,20 @@ public class Day5 {
     return input.stream()
             .map(Day5::repl)
             .mapToInt(s -> Integer.parseInt(s, 2))
-            .max().getAsInt();
+            .max()
+            .getAsInt();
   }
 
   public long solvePart2() {
-
-    List<Integer> list = input.stream()
+    return input.stream()
             .map(Day5::repl)
             .map(s -> Integer.parseInt(s, 2))
             .sorted()
-            .collect(Collectors.toList());
-    for (int i = 0; i < list.size() - 1; i++) {
-      int a = list.get(i);
-      int b = list.get(i + 1);
-      if (a + 2 == b) {
-        return a + 1;
-      }
-    }
-    throw new RuntimeException();
+            .collect(Util.adj()).stream()
+            .filter(pair -> pair.a() + 2 == pair.b())
+            .mapToInt(pair -> pair.a() + 1)
+            .reduce(Util.exactlyOne())
+            .getAsInt();
   }
 
   static String repl(String s) {

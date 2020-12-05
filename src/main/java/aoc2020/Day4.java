@@ -82,24 +82,21 @@ public class Day4 {
   }
 
   private List<Map<String, String>> readPassports() {
-    ArrayList<Map<String, String>> res = new ArrayList<>();
-    Map<String, String> passport = new HashMap<>();
-    for (String s : input) {
-      if (s.isEmpty()) {
-        res.add(passport);
-        passport = new HashMap<>();
-      } else {
-        String[] parts = s.split(" ");
-        for (String part : parts) {
-          String[] split = part.split(":");
-          if (split.length == 2) {
-            passport.put(split[0], split[1]);
-          }
-        }
-      }
-    }
-    res.add(passport);
-    return res;
+    return input.stream().collect(Util.toPartitions((o, o2) -> !o2.isEmpty())).stream()
+            .map(lines -> {
+              Map<String, String> passport = new HashMap<>();
+              lines.forEach(s -> {
+                String[] parts = s.split(" ");
+                for (String part : parts) {
+                  String[] split = part.split(":");
+                  if (split.length == 2) {
+                    passport.put(split[0], split[1]);
+                  }
+                }
+              });
+              return passport;
+            })
+            .collect(Collectors.toList());
   }
   private boolean inRange(String s, int min, int max) {
     int val = Integer.parseInt(s);

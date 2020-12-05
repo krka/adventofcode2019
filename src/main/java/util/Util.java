@@ -1,7 +1,5 @@
 package util;
 
-import intcode.assembler.Op;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,6 +9,9 @@ import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiFunction;
+import java.util.function.IntBinaryOperator;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 public class Util {
@@ -56,5 +57,19 @@ public class Util {
 
   public static String toString(List<BigInteger> intCode) {
     return intCode.stream().map(Object::toString).collect(Collectors.joining(","));
+  }
+
+  public static <T> Collector<T, ?, List<List<T>>> toPartitions(BiFunction<T, T, Boolean> predicate) {
+    return new Partitions<>(predicate);
+  }
+
+  public static <T> AdjCollector<T> adj() {
+    return new AdjCollector<>();
+  }
+
+  public static IntBinaryOperator exactlyOne() throws RuntimeException {
+    return (left, right) -> {
+      throw new RuntimeException();
+    };
   }
 }
