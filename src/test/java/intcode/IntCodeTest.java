@@ -3,8 +3,6 @@ package intcode;
 import org.junit.Test;
 import util.Util;
 
-import java.util.stream.Collectors;
-
 import static org.junit.Assert.*;
 
 public class IntCodeTest {
@@ -19,32 +17,32 @@ public class IntCodeTest {
 
   @Test
   public void testDecompilerDay5() {
-    testDecompile("day5.in");
+    testDecompile("2019/day5.in");
   }
 
   @Test
   public void testDecompilerDay7() {
-    testDecompile("day7.in");
+    testDecompile("2019/day7.in");
   }
 
   @Test
   public void testDecompilerDay9() {
-    testDecompile("day9.in");
+    testDecompile("2019/day9.in");
   }
 
   @Test
   public void testDecompilerDay11() {
-    testDecompile("day11.in");
+    testDecompile("2019/day11.in");
   }
 
   @Test
   public void testDecompilerDay17() {
-    testDecompile("day17.in");
+    testDecompile("2019/day17.in");
   }
 
   @Test
   public void testDecompilerDay25() {
-    testDecompile("day25.in");
+    testDecompile("2019/day25.in");
   }
 
   private void testDecompile(String resource) {
