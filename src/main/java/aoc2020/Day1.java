@@ -20,13 +20,11 @@ public class Day1 {
 
   public int solvePart1() {
     Set<Integer> set = input.stream().map(Integer::parseInt).collect(Collectors.toSet());
-    for (Integer x : set) {
-      int y = 2020 - x;
-      if (set.contains(y)) {
-        return x * y;
-      }
-    }
-    throw new RuntimeException();
+    return set.stream()
+            .filter(x -> set.contains(2020 - x))
+            .mapToInt(x -> x * (2020 - x))
+            .findAny()
+            .getAsInt();
   }
 
   public int solvePart2() {
