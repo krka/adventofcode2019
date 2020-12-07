@@ -3,7 +3,9 @@ package aoc2020;
 import util.Util;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class Day6 {
   private final List<String> input;
@@ -13,11 +15,26 @@ public class Day6 {
   }
 
   public long solvePart1() {
-    return 0;
+    return input.stream()
+            .collect(Util.splitBy(String::isEmpty)).stream()
+            .mapToInt(g -> g.stream()
+                    .map(String::chars).map(IntStream::boxed)
+                    .map(s -> s.collect(Collectors.toSet()))
+                    .reduce(Util::union)
+                    .map(Set::size).orElse(0))
+            .sum();
   }
 
   public long solvePart2() {
-    throw new RuntimeException();
+    return input.stream()
+            .collect(Util.splitBy(String::isEmpty)).stream()
+            .mapToInt(g -> g.stream()
+                    .map(String::chars).map(IntStream::boxed)
+                    .map(s -> s.collect(Collectors.toSet()))
+                    .reduce(Util::intersection)
+                    .map(Set::size).orElse(0))
+            .sum();
   }
+
 
 }

@@ -8,9 +8,12 @@ import java.io.Reader;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.IntBinaryOperator;
+import java.util.function.Predicate;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
@@ -63,6 +66,10 @@ public class Util {
     return new Partitions<>(predicate);
   }
 
+  public static <T> Collector<T, ?, List<List<T>>> splitBy(Predicate<T> predicate) {
+    return new SplitStream<>(predicate);
+  }
+
   public static <T> AdjCollector<T> adj() {
     return new AdjCollector<>();
   }
@@ -71,5 +78,19 @@ public class Util {
     return (left, right) -> {
       throw new RuntimeException();
     };
+  }
+
+  public static <T> Set<T> intersection(Set<T> a, Set<T> b) {
+    Set<T> ans = new HashSet<>();
+    ans.addAll(a);
+    ans.retainAll(b);
+    return ans;
+  }
+
+  public static <T> Set<T> union(Set<T> a, Set<T> b) {
+    Set<T> ans = new HashSet<>();
+    ans.addAll(a);
+    ans.addAll(b);
+    return ans;
   }
 }
