@@ -2,10 +2,7 @@ package aoc2020;
 
 import util.Util;
 
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class Day5 {
   private final List<String> input;
@@ -30,7 +27,7 @@ public class Day5 {
             .collect(Util.adj()).stream()
             .filter(pair -> pair.a() + 2 == pair.b())
             .mapToInt(pair -> pair.a() + 1)
-            .reduce(Util.exactlyOne())
+            .reduce(Util.exactlyOneInt())
             .getAsInt();
   }
 
