@@ -55,10 +55,8 @@ public class Day9Test {
     long target = 26796446L;
 
     // This only works because all input values are non-negative
-    while (true) {
-      if (sum == target) {
-        break;
-      } else if (sum < target) {
+    while (sum != target) {
+      if (sum < target) {
         maxIndex++;
         sum += ints.get(maxIndex);
       } else {
