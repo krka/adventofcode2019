@@ -15,6 +15,11 @@ public class Pair<A, B> {
     return new Pair<>(a, b);
   }
 
+  public static Pair<Integer, Integer> fromInt(String s) {
+    String[] split = s.split("[, ]+");
+    return Pair.of(Integer.parseInt(split[0]), Integer.parseInt(split[1]));
+  }
+
   public A a() {
     return a;
   }

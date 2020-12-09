@@ -16,7 +16,7 @@ public class Vector3 {
   }
 
   public static Vector3 parse(String line) {
-    String[] split = line.split(",");
+    String[] split = line.split("[, ]+");
     long x = Long.parseLong(split[0]);
     long y = Long.parseLong(split[1]);
     long z = Long.parseLong(split[2]);
