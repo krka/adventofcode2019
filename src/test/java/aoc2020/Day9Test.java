@@ -48,21 +48,27 @@ public class Day9Test {
 
   private long solvePart2() {
     List<Long> ints = input.stream().mapToLong(Long::parseLong).boxed().collect(Collectors.toList());
-    long[] sums = new long[ints.size()];
-    sums[0] = ints.get(0);
-    for (int i = 1; i < ints.size(); i++) {
-      sums[i] = sums[i - 1] + ints.get(i);
-    }
-    for (int i = 1; i < ints.size(); i++) {
-      for (int j = i + 1; j < ints.size(); j++) {
-        if (sums[j] - sums[i - 1] == 26796446L) {
-          long minVal = ints.subList(i, j + 1).stream().mapToLong(Long::longValue).min().getAsLong();
-          long maxVal = ints.subList(i, j + 1).stream().mapToLong(Long::longValue).max().getAsLong();
-          return minVal + maxVal;
-        }
+
+    int minIndex = 0;
+    int maxIndex = 1;
+    long sum = ints.get(0) + ints.get(1);
+    long target = 26796446L;
+
+    // This only works because all input values are non-negative
+    while (true) {
+      if (sum == target) {
+        break;
+      } else if (sum < target) {
+        maxIndex++;
+        sum += ints.get(maxIndex);
+      } else {
+        sum -= ints.get(minIndex);
+        minIndex++;
       }
     }
-    throw new RuntimeException();
+    long minVal = ints.subList(minIndex, maxIndex + 1).stream().mapToLong(Long::longValue).min().getAsLong();
+    long maxVal = ints.subList(minIndex, maxIndex + 1).stream().mapToLong(Long::longValue).max().getAsLong();
+    return minVal + maxVal;
   }
 
 }
