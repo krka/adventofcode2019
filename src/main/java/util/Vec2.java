@@ -1,8 +1,16 @@
 package util;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Vec2 {
+
+  public static final List<Vec2> DIRS = Stream
+          .of("1,0 -1,0 0,-1 0,1".split(" "))
+          .map(Vec2::parse).collect(Collectors.toList());
+
   final long x;
   final long y;
   private final int hash;
@@ -22,6 +30,10 @@ public class Vec2 {
 
   public static Vec2 zero() {
     return new Vec2(0, 0);
+  }
+
+  public static Vec2 of(long x, long y) {
+    return new Vec2(x, y);
   }
 
   public long getX() {
@@ -68,5 +80,9 @@ public class Vec2 {
             "" + x +
             ", " + y +
             ')';
+  }
+
+  public Vec2 divide(long n) {
+    return new Vec2(x / n, y / n);
   }
 }

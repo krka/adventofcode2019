@@ -7,20 +7,16 @@ import util.Vec2;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
 
 public class Day6Test {
-
-  private static final List<Vec2> DIRS = Stream
-          .of("1,0 -1,0 0,-1 0,1".split(" "))
-          .map(Vec2::parse).collect(Collectors.toList());
 
   @Test
   public void testPart1() {
@@ -72,7 +68,7 @@ public class Day6Test {
     for (Map.Entry<Vec2, Set<Vec2>> entry : next.entrySet()) {
       Vec2 pos = entry.getKey();
       Set<Vec2> owners = entry.getValue();
-      for (Vec2 dir : DIRS) {
+      for (Vec2 dir : Vec2.DIRS) {
         Vec2 newPos = pos.add(dir);
         if (!visited.contains(newPos)) {
           candidates.computeIfAbsent(newPos, ignore -> new HashSet<>()).addAll(owners);
@@ -101,11 +97,47 @@ public class Day6Test {
 
   @Test
   public void testPart2() {
-    assertEquals(-1, solvePart2());
+    assertEquals(45290, solvePart2("2018/day6.in"));
   }
 
-  private int solvePart2() {
-    return -1;
+  private int solvePart2(String name) {
+    Set<Vec2> roots = Util.readResource(name).stream().map(Vec2::parse).collect(Collectors.toSet());
+
+    Vec2 center = roots.stream().reduce(Vec2::add).get().divide(roots.size());
+
+    Queue<Vec2> queue = new LinkedList<>();
+    Set<Vec2> visited = new HashSet<>();
+    queue.add(center);
+    visited.add(center);
+    int count = 0;
+    if (within(center, roots)) {
+      count++;
+    }
+
+    while (true) {
+      Vec2 vec = queue.poll();
+      if (vec == null) {
+        break;
+      }
+      for (Vec2 dir : Vec2.DIRS) {
+        Vec2 nextPos = vec.add(dir);
+        if (visited.add(nextPos)) {
+          if (within(nextPos, roots)) {
+            count++;
+            queue.add(nextPos);
+          }
+        }
+      }
+    }
+    return count;
+  }
+
+  private boolean within(Vec2 v, Set<Vec2> roots) {
+    int sum = 0;
+    for (Vec2 root : roots) {
+      sum += v.sub(root).manhattan();
+    }
+    return sum < 10000;
   }
 
 
