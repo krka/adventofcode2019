@@ -62,8 +62,9 @@ public class Day10Test {
   private long solvePart2(String name) {
     List<String> input = Util.readResource(name);
 
-    List<Integer> ints = input.stream().mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
-    ints.sort(Comparator.naturalOrder());
+    List<Integer> ints = input.stream().mapToInt(Integer::parseInt).boxed()
+            .sorted(Comparator.naturalOrder())
+            .collect(Collectors.toList());
     int max = ints.get(ints.size() - 1) + 3;
     ints.add(max);
 
