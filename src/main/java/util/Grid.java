@@ -1,20 +1,30 @@
 package util;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.Spliterator;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 public class Grid<T> {
-  private final Object[][] data;
+  private final Object[] data;
   private final int rows;
   private final int cols;
   private final T defaultValue;
 
-  public Grid(int rows, int cols, T defaultValue) {
+  private Grid(int rows, int cols, T defaultValue, Object[] data) {
+    this.data = data;
     this.rows = rows;
     this.cols = cols;
     this.defaultValue = defaultValue;
-    this.data = new Object[rows][cols];
+  }
+
+  public Grid(int rows, int cols, T defaultValue) {
+    this(rows, cols, defaultValue, IntStream.rangeClosed(0, rows * cols).mapToObj(value -> defaultValue).toArray());
   }
 
   public static <T> Grid<T> from(List<String> lines, T defaultValue, Function<Character, T> mapper) {
@@ -35,7 +45,7 @@ public class Grid<T> {
 
   public void set(int row, int col, T value) {
     if (inbound(row, col)) {
-      data[row][col] = value;
+      data[row * cols + col] = value;
     } else {
       throw new RuntimeException("Out of bounds: " + row + ", " + col);
     }
@@ -43,7 +53,7 @@ public class Grid<T> {
 
   public T get(int row, int col, T defaultValue) {
     if (inbound(row, col)) {
-      return (T) data[row][col];
+      return (T) data[row * cols + col];
     } else {
       return defaultValue;
     }
@@ -62,14 +72,7 @@ public class Grid<T> {
   }
 
   public Grid<T> duplicate() {
-    Grid<T> newGrid = new Grid<>(rows, cols, defaultValue);
-    for (int row = 0; row < rows; row++) {
-      for (int col = 0; col < cols; col++) {
-        T val = get(row, col);
-        newGrid.set(row, col, val);
-      }
-    }
-    return newGrid;
+    return new Grid<>(rows, cols, defaultValue, data.clone());
   }
 
   public String toString() {
@@ -99,17 +102,108 @@ public class Grid<T> {
     }
   }
 
-  public int count(Predicate<T> predicate) {
-    int count = 0;
-    for (int row = 0; row < rows; row++) {
-      for (int col = 0; col < cols; col++) {
-        count += predicate.test(get(row, col)) ? 1 : 0;
+  public Stream<T> values() {
+    return stream().map(Entry::getValue);
+  }
+
+  public Stream<Entry<T>> stream() {
+    return StreamSupport.stream(new Spliterator<>() {
+      int row = 0;
+      int col = 0;
+      @Override
+      public boolean tryAdvance(Consumer<? super Entry<T>> action) {
+        if (row >= rows) {
+          return false;
+        }
+        int r = row;
+        int c = col;
+        col++;
+        if (col >= cols) {
+          col = 0;
+          row++;
+        }
+        action.accept(new Entry<T>(r, c, get(r, c), Grid.this));
+        return true;
       }
-    }
-    return count;
+
+      @Override
+      public Spliterator<Entry<T>> trySplit() {
+        return null;
+      }
+
+      @Override
+      public long estimateSize() {
+        return data.length;
+      }
+
+      @Override
+      public int characteristics() {
+        return Spliterator.ORDERED | Spliterator.DISTINCT | Spliterator.SIZED | Spliterator.NONNULL
+                | Spliterator.IMMUTABLE;
+      }
+    }, false);
+  }
+
+  public long count(Predicate<T> predicate) {
+    return values().filter(predicate).count();
   }
 
   public interface GridConsumer<T> {
     void accept(int row, int col, T value);
+  }
+
+  public static class Entry<T> {
+    private final int row;
+    private final int col;
+    private final T value;
+    private final Grid<T> grid;
+
+    public Entry(int row, int col, T value, Grid<T> grid) {
+      this.row = row;
+      this.col = col;
+      this.value = value;
+      this.grid = grid;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      Entry<?> entry = (Entry<?>) o;
+      return row == entry.row &&
+              col == entry.col &&
+              value.equals(entry.value) &&
+              grid.equals(entry.grid);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(row, col, value, grid);
+    }
+
+    @Override
+    public String toString() {
+      return "Entry{" +
+              "row=" + row +
+              ", col=" + col +
+              ", value=" + value +
+              '}';
+    }
+
+    public int getRow() {
+      return row;
+    }
+
+    public int getCol() {
+      return col;
+    }
+
+    public T getValue() {
+      return value;
+    }
+
+    public Grid<T> getGrid() {
+      return grid;
+    }
   }
 }
