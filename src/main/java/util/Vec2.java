@@ -11,6 +11,10 @@ public class Vec2 {
           .of("1,0 -1,0 0,-1 0,1".split(" "))
           .map(Vec2::parse).collect(Collectors.toList());
 
+  public static final List<Vec2> DIRS_8 = Stream
+          .of("1,0 -1,0 0,-1 0,1 -1,-1, -1,1 1,-1 1,1".split(" "))
+          .map(Vec2::parse).collect(Collectors.toList());
+
   final long x;
   final long y;
   private final int hash;
