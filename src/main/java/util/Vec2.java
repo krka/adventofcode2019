@@ -15,6 +15,11 @@ public class Vec2 {
           .of("1,0 -1,0 0,-1 0,1 -1,-1, -1,1 1,-1 1,1".split(" "))
           .map(Vec2::parse).collect(Collectors.toList());
 
+  public static final Vec2 WEST = Vec2.of(-1, 0);
+  public static final Vec2 EAST = Vec2.of(1, 0);
+  public static final Vec2 NORTH = Vec2.of(0, -1);
+  public static final Vec2 SOUTH = Vec2.of(0, 1);
+
   final long x;
   final long y;
   private final int hash;
@@ -78,6 +83,24 @@ public class Vec2 {
     return new Vec2(x - other.x, y - other.y);
   }
 
+  public Vec2 rotateLeft(int n) {
+    return rotateRight(-n);
+  }
+
+  public Vec2 rotateRight(int n) {
+    int n2 = n % 4;
+    if (n2 < 0) {
+      n2 += 4;
+    }
+    switch (n2) {
+      case 0: return this;
+      case 1: return new Vec2(-y, x);
+      case 2: return new Vec2(-x, -y);
+      case 3: return new Vec2(y, -x);
+      default: throw new RuntimeException();
+    }
+  }
+
   @Override
   public String toString() {
     return "(" +
@@ -88,5 +111,9 @@ public class Vec2 {
 
   public Vec2 divide(long n) {
     return new Vec2(x / n, y / n);
+  }
+
+  public Vec2 multiply(long n) {
+    return new Vec2(x * n, y * n);
   }
 }
