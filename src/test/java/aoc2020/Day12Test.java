@@ -45,7 +45,7 @@ public class Day12Test {
         case 'F': pos = pos.add(dir.multiply(n)); break;
         case 'L':
         case 'R':
-          dir = dir.rotateRight(((n / 90) * (type == 'L' ? 3 : 1)) % 4);
+          dir = dir.rotateRight((n / 90) * (type == 'L' ? 3 : 1));
           break;
         case 'W': pos = pos.add(Vec2.WEST.multiply(n)); break;
         case 'E': pos = pos.add(Vec2.EAST.multiply(n)); break;
@@ -69,7 +69,7 @@ public class Day12Test {
         case 'F': pos = pos.add(dir.multiply(n)); break;
         case 'L':
         case 'R':
-          dir = dir.rotateRight(((n / 90) * (type == 'L' ? 3 : 1)) % 4);
+          dir = dir.rotateRight((n / 90) * (type == 'L' ? 3 : 1));
           break;
         case 'W': dir = dir.add(Vec2.WEST.multiply(n)); break;
         case 'E': dir = dir.add(Vec2.EAST.multiply(n)); break;
