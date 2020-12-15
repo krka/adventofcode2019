@@ -2,10 +2,7 @@ package aoc2020;
 
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -41,26 +38,47 @@ public class Day15Test {
 
   private long solve(String nums, int max) {
     List<Integer> ints = Stream.of(nums.split(",")).map(Integer::parseInt).collect(Collectors.toList());
-    Map<Integer, List<Integer>> mem = new HashMap<>();
+    State[] states = new State[max + 1];
+
     int turn = 1;
     for (; turn <= ints.size(); turn++) {
-      mem.computeIfAbsent(ints.get(turn - 1), ignore -> new ArrayList<>()).add(turn);
+      states[ints.get(turn - 1)] = new State().update(turn);
     }
     int last = ints.get(ints.size() - 1);
-    List<Integer> list = mem.computeIfAbsent(last, ignore -> new ArrayList<>());
-    while (turn <= max) {
-      if (list.size() >= 2) {
-        last = list.get(1) - list.get(0);
-      } else {
-        last = 0;
-      }
-      list = mem.computeIfAbsent(last, ignore -> new ArrayList<>());
-      list.add(turn);
-      while (list.size() > 2) {
-        list.remove(0);
-      }
-      turn++;
+    State state = get(states, last);
+    for (; turn <= max; turn++) {
+      last = state.last();
+      state = get(states, last).update(turn);
     }
     return last;
+  }
+
+  private State get(State[] states, int index){
+    State state = states[index];
+    if (state != null) {
+      return state;
+    }
+    state = new State();
+    states[index] = state;
+    return state;
+  }
+
+  private static class State {
+    int oldest = -1;
+    int newest = -1;
+
+    State update(int turn) {
+      oldest = newest;
+      newest = turn;
+      return this;
+    }
+
+    int last() {
+      if (oldest != -1) {
+        return newest - oldest;
+      } else {
+        return 0;
+      }
+    }
   }
 }
