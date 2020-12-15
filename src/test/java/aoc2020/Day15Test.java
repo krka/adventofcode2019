@@ -28,7 +28,7 @@ public class Day15Test {
 
   @Test
   public void testPart2() {
-    assertEquals(30000000, solvePart2("20,9,11,0,1,2"));
+    assertEquals(48568, solvePart2("20,9,11,0,1,2"));
   }
 
   private long solvePart1(String nums) {
