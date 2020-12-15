@@ -38,47 +38,28 @@ public class Day15Test {
 
   private long solve(String nums, int max) {
     List<Integer> ints = Stream.of(nums.split(",")).map(Integer::parseInt).collect(Collectors.toList());
-    State[] states = new State[max + 1];
-
-    int turn = 1;
-    for (; turn <= ints.size(); turn++) {
-      states[ints.get(turn - 1)] = new State().update(turn);
+    int[] states = new int[max];
+    for (int i = 0; i < max; i++) {
+      states[i] = -1;
     }
-    int last = ints.get(ints.size() - 1);
-    State state = get(states, last);
-    for (; turn <= max; turn++) {
-      last = state.last();
-      state = get(states, last).update(turn);
+    int turn = 1;
+    int last = -1;
+    for (; turn <= ints.size(); turn++) {
+      last = update(states, ints.get(turn - 1), turn);
+    }
+    for (; turn < max; turn++) {
+      last = update(states, last, turn);
     }
     return last;
   }
 
-  private State get(State[] states, int index){
-    State state = states[index];
-    if (state != null) {
-      return state;
-    }
-    state = new State();
-    states[index] = state;
-    return state;
-  }
-
-  private static class State {
-    int oldest = -1;
-    int newest = -1;
-
-    State update(int turn) {
-      oldest = newest;
-      newest = turn;
-      return this;
-    }
-
-    int last() {
-      if (oldest != -1) {
-        return newest - oldest;
-      } else {
-        return 0;
-      }
+  static int update(int[] states, int index, int turn) {
+    int prev = states[index];
+    states[index] = turn;
+    if (prev != -1) {
+      return turn - prev;
+    } else {
+      return 0;
     }
   }
 }
