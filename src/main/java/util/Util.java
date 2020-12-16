@@ -8,8 +8,10 @@ import java.io.Reader;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
@@ -99,5 +101,16 @@ public class Util {
     ans.addAll(a);
     ans.addAll(b);
     return ans;
+  }
+
+  public static <K, V> Map<V, K> reverseMap(Map<K, V> map) {
+    Map<V, K> rev = new HashMap<>();
+    map.forEach((key, value) -> {
+      if (rev.containsKey(value)) {
+        throw new RuntimeException();
+      }
+      rev.put(value, key);
+    });
+    return rev;
   }
 }

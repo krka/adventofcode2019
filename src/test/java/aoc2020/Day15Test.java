@@ -45,15 +45,15 @@ public class Day15Test {
     int turn = 1;
     int last = -1;
     for (; turn <= ints.size(); turn++) {
-      last = update(states, ints.get(turn - 1), turn);
+      last = updateAndLast(states, ints.get(turn - 1), turn);
     }
     for (; turn < max; turn++) {
-      last = update(states, last, turn);
+      last = updateAndLast(states, last, turn);
     }
     return last;
   }
 
-  static int update(int[] states, int index, int turn) {
+  static int updateAndLast(int[] states, int index, int turn) {
     int prev = states[index];
     states[index] = turn;
     if (prev != -1) {
