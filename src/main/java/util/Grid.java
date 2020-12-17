@@ -152,6 +152,14 @@ public class Grid<T> {
     void accept(int row, int col, T value);
   }
 
+  public int getRows() {
+    return rows;
+  }
+
+  public int getCols() {
+    return cols;
+  }
+
   public static class Entry<T> {
     private final int row;
     private final int col;
