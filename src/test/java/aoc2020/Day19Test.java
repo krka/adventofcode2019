@@ -1,6 +1,7 @@
 package aoc2020;
 
 import org.junit.Test;
+import util.Pair;
 import util.Util;
 
 import java.util.Arrays;
@@ -92,10 +93,22 @@ public class Day19Test {
   }
 
   interface Rule {
-    Set<Integer> matches(String s, int index);
+    default Set<Integer> matchesCached(String s, int index, Map<Pair<Integer, Rule>, Set<Integer>> cache) {
+      Pair<Integer, Rule> key = Pair.of(index, this);
+      Set<Integer> val = cache.get(key);
+      if (val != null) {
+        return val;
+      }
+      val = matches(s, index, cache);
+      cache.put(key, val);
+      return val;
+    }
+
+    Set<Integer> matches(String s, int index, Map<Pair<Integer, Rule>, Set<Integer>> cache);
 
     default boolean matches(String s) {
-      return matches(s, 0).contains(s.length());
+      Map<Pair<Integer, Rule>, Set<Integer>> cache = new HashMap<>();
+      return matchesCached(s, 0, cache).contains(s.length());
     }
   }
 
@@ -109,7 +122,7 @@ public class Day19Test {
     }
 
     @Override
-    public Set<Integer> matches(String s, int index) {
+    public Set<Integer> matches(String s, int index, Map<Pair<Integer, Rule>, Set<Integer>> cache) {
       int end = index + length;
       if (end > s.length()) {
         return Set.of();
@@ -137,8 +150,8 @@ public class Day19Test {
     }
 
     @Override
-    public Set<Integer> matches(String s, int index) {
-      return getRule().matches(s, index);
+    public Set<Integer> matches(String s, int index, Map<Pair<Integer, Rule>, Set<Integer>> cache) {
+      return getRule().matchesCached(s, index, cache);
     }
 
     private Rule getRule() {
@@ -163,9 +176,9 @@ public class Day19Test {
     }
 
     @Override
-    public Set<Integer> matches(String s, int index) {
+    public Set<Integer> matches(String s, int index, Map<Pair<Integer, Rule>, Set<Integer>> cache) {
       return rules.stream()
-              .map(rule -> rule.matches(s, index))
+              .map(rule -> rule.matchesCached(s, index, cache))
               .flatMap(Collection::stream)
               .collect(Collectors.toSet());
     }
@@ -184,11 +197,11 @@ public class Day19Test {
     }
 
     @Override
-    public Set<Integer> matches(String s, int index) {
+    public Set<Integer> matches(String s, int index, Map<Pair<Integer, Rule>, Set<Integer>> cache) {
       Set<Integer> cur = Set.of(index);
       for (Rule rule : rules) {
         cur = cur.stream()
-                .map(index2 -> rule.matches(s, index2))
+                .map(index2 -> rule.matchesCached(s, index2, cache))
                 .flatMap(Collection::stream)
                 .collect(Collectors.toSet());
       }
