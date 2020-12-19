@@ -43,19 +43,8 @@ public class Day19Test {
     Map<Integer, Rule> ruleDefs = parseRules(parts);
 
     Rule rule0 = ruleDefs.get(0);
-    System.out.println("Rule: '" + rule0 + "'");
-
     List<String> messages = parts.get(1);
     return messages.stream().filter(rule0::matches).count();
-  }
-
-  private Map<Integer, Rule> parseRules(List<List<String>> parts) {
-    Map<Integer, Rule> ruleDefs = new HashMap<>();
-    for (String ruleDef : parts.get(0)) {
-      String[] split = ruleDef.split(":");
-      ruleDefs.put(Integer.parseInt(split[0]), parseRule(ruleDefs, split[1].trim()));
-    }
-    return ruleDefs;
   }
 
   private long solvePart2(String name) {
@@ -70,6 +59,15 @@ public class Day19Test {
 
     List<String> messages = parts.get(1);
     return messages.stream().filter(rule0::matches).count();
+  }
+
+  private Map<Integer, Rule> parseRules(List<List<String>> parts) {
+    Map<Integer, Rule> ruleDefs = new HashMap<>();
+    for (String ruleDef : parts.get(0)) {
+      String[] split = ruleDef.split(":");
+      ruleDefs.put(Integer.parseInt(split[0]), parseRule(ruleDefs, split[1].trim()));
+    }
+    return ruleDefs;
   }
 
   private Rule parseRule(Map<Integer, Rule> ruleDefs, String ruleDef) {
@@ -99,11 +97,6 @@ public class Day19Test {
     default boolean matches(String s) {
       return matches(s, 0).contains(s.length());
     }
-
-    default void debug(String s, int index, Set<Integer> ans) {
-      //System.out.printf("pattern=%s: %s[%d:]=%s: %s%n", toString(), s, index, s.substring(index), ans);
-    }
-
   }
 
   private static class ConstRule implements Rule {
@@ -171,12 +164,10 @@ public class Day19Test {
 
     @Override
     public Set<Integer> matches(String s, int index) {
-      Set<Integer> cur = rules.stream()
+      return rules.stream()
               .map(rule -> rule.matches(s, index))
               .flatMap(Collection::stream)
               .collect(Collectors.toSet());
-      debug(s, index, cur);
-      return cur;
     }
 
     @Override
@@ -201,17 +192,12 @@ public class Day19Test {
                 .flatMap(Collection::stream)
                 .collect(Collectors.toSet());
       }
-      debug(s, index, cur);
       return cur;
     }
 
     @Override
     public String toString() {
-      StringBuilder sb = new StringBuilder();
-      for (Rule rule : rules) {
-        sb.append(rule.toString());
-      }
-      return sb.toString();
+      return rules.stream().map(Object::toString).collect(Collectors.joining(""));
     }
   }
 }
