@@ -3,12 +3,13 @@ package aoc2020;
 import org.junit.Test;
 import util.Util;
 
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 
@@ -39,111 +40,178 @@ public class Day19Test {
     List<String> input = Util.readResource(name);
     List<List<String>> parts = input.stream().collect(Util.splitBy(String::isEmpty));
 
-    Map<Integer, String> ruleDefs = mapDefs(parts.get(0));
+    Map<Integer, Rule> ruleDefs = parseRules(parts);
 
-    Map<Integer, Rule> rules = new HashMap<>();
-    Rule rule0 = readRule(rules, ruleDefs, 0);
+    Rule rule0 = ruleDefs.get(0);
+    System.out.println("Rule: '" + rule0 + "'");
 
     List<String> messages = parts.get(1);
     return messages.stream().filter(rule0::matches).count();
+  }
+
+  private Map<Integer, Rule> parseRules(List<List<String>> parts) {
+    Map<Integer, Rule> ruleDefs = new HashMap<>();
+    for (String ruleDef : parts.get(0)) {
+      String[] split = ruleDef.split(":");
+      ruleDefs.put(Integer.parseInt(split[0]), parseRule(ruleDefs, split[1].trim()));
+    }
+    return ruleDefs;
   }
 
   private long solvePart2(String name) {
     List<String> input = Util.readResource(name);
     List<List<String>> parts = input.stream().collect(Util.splitBy(String::isEmpty));
 
-    Map<Integer, String> ruleDefs = mapDefs(parts.get(0));
-    ruleDefs.put(8, "42 | 42 8");
-    ruleDefs.put(11, "42 31 | 42 11 31");
+    Map<Integer, Rule> ruleDefs = parseRules(parts);
+    ruleDefs.put(8, parseRule(ruleDefs, "42 | 42 8"));
+    ruleDefs.put(11, parseRule(ruleDefs, "42 31 | 42 11 31"));
 
-    Map<Integer, Rule> ruleMap = new HashMap<>();
-    Rule rule0 = readRule(ruleMap, ruleDefs, 0);
+    Rule rule0 = ruleDefs.get(0);
 
     List<String> messages = parts.get(1);
     return messages.stream().filter(rule0::matches).count();
   }
 
-  private Map<Integer, String> mapDefs(List<String> ruleList) {
-    Map<Integer, String> ruleDefs = new HashMap<>();
-    for (String rule : ruleList) {
-      String[] split = rule.split(":");
-      ruleDefs.put(Integer.parseInt(split[0].trim()), split[1].trim());
+  private Rule parseRule(Map<Integer, Rule> ruleDefs, String ruleDef) {
+    ruleDef = ruleDef.trim();
+    if (ruleDef.contains("|")) {
+      return new AltRule(Arrays.stream(ruleDef.split("\\|"))
+              .map(alt -> parseRule(ruleDefs, alt))
+              .collect(Collectors.toList()));
     }
-    return ruleDefs;
+
+    if (ruleDef.contains(" ")) {
+      return new SequenceRule(Arrays.stream(ruleDef.split("\\s+"))
+              .map(s -> parseRule(ruleDefs, s))
+              .collect(Collectors.toList()));
+    }
+
+    if (ruleDef.charAt(0) == '"') {
+      return new ConstRule(ruleDef.substring(1, ruleDef.length() - 1));
+    }
+
+    return new RuleRef(ruleDefs, Integer.parseInt(ruleDef));
   }
 
-  private Rule readRule(Map<Integer, Rule> ruleMap, Map<Integer, String> ruleInput, int i) {
-    if (ruleMap.containsKey(i)) {
-      return ruleMap.get(i);
+  interface Rule {
+    Set<Integer> matches(String s, int index);
+
+    default boolean matches(String s) {
+      return matches(s, 0).contains(s.length());
     }
-    String s = ruleInput.get(i);
-    String[] alternatives = s.split("\\|");
-    Rule rule = new Rule();
-    rule.id = i;
-    ruleMap.put(i, rule);
-    for (String alt : alternatives) {
-      alt = alt.trim();
-      List<Rule> alt2 = new ArrayList<>();
-      for (String part : alt.split(" ")) {
-        part = part.trim();
-        if (part.startsWith("\"")) {
-          if (part.length() != 3 || rule.c != 0) {
-            throw new RuntimeException();
-          }
-          rule.c = part.charAt(1);
-        } else {
-          alt2.add(readRule(ruleMap, ruleInput, Integer.parseInt(part)));
-        }
-      }
-      if (!alt2.isEmpty()) {
-        rule.alts.add(alt2);
-      }
+
+    default void debug(String s, int index, Set<Integer> ans) {
+      //System.out.printf("pattern=%s: %s[%d:]=%s: %s%n", toString(), s, index, s.substring(index), ans);
     }
-    if (rule.c != 0 && !rule.alts.isEmpty()) {
-      throw new RuntimeException();
-    }
-    return rule;
+
   }
 
-  private class Rule {
-    int id;
-    List<List<Rule>> alts = new ArrayList<>();
-    char c;
+  private static class ConstRule implements Rule {
+    private final String pattern;
+    private final int length;
 
-    public boolean matches(String message) {
-      return matches(message, 0).contains(message.length());
+    ConstRule(String s) {
+      pattern = s;
+      length = s.length();
     }
 
-    private Set<Integer> matches(String message, int i) {
-      if (i >= message.length()) {
+    @Override
+    public Set<Integer> matches(String s, int index) {
+      int end = index + length;
+      if (end > s.length()) {
         return Set.of();
       }
-      if (c != 0) {
-        if (message.charAt(i) == c) {
-          return Set.of(i + 1);
-        } else {
-          return Set.of();
-        }
+      if (s.substring(index, end).equals(pattern)) {
+        return Set.of(end);
       }
-
-      Set<Integer> all = new HashSet<>();
-      for (List<Rule> alt : alts) {
-        Set<Integer> cur = Set.of(i);
-        for (Rule rule : alt) {
-          Set<Integer> next = new HashSet<>();
-          for (Integer i2 : cur) {
-            next.addAll(rule.matches(message, i2));
-          }
-          cur = next;
-        }
-        all.addAll(cur);
-      }
-      return all;
+      return Set.of();
     }
 
     @Override
     public String toString() {
-      return "Rule " + id;
+      return pattern;
+    }
+  }
+
+  private static class RuleRef implements Rule {
+    private final Map<Integer, Rule> ruleDefs;
+    private final int ruleId;
+    private Rule rule;
+
+    RuleRef(Map<Integer, Rule> ruleDefs, int ruleId) {
+      this.ruleDefs = ruleDefs;
+      this.ruleId = ruleId;
+    }
+
+    @Override
+    public Set<Integer> matches(String s, int index) {
+      return getRule().matches(s, index);
+    }
+
+    private Rule getRule() {
+      if (rule == null) {
+        rule = ruleDefs.get(ruleId);
+      }
+      return rule;
+    }
+
+    @Override
+    public String toString() {
+      return getRule().toString();
+    }
+  }
+
+  private static class AltRule implements Rule {
+
+    private final List<Rule> rules;
+
+    AltRule(List<Rule> rules) {
+      this.rules = rules;
+    }
+
+    @Override
+    public Set<Integer> matches(String s, int index) {
+      Set<Integer> cur = rules.stream()
+              .map(rule -> rule.matches(s, index))
+              .flatMap(Collection::stream)
+              .collect(Collectors.toSet());
+      debug(s, index, cur);
+      return cur;
+    }
+
+    @Override
+    public String toString() {
+      return "(" + rules.stream().map(Object::toString).collect(Collectors.joining("|")) + ")";
+    }
+  }
+
+  private static class SequenceRule implements Rule {
+    private final List<Rule> rules;
+
+    SequenceRule(List<Rule> rules) {
+      this.rules = rules;
+    }
+
+    @Override
+    public Set<Integer> matches(String s, int index) {
+      Set<Integer> cur = Set.of(index);
+      for (Rule rule : rules) {
+        cur = cur.stream()
+                .map(index2 -> rule.matches(s, index2))
+                .flatMap(Collection::stream)
+                .collect(Collectors.toSet());
+      }
+      debug(s, index, cur);
+      return cur;
+    }
+
+    @Override
+    public String toString() {
+      StringBuilder sb = new StringBuilder();
+      for (Rule rule : rules) {
+        sb.append(rule.toString());
+      }
+      return sb.toString();
     }
   }
 }
