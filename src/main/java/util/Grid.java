@@ -43,6 +43,14 @@ public class Grid<T> {
     return grid;
   }
 
+  public void setGrid(int row, int col, Grid<T> source, int offsetRow, int offsetCol, int rows, int cols) {
+    for (int sourceRow = 0; sourceRow < rows; sourceRow++) {
+      for (int sourceCol = 0; sourceCol < cols; sourceCol++) {
+        set(row + sourceRow, col + sourceCol, source.get(sourceRow + offsetRow, sourceCol + offsetCol));
+      }
+    }
+  }
+
   public void set(int row, int col, T value) {
     if (inbound(row, col)) {
       data[row * cols + col] = value;
@@ -146,6 +154,22 @@ public class Grid<T> {
 
   public long count(Predicate<T> predicate) {
     return values().filter(predicate).count();
+  }
+
+  public Grid<T> rotateLeft() {
+    Grid<T> newGrid = new Grid<>(cols, rows, defaultValue, new Object[data.length]);
+    forEach((row, col, value) -> {
+      newGrid.set(cols - col - 1, row, value);
+    });
+    return newGrid;
+  }
+
+  public Grid<T> mirror() {
+    Grid<T> newGrid = new Grid<>(rows, cols, defaultValue, new Object[data.length]);
+    forEach((row, col, value) -> {
+      newGrid.set(rows - row - 1, col, value);
+    });
+    return newGrid;
   }
 
   public interface GridConsumer<T> {
