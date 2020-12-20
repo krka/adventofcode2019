@@ -129,21 +129,34 @@ public class Day20Test {
       }
     }
 
-    List<Grid<Character>> monsters = createMonsters();
+    Grid<Character> monster = Grid.from(
+            List.of(
+                    "                  # ",
+                    "#    ##    ##    ###",
+                    " #  #  #  #  #  #   "
+            ), 'X', c -> c);
 
-    Grid<Integer> monsterCount = new Grid<>(grid.rows(), grid.cols(), 0);
-
-    for (Grid<Character> monster : monsters) {
-      for (int row = 0; row < grid.rows() - monster.rows(); row++) {
-        for (int col = 0; col < grid.cols() - monster.cols(); col++) {
-          if (isMonster(grid, row, col, monster)) {
-            markMonster(monsterCount, monster, row, col);
+    for (int mirror = 0; mirror < 2; mirror++) {
+      for (int rot = 0; rot < 4; rot++) {
+        boolean hasMonster = false;
+        Grid<Integer> monsterCount = new Grid<>(grid.rows(), grid.cols(), 0);
+        for (int row = 0; row < grid.rows() - monster.rows(); row++) {
+          for (int col = 0; col < grid.cols() - monster.cols(); col++) {
+            if (isMonster(grid, row, col, monster)) {
+              markMonster(monsterCount, monster, row, col);
+              hasMonster = true;
+            }
           }
         }
+        if (hasMonster) {
+          return grid.count(v -> v == '#') - monsterCount.count(v1 -> v1 == 1);
+        }
+        grid = grid.rotateLeft();
       }
+      grid = grid.mirror();
     }
 
-    return grid.count(v -> v == '#') - monsterCount.count(v1 -> v1 == 1);
+    throw new RuntimeException();
   }
 
   private Set<Integer> edgeSignature(List<Tile> tiles) {
@@ -172,40 +185,6 @@ public class Day20Test {
         }
       }
     }
-  }
-
-  private List<Grid<Character>> createMonsters() {
-    List<Grid<Character>> monsters = new ArrayList<>();
-
-    Grid<Character> monster = Grid.from(
-            List.of(
-                    "                  # ",
-                    "#    ##    ##    ###",
-                    " #  #  #  #  #  #   "
-            ), 'X', c -> c);
-    monsters.add(monster);
-
-    monster = monster.rotateLeft();
-    monsters.add(monster);
-
-    monster = monster.rotateLeft();
-    monsters.add(monster);
-
-    monster = monster.rotateLeft();
-    monsters.add(monster);
-
-    monster = monster.mirror();
-    monsters.add(monster);
-
-    monster = monster.rotateLeft();
-    monsters.add(monster);
-
-    monster = monster.rotateLeft();
-    monsters.add(monster);
-
-    monster = monster.rotateLeft();
-    monsters.add(monster);
-    return monsters;
   }
 
   private boolean isMonster(Grid<Character> grid, int row, int col, Grid<Character> monster) {
