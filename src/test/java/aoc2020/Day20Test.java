@@ -90,16 +90,16 @@ public class Day20Test {
     for (int col = 1; col < dim; col++) {
       Tile prev = tileGrid.get(0, col - 1);
       int targetLeft = rev(prev.right);
-      Tile match = getAdjacent(edgeMap, prev, targetLeft);
-      match = Rotatable.rotateUntil(match, tile -> tile.left == targetLeft);
+      Tile adj = getAdjacent(edgeMap, prev, targetLeft);
+      Tile match = Rotatable.rotateUntil(adj, tile -> tile.left == targetLeft);
       tileGrid.set(0, col, match);
     }
 
     for (int row = 1; row < dim; row++) {
       Tile prev = tileGrid.get(row - 1, 0);
       int targetTop = rev(prev.bottom);
-      Tile match = getAdjacent(edgeMap, prev, targetTop);
-      match = Rotatable.rotateUntil(match, tile -> tile.top == targetTop);
+      Tile adj = getAdjacent(edgeMap, prev, targetTop);
+      Tile match = Rotatable.rotateUntil(adj, tile -> tile.top == targetTop);
       tileGrid.set(row, 0, match);
     }
 
@@ -110,8 +110,8 @@ public class Day20Test {
         int targetLeft = rev(left.right);
         int targetAbove = rev(above.bottom);
 
-        Tile match = getAdjacent(edgeMap, left, targetLeft);
-        match = Rotatable.rotateUntil(match, tile -> tile.left == targetLeft);
+        Tile adj = getAdjacent(edgeMap, left, targetLeft);
+        Tile match = Rotatable.rotateUntil(adj, tile -> tile.left == targetLeft);
         assertEquals(match.top, targetAbove);
         tileGrid.set(row, col, match);
       }
