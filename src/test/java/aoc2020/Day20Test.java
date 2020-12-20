@@ -166,10 +166,10 @@ public class Day20Test {
       counts.merge(tile.bottomRow, 1, Integer::sum);
       counts.merge(tile.leftCol, 1, Integer::sum);
       counts.merge(tile.rightCol, 1, Integer::sum);
-      counts.merge(tile.topRev, 1, Integer::sum);
-      counts.merge(tile.bottomRev, 1, Integer::sum);
-      counts.merge(tile.leftRev, 1, Integer::sum);
-      counts.merge(tile.rightRev, 1, Integer::sum);
+      counts.merge(rev(tile.topRow), 1, Integer::sum);
+      counts.merge(rev(tile.bottomRow), 1, Integer::sum);
+      counts.merge(rev(tile.leftCol), 1, Integer::sum);
+      counts.merge(rev(tile.rightCol), 1, Integer::sum);
     }
     return counts.entrySet().stream()
             .filter(entry -> entry.getValue() == 1)
@@ -211,6 +211,10 @@ public class Day20Test {
     throw new RuntimeException();
   }
 
+  private static int rev(int edge) {
+    return Integer.reverse(edge) >>> 22;
+  }
+
   static class Tile {
     final Grid<Character> grid;
     final int id;
@@ -218,10 +222,6 @@ public class Day20Test {
     int bottomRow;
     int leftCol;
     int rightCol;
-    int topRev;
-    int bottomRev;
-    int leftRev;
-    int rightRev;
 
     public Tile(Grid<Character> grid, int id, int topRow, int bottomRow, int leftCol, int rightCol) {
       this.grid = grid;
@@ -230,10 +230,6 @@ public class Day20Test {
       this.bottomRow = bottomRow;
       this.leftCol = leftCol;
       this.rightCol = rightCol;
-      this.topRev = rev(topRow);
-      this.bottomRev = rev(bottomRow);
-      this.leftRev = rev(leftCol);
-      this.rightRev = rev(rightCol);
     }
 
     Tile(List<String> data) {
@@ -255,38 +251,27 @@ public class Day20Test {
         rightCol <<= 1;
         rightCol |= grid.get(row, grid.cols() - 1) == '.' ? 0 : 1;
       }
-
-      topRev = rev(topRow);
-      bottomRev = rev(bottomRow);
-      leftRev = rev(leftCol);
-      rightRev = rev(rightCol);
-    }
-
-    private int rev(int edge) {
-      return Integer.reverse(edge) >>> 22;
     }
 
     boolean matches(int edge) {
+      int edge2 = rev(edge);
       return edge == topRow || edge == bottomRow || edge == leftCol || edge == rightCol ||
-              edge == topRev || edge == bottomRev || edge == leftRev || edge == rightRev;
+              edge2 == topRow || edge2 == bottomRow || edge2 == leftCol || edge2 == rightCol;
     }
 
     List<Integer> getOnes(Set<Integer> edgeSignatures) {
       ArrayList<Integer> res = new ArrayList<>();
       addIfOne(res, edgeSignatures, topRow);
-      addIfOne(res, edgeSignatures, topRev);
       addIfOne(res, edgeSignatures, bottomRow);
-      addIfOne(res, edgeSignatures, bottomRev);
       addIfOne(res, edgeSignatures, leftCol);
-      addIfOne(res, edgeSignatures, leftRev);
       addIfOne(res, edgeSignatures, rightCol);
-      addIfOne(res, edgeSignatures, rightRev);
       return res;
     }
 
     private void addIfOne(ArrayList<Integer> res, Set<Integer> edgeSignatures, int signature) {
       if (edgeSignatures.contains(signature)) {
         res.add(signature);
+        res.add(rev(signature));
       }
     }
 
@@ -295,11 +280,11 @@ public class Day20Test {
     }
 
     public Tile rotateLeft() {
-      return new Tile(grid.rotateLeft(), id, rightCol, leftCol, topRev, bottomRev);
+      return new Tile(grid.rotateLeft(), id, rightCol, leftCol, rev(topRow), rev(bottomRow));
     }
 
     public Tile mirror() {
-      return new Tile(grid.mirror(), id, bottomRow, topRow, leftRev, rightRev);
+      return new Tile(grid.mirror(), id, bottomRow, topRow, rev(leftCol), rev(rightCol));
     }
   }
 
