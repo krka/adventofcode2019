@@ -2,18 +2,18 @@ package aoc2020;
 
 import org.junit.Test;
 import util.Grid;
+import util.Rotatable;
 import util.Util;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class Day20Test {
 
@@ -50,9 +50,9 @@ public class Day20Test {
             .stream().map(Tile::new)
             .collect(Collectors.toList());
 
-    Set<Integer> edgeSignatures = edgeSignature(tiles);
+    Map<Integer, Set<Tile>> edgeMap = createEdgeMap(tiles);
 
-    return tiles.stream().filter(tile -> tile.hasTwoEdges(edgeSignatures))
+    return tiles.stream().filter(tile -> tile.isCorner(edgeMap))
             .map(tile -> tile.id)
             .mapToLong(Integer::longValue)
             .reduce((a, b) -> a * b)
@@ -67,55 +67,50 @@ public class Day20Test {
             .stream().map(Tile::new)
             .collect(Collectors.toList());
 
-    Set<Integer> edgeSignatures = edgeSignature(tiles);
+    Map<Integer, Set<Tile>> edgeMap = createEdgeMap(tiles);
 
-    int dim = (int) Math.sqrt(tiles.size());
+    List<Tile> allCorners = tiles.stream()
+            .filter(tile -> tile.isCorner(edgeMap))
+            .collect(Collectors.toList());
 
-    Grid<Tile> tileGrid = new Grid<>(dim, dim, null);
+    assertEquals(4, allCorners.size());
 
     // Doesn't matter which corner we choose
-    Tile corner = tiles.stream().filter(tile -> tile.hasTwoEdges(edgeSignatures)).findFirst().get();
+    Tile corner = allCorners.get(0);
 
-    Set<Integer> used = new HashSet<>();
-    used.add(corner.id);
+    Set<Integer> cornerEdges = corner.countOnes(edgeMap);
+    assertEquals(4, cornerEdges.size());
 
-    List<Integer> ones = corner.getOnes(edgeSignatures);
-    corner = rotateUntilMatch(corner, tile -> ones.contains(tile.leftCol) && ones.contains(tile.topRow));
+    int dim = (int) Math.sqrt(tiles.size());
+    Grid<Tile> tileGrid = new Grid<>(dim, dim, null);
+
+    corner = Rotatable.rotateUntil(corner, tile -> cornerEdges.contains(tile.leftCol) && cornerEdges.contains(tile.topRow));
     tileGrid.set(0, 0, corner);
 
-    for (int i = 1; i < dim; i++) {
-      int targetEdge = tileGrid.get(0, i - 1).rightCol;
-      Tile match = tiles.stream()
-              .filter(tile -> !used.contains(tile.id))
-              .filter(tile -> tile.matches(targetEdge))
-              .reduce(Util.exactlyOne()).get();
-
-      match = rotateUntilMatch(match, tile -> tile.leftCol == targetEdge && edgeSignatures.contains(tile.topRow));
-      used.add(match.id);
-      tileGrid.set(0, i, match);
+    for (int col = 1; col < dim; col++) {
+      Tile prev = tileGrid.get(0, col - 1);
+      Tile match = getAdjacent(edgeMap, prev, prev.rightCol);
+      match = Rotatable.rotateUntil(match, tile -> tile.leftCol == prev.rightCol);
+      tileGrid.set(0, col, match);
     }
 
-    for (int i = 1; i < dim; i++) {
-      int targetEdge = tileGrid.get(i - 1, 0).bottomRow;
-      Tile match = tiles.stream()
-              .filter(tile -> !used.contains(tile.id))
-              .filter(tile -> tile.matches(targetEdge))
-              .reduce(Util.exactlyOne()).get();
-      match = rotateUntilMatch(match, tile -> tile.topRow == targetEdge && edgeSignatures.contains(tile.leftCol));
-      used.add(match.id);
-      tileGrid.set(i, 0, match);
+    for (int row = 1; row < dim; row++) {
+      Tile prev = tileGrid.get(row - 1, 0);
+      Tile match = getAdjacent(edgeMap, prev, prev.bottomRow);
+      match = Rotatable.rotateUntil(match, tile -> tile.topRow == prev.bottomRow);
+      tileGrid.set(row, 0, match);
     }
 
     for (int row = 1; row < dim; row++) {
       for (int col = 1; col < dim; col++) {
-        int targetLeft = tileGrid.get(row, col - 1).rightCol;
-        int targetTop = tileGrid.get(row - 1, col).bottomRow;
-        Tile match = tiles.stream()
-                .filter(tile -> !used.contains(tile.id))
-                .filter(tile -> tile.matches(targetLeft) && tile.matches(targetTop))
-                .reduce(Util.exactlyOne()).get();
-        match = rotateUntilMatch(match, tile -> tile.topRow == targetTop && tile.leftCol == targetLeft);
-        used.add(match.id);
+        Tile left = tileGrid.get(row, col - 1);
+        Tile above = tileGrid.get(row - 1, col);
+        int targetLeft = left.rightCol;
+        int targetAbove = above.bottomRow;
+
+        Tile match = getAdjacent(edgeMap, left, targetLeft);
+        match = Rotatable.rotateUntil(match, tile -> tile.leftCol == targetLeft);
+        assertEquals(match.topRow, targetAbove);
         tileGrid.set(row, col, match);
       }
     }
@@ -136,45 +131,59 @@ public class Day20Test {
                     " #  #  #  #  #  #   "
             ), 'X', c -> c);
 
-    for (int mirror = 0; mirror < 2; mirror++) {
-      for (int rot = 0; rot < 4; rot++) {
-        boolean hasMonster = false;
-        Grid<Integer> monsterCount = new Grid<>(grid.rows(), grid.cols(), 0);
-        for (int row = 0; row < grid.rows() - monster.rows(); row++) {
-          for (int col = 0; col < grid.cols() - monster.cols(); col++) {
-            if (isMonster(grid, row, col, monster)) {
-              markMonster(monsterCount, monster, row, col);
-              hasMonster = true;
-            }
-          }
-        }
-        if (hasMonster) {
-          return grid.count(v -> v == '#') - monsterCount.count(v1 -> v1 == 1);
-        }
-        grid = grid.rotateLeft();
-      }
-      grid = grid.mirror();
-    }
-
-    throw new RuntimeException();
+    return Rotatable.all(grid)
+            .mapToLong(g -> countMonsters(monster, g))
+            .filter(v -> v >= 0)
+            .reduce(Util.exactlyOneLong()).getAsLong();
   }
 
-  private Set<Integer> edgeSignature(List<Tile> tiles) {
-    Map<Integer, Integer> counts = new HashMap<>();
-    for (Tile tile : tiles) {
-      counts.merge(tile.topRow, 1, Integer::sum);
-      counts.merge(tile.bottomRow, 1, Integer::sum);
-      counts.merge(tile.leftCol, 1, Integer::sum);
-      counts.merge(tile.rightCol, 1, Integer::sum);
-      counts.merge(rev(tile.topRow), 1, Integer::sum);
-      counts.merge(rev(tile.bottomRow), 1, Integer::sum);
-      counts.merge(rev(tile.leftCol), 1, Integer::sum);
-      counts.merge(rev(tile.rightCol), 1, Integer::sum);
+  private long countMonsters(Grid<Character> monster, Grid<Character> grid) {
+    boolean hasMonster = false;
+    Grid<Integer> monsterCount = new Grid<>(grid.rows(), grid.cols(), 0);
+    for (int row = 0; row < grid.rows() - monster.rows(); row++) {
+      for (int col = 0; col < grid.cols() - monster.cols(); col++) {
+        if (isMonster(grid, row, col, monster)) {
+          markMonster(monsterCount, monster, row, col);
+          hasMonster = true;
+        }
+      }
     }
-    return counts.entrySet().stream()
-            .filter(entry -> entry.getValue() == 1)
-            .map(Map.Entry::getKey)
-            .collect(Collectors.toSet());
+    if (hasMonster) {
+      return grid.count(v -> v == '#') - monsterCount.count(v1 -> v1 == 1);
+    }
+    return -1;
+  }
+
+  private Tile getAdjacent(Map<Integer, Set<Tile>> edgeMap, Tile prev, int edge) {
+    Set<Tile> matches = edgeMap.get(edge);
+    assertEquals(2, matches.size());
+    return matches.stream()
+            .filter(tile -> tile.id != prev.id)
+            .reduce(Util.exactlyOne()).get();
+  }
+
+  private Map<Integer, Set<Tile>> createEdgeMap(List<Tile> tiles) {
+    Map<Integer, Set<Tile>> counts = new HashMap<>();
+    for (Tile tile : tiles) {
+      addSignature(counts, tile, tile.topRow);
+      addSignature(counts, tile, tile.bottomRow);
+      addSignature(counts, tile, tile.leftCol);
+      addSignature(counts, tile, tile.rightCol);
+    }
+    for (Set<Tile> value : counts.values()) {
+      int size = value.size();
+      switch (size) {
+        case 1: break; // Frame piece
+        case 2: break; // middle piece
+        default: fail("Unexpected size: " + size);
+      }
+    }
+    return counts;
+  }
+
+  private void addSignature(Map<Integer, Set<Tile>> counts, Tile tile, int add) {
+    counts.computeIfAbsent(add, ignore -> new HashSet<>()).add(tile);
+    counts.computeIfAbsent(rev(add), ignore -> new HashSet<>()).add(tile);
   }
 
   private void markMonster(Grid<Integer> monsterCount, Grid<Character> monster2, int row, int col) {
@@ -198,24 +207,11 @@ public class Day20Test {
     return true;
   }
 
-  private Tile rotateUntilMatch(Tile tile, Predicate<Tile> predicate) {
-    for (int mirror = 0; mirror < 2; mirror++) {
-      for (int rot = 0; rot < 4; rot++) {
-        if (predicate.test(tile)) {
-          return tile;
-        }
-        tile = tile.rotateLeft();
-      }
-      tile = tile.mirror();
-    }
-    throw new RuntimeException();
-  }
-
   private static int rev(int edge) {
     return Integer.reverse(edge) >>> 22;
   }
 
-  static class Tile {
+  static class Tile implements Rotatable {
     final Grid<Character> grid;
     final int id;
     int topRow;
@@ -253,39 +249,36 @@ public class Day20Test {
       }
     }
 
-    boolean matches(int edge) {
-      int edge2 = rev(edge);
-      return edge == topRow || edge == bottomRow || edge == leftCol || edge == rightCol ||
-              edge2 == topRow || edge2 == bottomRow || edge2 == leftCol || edge2 == rightCol;
+    public boolean isCorner(Map<Integer, Set<Tile>> edges) {
+      return countOnes(edges).size() == 4;
     }
 
-    List<Integer> getOnes(Set<Integer> edgeSignatures) {
-      ArrayList<Integer> res = new ArrayList<>();
-      addIfOne(res, edgeSignatures, topRow);
-      addIfOne(res, edgeSignatures, bottomRow);
-      addIfOne(res, edgeSignatures, leftCol);
-      addIfOne(res, edgeSignatures, rightCol);
+    Set<Integer> countOnes(Map<Integer, Set<Tile>> edgeMap) {
+      Set<Integer> res = new HashSet<>();
+      addIfOne(res, edgeMap, topRow);
+      addIfOne(res, edgeMap, bottomRow);
+      addIfOne(res, edgeMap, leftCol);
+      addIfOne(res, edgeMap, rightCol);
       return res;
     }
 
-    private void addIfOne(ArrayList<Integer> res, Set<Integer> edgeSignatures, int signature) {
-      if (edgeSignatures.contains(signature)) {
+    private void addIfOne(Set<Integer> res, Map<Integer, Set<Tile>> edgeMap, int signature) {
+      if (edgeMap.getOrDefault(signature, Set.of()).size() == 1) {
         res.add(signature);
         res.add(rev(signature));
       }
     }
 
-    public boolean hasTwoEdges(Set<Integer> edges) {
-      return getOnes(edges).size() == 4;
-    }
-
+    @Override
     public Tile rotateLeft() {
       return new Tile(grid.rotateLeft(), id, rightCol, leftCol, rev(topRow), rev(bottomRow));
     }
 
+    @Override
     public Tile mirror() {
       return new Tile(grid.mirror(), id, bottomRow, topRow, rev(leftCol), rev(rightCol));
     }
+
   }
 
 }

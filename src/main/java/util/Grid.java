@@ -10,7 +10,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-public class Grid<T> {
+public class Grid<T> implements Rotatable<Grid<T>> {
   private final Object[] data;
   private final int rows;
   private final int cols;
@@ -156,6 +156,7 @@ public class Grid<T> {
     return values().filter(predicate).count();
   }
 
+  @Override
   public Grid<T> rotateLeft() {
     Grid<T> newGrid = new Grid<>(cols, rows, defaultValue, new Object[data.length]);
     forEach((row, col, value) -> {
@@ -164,6 +165,7 @@ public class Grid<T> {
     return newGrid;
   }
 
+  @Override
   public Grid<T> mirror() {
     Grid<T> newGrid = new Grid<>(rows, cols, defaultValue, new Object[data.length]);
     forEach((row, col, value) -> {

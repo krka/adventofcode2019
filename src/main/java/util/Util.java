@@ -13,12 +13,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Spliterator;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
+import java.util.function.Consumer;
 import java.util.function.IntBinaryOperator;
+import java.util.function.LongBinaryOperator;
 import java.util.function.Predicate;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 public class Util {
   private static final ClassLoader CLASS_LOADER = Util.class.getClassLoader();
@@ -83,6 +88,12 @@ public class Util {
     };
   }
 
+  public static LongBinaryOperator exactlyOneLong() throws RuntimeException {
+    return (left, right) -> {
+      throw new RuntimeException();
+    };
+  }
+
   public static <T> BinaryOperator<T> exactlyOne() throws RuntimeException {
     return (left, right) -> {
       throw new RuntimeException();
@@ -113,4 +124,5 @@ public class Util {
     });
     return rev;
   }
+
 }
