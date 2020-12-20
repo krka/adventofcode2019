@@ -166,7 +166,7 @@ public class Grid<T> implements Rotatable<Grid<T>> {
   }
 
   @Override
-  public Grid<T> mirror() {
+  public Grid<T> mirrorHoriz() {
     Grid<T> newGrid = new Grid<>(rows, cols, defaultValue, new Object[data.length]);
     forEach((row, col, value) -> {
       newGrid.set(rows - row - 1, col, value);

@@ -1,6 +1,5 @@
 package util;
 
-import java.util.Optional;
 import java.util.Spliterator;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -26,7 +25,7 @@ public interface Rotatable<T extends Rotatable<T>> {
         if (i == 8) {
           // Last step, no need to do anything
         } else if (i == 4) {
-          cur = cur.mirror();
+          cur = cur.mirrorHoriz();
         } else {
           cur = cur.rotateLeft();
         }
@@ -51,14 +50,13 @@ public interface Rotatable<T extends Rotatable<T>> {
   }
 
   static <T extends Rotatable<T>> T rotateUntil(T tile, Predicate<T> predicate) {
-    Optional<T> first = all(tile)
+    return all(tile)
             .filter(predicate)
-            .findFirst();
-    return first.get();
+            .findFirst().get();
   }
 
   T rotateLeft();
-  T mirror();
+  T mirrorHoriz();
 
   default T rotateRight() {
     return rotateLeft().rotateLeft().rotateLeft();

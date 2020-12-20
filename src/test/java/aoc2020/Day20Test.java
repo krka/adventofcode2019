@@ -84,20 +84,22 @@ public class Day20Test {
     int dim = (int) Math.sqrt(tiles.size());
     Grid<Tile> tileGrid = new Grid<>(dim, dim, null);
 
-    corner = Rotatable.rotateUntil(corner, tile -> cornerEdges.contains(tile.leftCol) && cornerEdges.contains(tile.topRow));
+    corner = Rotatable.rotateUntil(corner, tile -> tile.isTopLeft(cornerEdges));
     tileGrid.set(0, 0, corner);
 
     for (int col = 1; col < dim; col++) {
       Tile prev = tileGrid.get(0, col - 1);
-      Tile match = getAdjacent(edgeMap, prev, prev.rightCol);
-      match = Rotatable.rotateUntil(match, tile -> tile.leftCol == prev.rightCol);
+      int targetLeft = rev(prev.right);
+      Tile match = getAdjacent(edgeMap, prev, targetLeft);
+      match = Rotatable.rotateUntil(match, tile -> tile.left == targetLeft);
       tileGrid.set(0, col, match);
     }
 
     for (int row = 1; row < dim; row++) {
       Tile prev = tileGrid.get(row - 1, 0);
-      Tile match = getAdjacent(edgeMap, prev, prev.bottomRow);
-      match = Rotatable.rotateUntil(match, tile -> tile.topRow == prev.bottomRow);
+      int targetTop = rev(prev.bottom);
+      Tile match = getAdjacent(edgeMap, prev, targetTop);
+      match = Rotatable.rotateUntil(match, tile -> tile.top == targetTop);
       tileGrid.set(row, 0, match);
     }
 
@@ -105,12 +107,12 @@ public class Day20Test {
       for (int col = 1; col < dim; col++) {
         Tile left = tileGrid.get(row, col - 1);
         Tile above = tileGrid.get(row - 1, col);
-        int targetLeft = left.rightCol;
-        int targetAbove = above.bottomRow;
+        int targetLeft = rev(left.right);
+        int targetAbove = rev(above.bottom);
 
         Tile match = getAdjacent(edgeMap, left, targetLeft);
-        match = Rotatable.rotateUntil(match, tile -> tile.leftCol == targetLeft);
-        assertEquals(match.topRow, targetAbove);
+        match = Rotatable.rotateUntil(match, tile -> tile.left == targetLeft);
+        assertEquals(match.top, targetAbove);
         tileGrid.set(row, col, match);
       }
     }
@@ -140,8 +142,10 @@ public class Day20Test {
   private long countMonsters(Grid<Character> monster, Grid<Character> grid) {
     boolean hasMonster = false;
     Grid<Integer> monsterCount = new Grid<>(grid.rows(), grid.cols(), 0);
-    for (int row = 0; row < grid.rows() - monster.rows(); row++) {
-      for (int col = 0; col < grid.cols() - monster.cols(); col++) {
+    int maxRow = grid.rows() - monster.rows();
+    int maxCol = grid.cols() - monster.cols();
+    for (int row = 0; row < maxRow; row++) {
+      for (int col = 0; col < maxCol; col++) {
         if (isMonster(grid, row, col, monster)) {
           markMonster(monsterCount, monster, row, col);
           hasMonster = true;
@@ -165,10 +169,10 @@ public class Day20Test {
   private Map<Integer, Set<Tile>> createEdgeMap(List<Tile> tiles) {
     Map<Integer, Set<Tile>> counts = new HashMap<>();
     for (Tile tile : tiles) {
-      addSignature(counts, tile, tile.topRow);
-      addSignature(counts, tile, tile.bottomRow);
-      addSignature(counts, tile, tile.leftCol);
-      addSignature(counts, tile, tile.rightCol);
+      addSignature(counts, tile, tile.top);
+      addSignature(counts, tile, tile.bottom);
+      addSignature(counts, tile, tile.left);
+      addSignature(counts, tile, tile.right);
     }
     for (Set<Tile> value : counts.values()) {
       int size = value.size();
@@ -214,39 +218,50 @@ public class Day20Test {
   static class Tile implements Rotatable {
     final Grid<Character> grid;
     final int id;
-    int topRow;
-    int bottomRow;
-    int leftCol;
-    int rightCol;
+    final int top;
+    final int bottom;
+    final int left;
+    final int right;
 
-    public Tile(Grid<Character> grid, int id, int topRow, int bottomRow, int leftCol, int rightCol) {
+    public Tile(Grid<Character> grid, int id, int left, int top, int right, int bottom) {
       this.grid = grid;
       this.id = id;
-      this.topRow = topRow;
-      this.bottomRow = bottomRow;
-      this.leftCol = leftCol;
-      this.rightCol = rightCol;
+      this.top = top;
+      this.bottom = bottom;
+      this.left = left;
+      this.right = right;
     }
 
     Tile(List<String> data) {
       id = Integer.parseInt(data.get(0).split("[ :]+")[1]);
       grid = Grid.from(data.subList(1, data.size()), 'X', c -> c);
 
+      int top = 0;
+      int bottom = 0;
+
       for (int col = 0; col < grid.cols(); col++) {
-        topRow <<= 1;
-        topRow |= grid.get(0, col) == '.' ? 0 : 1;
+        top <<= 1;
+        top |= grid.get(0, col) == '.' ? 0 : 1;
 
-        bottomRow <<= 1;
-        bottomRow |= grid.get(grid.rows() - 1, col) == '.' ? 0 : 1;
+        bottom <<= 1;
+        bottom |= grid.get(grid.rows() - 1, col) == '.' ? 0 : 1;
       }
 
+      this.top = top;
+      this.bottom = rev(bottom);
+
+      int left = 0;
+      int right = 0;
       for (int row = 0; row < grid.rows(); row++) {
-        leftCol <<= 1;
-        leftCol |= grid.get(row, 0) == '.' ? 0 : 1;
+        left <<= 1;
+        left |= grid.get(row, 0) == '.' ? 0 : 1;
 
-        rightCol <<= 1;
-        rightCol |= grid.get(row, grid.cols() - 1) == '.' ? 0 : 1;
+        right <<= 1;
+        right |= grid.get(row, grid.cols() - 1) == '.' ? 0 : 1;
       }
+
+      this.left = rev(left);
+      this.right = right;
     }
 
     public boolean isCorner(Map<Integer, Set<Tile>> edges) {
@@ -255,10 +270,10 @@ public class Day20Test {
 
     Set<Integer> countOnes(Map<Integer, Set<Tile>> edgeMap) {
       Set<Integer> res = new HashSet<>();
-      addIfOne(res, edgeMap, topRow);
-      addIfOne(res, edgeMap, bottomRow);
-      addIfOne(res, edgeMap, leftCol);
-      addIfOne(res, edgeMap, rightCol);
+      addIfOne(res, edgeMap, top);
+      addIfOne(res, edgeMap, bottom);
+      addIfOne(res, edgeMap, left);
+      addIfOne(res, edgeMap, right);
       return res;
     }
 
@@ -271,14 +286,17 @@ public class Day20Test {
 
     @Override
     public Tile rotateLeft() {
-      return new Tile(grid.rotateLeft(), id, rightCol, leftCol, rev(topRow), rev(bottomRow));
+      return new Tile(grid.rotateLeft(), id, top, right, bottom, left);
     }
 
     @Override
-    public Tile mirror() {
-      return new Tile(grid.mirror(), id, bottomRow, topRow, rev(leftCol), rev(rightCol));
+    public Tile mirrorHoriz() {
+      return new Tile(grid.mirrorHoriz(), id, rev(left), rev(bottom), rev(right), rev(top));
     }
 
+    private boolean isTopLeft(Set<Integer> cornerEdges) {
+      return cornerEdges.contains(left) && cornerEdges.contains(top);
+    }
   }
 
 }
