@@ -30,7 +30,7 @@ public class Day24Test {
 
   @Test
   public void testPart2() {
-    assertEquals(0, solvePart2(MAIN_INPUT));
+    assertEquals(4059, solvePart2(MAIN_INPUT));
   }
 
   @Test

@@ -43,7 +43,7 @@ public class Day3Test {
 
   @Test
   public void testPart2() {
-    assertEquals(3353494, solvePart2());
+    assertEquals(331, solvePart2());
   }
 
   private long solvePart2() {
