@@ -24,9 +24,9 @@ public class Day5 {
             .map(Day5::repl)
             .map(s -> Integer.parseInt(s, 2))
             .sorted()
-            .collect(Util.adj()).stream()
-            .filter(pair -> pair.a() + 2 == pair.b())
-            .mapToInt(pair -> pair.a() + 1)
+            .collect(Util.windows(2)).stream()
+            .filter(pair -> pair.get(0) + 2 == pair.get(1))
+            .mapToInt(pair -> pair.get(0) + 1)
             .reduce(Util.exactlyOneInt())
             .getAsInt();
   }

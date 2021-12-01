@@ -2,9 +2,7 @@ package aoc2021;
 
 import util.Util;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class Day1 {
 
@@ -17,21 +15,18 @@ public class Day1 {
   public long solvePart1() {
     return input.stream()
             .map(Integer::parseInt)
-            .collect(Util.adj()).stream()
-            .filter(pair -> pair.b() > pair.a())
+            .collect(Util.windows(2)).stream()
+            .filter(pair -> pair.get(1) > pair.get(0))
             .count();
   }
 
   public long solvePart2() {
-    List<Integer> integers = input.stream()
+    return input.stream()
             .map(Integer::parseInt)
-            .collect(Collectors.toList());
-    List<Integer> sums = new ArrayList<>();
-    for (int i = 0; i < integers.size() - 2; i++) {
-      sums.add(integers.get(i) + integers.get(i + 1) + integers.get(i + 2));
-    }
-    return sums.stream().collect(Util.adj()).stream()
-            .filter(pair -> pair.b() > pair.a())
+            .collect(Util.windows(3)).stream()
+            .map(tuple -> tuple.stream().mapToInt(Integer::intValue).sum())
+            .collect(Util.windows(2)).stream()
+            .filter(pair -> pair.get(1) > pair.get(0))
             .count();
   }
 }

@@ -26,12 +26,12 @@ public class UtilTest {
   public void testAdj() {
     assertAdj(List.of());
     assertAdj(List.of(), 1);
-    assertAdj(List.of(Pair.of(1, 2)), 1, 2);
-    assertAdj(List.of(Pair.of(1, 2), Pair.of(2, 3)), 1, 2, 3);
+    assertAdj(List.of(List.of(1, 2)), 1, 2);
+    assertAdj(List.of(List.of(1, 2), List.of(2, 3)), 1, 2, 3);
   }
 
-  private void assertAdj(List<Pair<Integer, Integer>> expected, int... input) {
-    List<Pair<Integer, Integer>> actual = IntStream.of(input).boxed().collect(Util.adj());
+  private void assertAdj(List<List<Integer>> expected, int... input) {
+    List<List<Integer>> actual = IntStream.of(input).boxed().collect(Util.windows(2));
     assertEquals(expected, actual);
   }
 }

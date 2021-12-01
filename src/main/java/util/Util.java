@@ -13,17 +13,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Spliterator;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
-import java.util.function.Consumer;
 import java.util.function.IntBinaryOperator;
 import java.util.function.LongBinaryOperator;
 import java.util.function.Predicate;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 public class Util {
   private static final ClassLoader CLASS_LOADER = Util.class.getClassLoader();
@@ -78,8 +74,8 @@ public class Util {
     return new SplitStream<>(predicate);
   }
 
-  public static <T> AdjCollector<T> adj() {
-    return new AdjCollector<>();
+  public static <T> WindowsCollector<T> windows(final int size) {
+    return new WindowsCollector<>(size);
   }
 
   public static IntBinaryOperator exactlyOneInt() throws RuntimeException {
