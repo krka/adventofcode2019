@@ -12,8 +12,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.Stack;
+import java.util.stream.Collectors;
 
 public class Assembler {
   private final Set<String> resources = new HashSet<>();
@@ -114,7 +116,23 @@ public class Assembler {
 
     pc = main.finalize(pc);
 
-    for (Function func : functions.values()) {
+    Set<String> usedFunctions = new HashSet<>();
+    usedFunctions.addAll(main.functionCalls);
+    while (true) {
+      Set<String> moreFunctions = usedFunctions.stream()
+              .map(functions::get)
+              .filter(Objects::nonNull)
+              .flatMap(fun -> fun.getFunctionCalls().stream())
+              .collect(Collectors.toSet());
+      if (!usedFunctions.addAll(moreFunctions)) {
+        break;
+      }
+    }
+
+    List<Function> usedFunctionList = usedFunctions.stream().map(functions::get)
+            .filter(Objects::nonNull).collect(Collectors.toList());
+
+    for (Function func : usedFunctionList) {
       pc = func.finalize(pc);
     }
 
@@ -144,7 +162,7 @@ public class Assembler {
     setRelBase.setParameter(Constant.of(pc));
     main.writeTo(res);
 
-    for (Function func : functions.values()) {
+    for (Function func : usedFunctionList) {
       func.writeTo(res);
     }
 
@@ -242,6 +260,7 @@ public class Assembler {
     public int numReturnValues = -1;
     private int lastReturn;
     private int numStackVars = 0;
+    private final Set<String> functionCalls = new HashSet<>();
 
     public IntCodeFunction(boolean isStack, String name, String context, List<String> parameters) {
       this.isStack = isStack;
@@ -264,6 +283,11 @@ public class Assembler {
         i++;
       }
       injectStackAllocations = operations.size();
+    }
+
+    @Override
+    public Set<String> getFunctionCalls() {
+      return functionCalls;
     }
 
     public void jump(boolean isTrue, String cmpRef, Label destination, String description) {
@@ -456,6 +480,7 @@ public class Assembler {
     }
 
     public void addFunctionCall(String funcName, int parameters, int returnVars, String context) {
+      functionCalls.add(funcName);
       Function function = resolveFunction(funcName);
 
       if (parameters != function.getNumParameters()) {

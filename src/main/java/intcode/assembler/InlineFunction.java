@@ -1,5 +1,7 @@
 package intcode.assembler;
 
+import java.util.Set;
+
 class InlineFunction implements Function {
   private final int numParams;
   private final int numReturnValues;
@@ -21,6 +23,11 @@ class InlineFunction implements Function {
   @Override
   public void prepareCall(Assembler.IntCodeFunction caller, String context, int returnVars) {
     code.call(caller, context, returnVars);
+  }
+
+  @Override
+  public Set<String> getFunctionCalls() {
+    return Set.of();
   }
 
   @Override
