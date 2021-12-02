@@ -7,6 +7,10 @@ int tempn = 0
 int remainder = 0
 
 func outputNumber(n)
+  if n < 0 then
+    output('-')
+    n = -n
+  end
   if n == 0 then
     output('0')
     return
@@ -16,8 +20,7 @@ func outputNumber(n)
   tempn = n
   while tempn do
     tempn, remainder = div(tempn, 10)
-    remainder = remainder + 48
-    tempnumber[i] = remainder
+    tempnumber[i] = remainder + '0'
     i = i + 1
   end
 

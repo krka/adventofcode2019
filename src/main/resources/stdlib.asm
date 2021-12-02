@@ -42,7 +42,7 @@ func read()
   if peek != -1 then
     int x = peek
     peek = -1
-    return peek
+    return x
   end
   return input()
 end
@@ -91,17 +91,16 @@ func read_int()
   return -1
 end
 
-func read_chars(buf)
+func read_chars(buf, limit)
   int i = 0
 
-  while 1 do
+  while i < limit do
     int x = peek()
     if x < 'a' || x > 'z' then
       buf[i] = 0
       return
     else
-      read()
-      buf[i] = x
+      buf[i] = read()
       i = i + 1
     end
   end
@@ -109,14 +108,21 @@ func read_chars(buf)
   return
 end
 
+# Consume and ignore all characters until the next c
 func skip_until(c)
   while 1 do
-    int x = peek()
-    if x != c then
+    if read() == c then
       return
-    else
-      read()
     end
+  end
+end
+
+func skip_while(c)
+  while 1 do
+    if peek() != c then
+      return
+    end
+    read()
   end
 end
 

@@ -56,4 +56,5 @@ public class Day2 {
     }
     return x * y;
   }
+
 }
