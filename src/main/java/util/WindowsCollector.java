@@ -10,15 +10,15 @@ import java.util.function.Supplier;
 import java.util.stream.Collector;
 
 class WindowsCollector<T> implements Collector<T, WindowsAccumulator<T>, List<List<T>>> {
-  private final int size;
+  private final int window;
 
-  WindowsCollector(final int size) {
-    this.size = size;
+  WindowsCollector(final int window) {
+    this.window = window;
   }
 
   @Override
   public Supplier<WindowsAccumulator<T>> supplier() {
-    return () -> new WindowsAccumulator<>(size);
+    return () -> new WindowsAccumulator<>(window);
   }
 
   @Override
@@ -43,19 +43,15 @@ class WindowsCollector<T> implements Collector<T, WindowsAccumulator<T>, List<Li
 }
 
 class WindowsAccumulator<T> {
-  private final int size;
-  private List<T> points = new ArrayList<>();
-  private List<List<T>> tuples = new ArrayList<>();
+  private final int window;
+  private final List<T> points = new ArrayList<>();
 
-  WindowsAccumulator(final int size) {
-    this.size = size;
+  WindowsAccumulator(final int window) {
+    this.window = window;
   }
 
   public void add(T value) {
     points.add(value);
-    if (points.size() >= size) {
-      tuples.add(points.subList(points.size() - size, points.size()));
-    }
   }
 
   public WindowsAccumulator<T> combiner(WindowsAccumulator<T> other) {
@@ -63,6 +59,11 @@ class WindowsAccumulator<T> {
   }
 
   public List<List<T>> finisher() {
+    final List<List<T>> tuples = new ArrayList<>();
+    int size = points.size();
+    for (int i = window; i <= size; i++) {
+      tuples.add(points.subList(i - window, i));
+    }
     return tuples;
   }
 }

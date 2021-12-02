@@ -74,8 +74,8 @@ public class Util {
     return new SplitStream<>(predicate);
   }
 
-  public static <T> WindowsCollector<T> windows(final int size) {
-    return new WindowsCollector<>(size);
+  public static <T> WindowsCollector<T> windows(final int window) {
+    return new WindowsCollector<>(window);
   }
 
   public static IntBinaryOperator exactlyOneInt() throws RuntimeException {
