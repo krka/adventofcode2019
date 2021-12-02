@@ -1,7 +1,6 @@
 package util;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.BiConsumer;
@@ -45,18 +44,17 @@ class WindowsCollector<T> implements Collector<T, WindowsAccumulator<T>, List<Li
 
 class WindowsAccumulator<T> {
   private final int size;
+  private List<T> points = new ArrayList<>();
   private List<List<T>> tuples = new ArrayList<>();
-  private List<T> current = new LinkedList<>();
 
   WindowsAccumulator(final int size) {
     this.size = size;
   }
 
   public void add(T value) {
-    current.add(value);
-    if (current.size() == size) {
-      tuples.add(List.copyOf(current));
-      current.remove(0);
+    points.add(value);
+    if (points.size() >= size) {
+      tuples.add(points.subList(points.size() - size, points.size()));
     }
   }
 
