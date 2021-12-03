@@ -132,8 +132,7 @@ func read_until(buf, c)
   while 1 do
     int x = peek()
     if x == c then
-      buf[i] = 0
-      return
+      break
     else
       read()
       buf[i] = x

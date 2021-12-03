@@ -1,6 +1,12 @@
 package aoc2021;
 
+import intcode.IntCode;
+import intcode.assembler.AnnotatedIntCode;
+import intcode.assembler.Assembler;
 import org.junit.Test;
+import util.Util;
+
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
@@ -13,6 +19,19 @@ public class Day3Test {
   @Test
   public void testPart2() {
     assertEquals(4203981, new Day3("2021/day3.in").solvePart2());
+  }
+
+  @Test
+  public void testPart2IntCode() {
+    AnnotatedIntCode compiled = Assembler.compileAnnotated("2021/day3.asm");
+    System.out.println(compiled.toString());
+    System.out.println(compiled.toProgram());
+    IntCode intCode = IntCode.fromResource(compiled.getIntCode());
+
+    Util.readResource("2021/day3.in").forEach(intCode::writeASCIILine);
+    intCode.run();
+    assertEquals(IntCode.State.HALTED, intCode.getState());
+    assertEquals(List.of("4203981"), intCode.readAllASCIILines());
   }
 
 }
