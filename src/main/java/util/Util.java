@@ -121,4 +121,12 @@ public class Util {
     return rev;
   }
 
+  public static <A, B> List<Pair<A, B>> zip(List<A> a, List<B> b) {
+    int size = Math.min(a.size(), b.size());
+    ArrayList<Pair<A, B>> res = new ArrayList<>(size);
+    for (int i = 0; i < size; i++) {
+      res.add(Pair.of(a.get(i), b.get(i)));
+    }
+    return res;
+  }
 }
