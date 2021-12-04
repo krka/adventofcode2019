@@ -14,6 +14,7 @@ public class Day1 {
 
   public long solvePart1() {
     return input.stream()
+            .filter(s -> !s.isEmpty())
             .map(Integer::parseInt)
             .collect(Util.windows(2)).stream()
             .filter(pair -> pair.get(1) > pair.get(0))
@@ -22,6 +23,7 @@ public class Day1 {
 
   public long solvePart2() {
     return input.stream()
+            .filter(s -> !s.isEmpty())
             .map(Integer::parseInt)
             .collect(Util.windows(3)).stream()
             .map(tuple -> tuple.stream().mapToInt(Integer::intValue).sum())

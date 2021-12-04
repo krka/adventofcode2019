@@ -33,5 +33,5 @@ assert(value == 1234)
 
 array[10] str
 skip_non_chars()
-read_chars(str)
+read_chars(str, 9)
 assert(strcmp(hello, str) == 0)

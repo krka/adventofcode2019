@@ -15,10 +15,10 @@ for case = 0, case < num_entries do
   int max = read_int()
 
   skip_non_chars()
-  read_chars(c)
+  read_chars(c, 1)
 
   skip_non_chars()
-  read_chars(pw)
+  read_chars(pw, 999)
 
   int c0 = c[0]
   int matches = 0
