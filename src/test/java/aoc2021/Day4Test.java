@@ -1,12 +1,6 @@
 package aoc2021;
 
-import intcode.IntCode;
-import intcode.assembler.AnnotatedIntCode;
-import intcode.assembler.Assembler;
 import org.junit.Test;
-import util.Util;
-
-import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
