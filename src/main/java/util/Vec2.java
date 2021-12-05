@@ -74,6 +74,10 @@ public class Vec2 {
             y == vector3.y;
   }
 
+  public Vec2 signum() {
+    return new Vec2(Long.signum(x), Long.signum(y));
+  }
+
   @Override
   public int hashCode() {
     return hash;
