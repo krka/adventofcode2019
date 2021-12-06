@@ -5,13 +5,14 @@ import util.Util;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class Day6 {
 
-  private final List<Integer> ints;
+  private final List<Integer> input;
 
   public Day6(String name) {
-    ints = Util.readResource(name).stream()
+    input = Util.readResource(name).stream()
             .filter(s -> !s.isEmpty())
             .map(s -> s.split(","))
             .flatMap(Arrays::stream)
@@ -29,16 +30,13 @@ public class Day6 {
 
   private long solve(int days) {
     long[] nums = new long[9];
-    ints.forEach(i -> nums[i]++);
-
-    for (int day = 0; day < days; day++) {
+    input.forEach(i -> nums[i]++);
+    IntStream.range(0, days).forEach(day -> {
       long zero = nums[0];
-      for (int i = 0; i < 8; i++) {
-        nums[i] = nums[i+1];
-      }
+      System.arraycopy(nums, 1, nums, 0, 8);
       nums[8] = zero;
       nums[6] += zero;
-    }
+    });
     return Arrays.stream(nums).sum();
   }
 
