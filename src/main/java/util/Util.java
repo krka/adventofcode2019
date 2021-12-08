@@ -110,6 +110,13 @@ public class Util {
     return ans;
   }
 
+  public static <T> Set<T> diff(Set<T> a, Set<T> b) {
+    Set<T> ans = new HashSet<>();
+    ans.addAll(a);
+    ans.removeAll(b);
+    return ans;
+  }
+
   public static <K, V> Map<V, K> reverseMap(Map<K, V> map) {
     Map<V, K> rev = new HashMap<>();
     map.forEach((key, value) -> {
