@@ -75,7 +75,7 @@ public class Grid<T> implements Rotatable<Grid<T>> {
     return get((int) row, (int) col);
   }
 
-    private boolean inbound(int row, int col) {
+  public boolean inbound(int row, int col) {
     return row >= 0 && row < rows && col >= 0 && col < cols;
   }
 
