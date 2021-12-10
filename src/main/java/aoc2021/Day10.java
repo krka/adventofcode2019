@@ -9,18 +9,6 @@ import java.util.stream.Collectors;
 
 public class Day10 {
 
-  private final List<String> input;
-
-  public Day10(String name) {
-    this.input = Util.readResource(name).stream()
-            .filter(s -> !s.isEmpty())
-            .collect(Collectors.toList());
-  }
-
-  public long solvePart1() {
-    return input.stream().mapToLong(s -> score(s)).sum();
-  }
-
   private static final Map<Character, Character> OPEN = Map.of(
           '(', ')',
           '[', ']',
@@ -41,6 +29,19 @@ public class Day10 {
           '}', 3,
           '>', 4
   );
+
+  private final List<String> input;
+
+  public Day10(String name) {
+    this.input = Util.readResource(name).stream()
+            .filter(s -> !s.isEmpty())
+            .collect(Collectors.toList());
+  }
+
+  public long solvePart1() {
+    return input.stream().mapToLong(Day10::score).sum();
+  }
+
 
   private static long score(String s) {
     Stack<Character> stack = new Stack<>();
