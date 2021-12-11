@@ -1,5 +1,6 @@
 package util;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Spliterator;
@@ -150,6 +151,21 @@ public class Grid<T> implements Rotatable<Grid<T>> {
                 | Spliterator.IMMUTABLE;
       }
     }, false);
+  }
+
+  public void forEachNeighbour(int row, int col, GridConsumer<T> consumer) {
+    for (int i = -1; i < 2; i++) {
+      for (int j = -1; j < 2; j++) {
+        if (i == 0 && j == 0) {
+          continue;
+        }
+        int r = row + i;
+        int c = col + j;
+        if (inbound(r, c)) {
+          consumer.accept(r, c, get(r, c));
+        }
+      }
+    }
   }
 
   public long count(Predicate<T> predicate) {
