@@ -20,19 +20,17 @@ public class Day13 {
             .collect(Util.splitBy(String::isEmpty));
     points = lists.get(0).stream().map(Vec2::parse).collect(Collectors.toSet());
     instructions = lists.get(1).stream().map(s -> {
-      String[] s1 = s.split(" ");
-      String[] split = s1[2].split("=");
-      return Pair.of(split[0], Integer.parseInt(split[1]));
+      String[] split = s.split("[ =]");
+      return Pair.of(split[2], Integer.parseInt(split[3]));
     }).collect(Collectors.toList());
   }
 
   public long solvePart1() {
-    Set<Vec2> res = fold(points, instructions.subList(0, 1));
-    return res.size();
+    return fold(instructions.subList(0, 1)).size();
   }
 
   public List<String> solvePart2() {
-    Set<Vec2> solution = fold(points, instructions);
+    Set<Vec2> solution = fold(instructions);
     int maxCol = (int) solution.stream().mapToLong(Vec2::getX).max().getAsLong();
     int maxRow = (int) solution.stream().mapToLong(Vec2::getY).max().getAsLong();
     List<String> res = new ArrayList<>();
@@ -46,24 +44,17 @@ public class Day13 {
     return res;
   }
 
-  private Set<Vec2> fold(Set<Vec2> cur, List<Pair<String, Integer>> instr) {
-    Set<Vec2> next = new HashSet<>();
-    for (Pair<String, Integer> pair : instr) {
-      for (Vec2 vec2 : cur) {
-        String orient = pair.a();
-        int pos = pair.b();
-        if (orient.equals("x") && pos < vec2.getX()) {
-          vec2 = Vec2.of(2 * pos - vec2.getX(), vec2.getY());
-        } else if (orient.equals("y") && pos < vec2.getY()) {
-          vec2 = Vec2.of(vec2.getX(), 2 * pos - vec2.getY());
-
+  private Set<Vec2> fold(List<Pair<String, Integer>> instructions) {
+    return points.stream().map(p -> {
+      long x = p.getX(), y = p.getY();
+      for (var pair : instructions) {
+        switch (pair.a()) {
+          case "x": x = Math.min(x, 2 * pair.b() - x); break;
+          case "y": y = Math.min(y, 2 * pair.b() - y); break;
         }
-        next.add(vec2);
       }
-      cur = next;
-      next = new HashSet<>();
-    }
-    return cur;
+      return Vec2.of(x, y);
+    }).collect(Collectors.toSet());
   }
 
 
