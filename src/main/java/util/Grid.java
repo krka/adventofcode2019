@@ -76,8 +76,20 @@ public class Grid<T> implements Rotatable<Grid<T>> {
     return get((int) row, (int) col);
   }
 
+  public T get(Vec2 v) {
+    return get(v.getY(), v.getX());
+  }
+
   public boolean inbound(int row, int col) {
     return row >= 0 && row < rows && col >= 0 && col < cols;
+  }
+
+  public boolean inbound(long row, long col) {
+    return inbound((int) row, (int) col);
+  }
+
+  public boolean inbound(Vec2 v) {
+    return inbound(v.getY(), v.getX());
   }
 
   public Grid<T> duplicate() {
