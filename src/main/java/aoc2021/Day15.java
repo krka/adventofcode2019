@@ -53,13 +53,13 @@ public class Day15 implements Day {
         return cur.risk;
       }
       if (!visited.get(cur.pos)) {
-        visited.set(cur.pos, true);
-        Vec2.DIRS.forEach(dir -> {
+        visited.set(cur.pos, Boolean.TRUE);
+        for (Vec2 dir : Vec2.DIRS) {
           Vec2 newPos = cur.pos.add(dir);
           if (grid.inbound(newPos) && !visited.get(newPos)) {
             queue.add(new Node(newPos, cur.risk + grid.get(newPos), target));
           }
-        });
+        }
       }
     }
   }
