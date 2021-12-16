@@ -55,7 +55,7 @@ public class Day15 implements Day {
       if (visited.add(cur.pos)) {
         Vec2.DIRS.forEach(dir -> {
           Vec2 newPos = cur.pos.add(dir);
-          if (grid.inbound(newPos)) {
+          if (grid.inbound(newPos) && !visited.contains(newPos)) {
             queue.add(new Node(newPos, cur.risk + grid.get(newPos), target));
           }
         });
