@@ -15,7 +15,11 @@ public class Day16Test {
 
   @Test
   public void testPart2() {
-    assertEquals(470949537659L, day.solvePart2());
+    long t1 = System.nanoTime();
+    long actual = day.solvePart2();
+    long t2 = System.nanoTime();
+    System.out.println(t2 - t1);
+    assertEquals(470949537659L, actual);
   }
 
 }

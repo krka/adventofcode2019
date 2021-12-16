@@ -60,6 +60,14 @@ public class Grid<T> implements Rotatable<Grid<T>> {
     }
   }
 
+  public void set(long row, long col, T value) {
+    set((int) row, (int) col, value);
+  }
+
+  public void set(Vec2 pos, T value) {
+    set(pos.getY(), pos.getX(), value);
+  }
+
   public T get(int row, int col, T defaultValue) {
     if (inbound(row, col)) {
       return (T) data[row * cols + col];

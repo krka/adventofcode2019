@@ -38,14 +38,12 @@ public class Day16 implements Day {
     return parsePacket();
   }
 
-  private String consume(int n) {
-    String res = data.substring(pc, pc + n);
-    pc += n;
-    return res;
-  }
-
   private int consumeInt(int n) {
-    return Integer.parseInt(consume(n), 2);
+    int res = 0;
+    while (--n >= 0) {
+      res = res * 2 + (data.charAt(pc++) - '0');
+    }
+    return res;
   }
 
   private long parsePacket() {
@@ -67,7 +65,7 @@ public class Day16 implements Day {
 
   private long operator(long init, LongBinaryOperator operator) {
     long cur = init;
-    if (consume(1).equals("0")) {
+    if (consumeInt(1) == 0) {
       int len = consumeInt(15);
       int end = pc + len;
       while (pc < end) {
@@ -83,12 +81,12 @@ public class Day16 implements Day {
   }
 
   private long literal() {
-    long number = 0;
+    long res = 0;
     while (true) {
-      boolean stop = consume(1).equals("0");
-      number = number * 16 + consumeInt(4);
+      boolean stop = consumeInt(1) == 0;
+      res = res * 16 + consumeInt(4);
       if (stop) {
-        return number;
+        return res;
       }
     }
   }

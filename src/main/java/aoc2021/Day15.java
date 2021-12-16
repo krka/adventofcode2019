@@ -43,7 +43,7 @@ public class Day15 implements Day {
   }
 
   private long solveGrid(Grid<Integer> grid) {
-    Set<Vec2> visited = new HashSet<>();
+    Grid<Boolean> visited = new Grid<>(grid.rows(), grid.cols(), false);
     Vec2 target = Vec2.of(grid.cols() - 1, grid.rows() - 1);
     Queue<Node> queue = new PriorityQueue<>(Comparator.comparingInt(Node::getEstimate));
     queue.add(new Node(Vec2.zero(), 0, target));
@@ -52,10 +52,11 @@ public class Day15 implements Day {
       if (cur.pos.equals(target)) {
         return cur.risk;
       }
-      if (visited.add(cur.pos)) {
+      if (!visited.get(cur.pos)) {
+        visited.set(cur.pos, true);
         Vec2.DIRS.forEach(dir -> {
           Vec2 newPos = cur.pos.add(dir);
-          if (grid.inbound(newPos) && !visited.contains(newPos)) {
+          if (grid.inbound(newPos) && !visited.get(newPos)) {
             queue.add(new Node(newPos, cur.risk + grid.get(newPos), target));
           }
         });
