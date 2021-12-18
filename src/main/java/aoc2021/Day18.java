@@ -3,21 +3,26 @@ package aoc2021;
 import util.Util;
 
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class Day18 implements Day {
 
-  public static final Number[] NUMBERS = new Number[1000];
-  public static final Node ZERO = Number.of(0);
+  private static final Number[] NUMBERS = new Number[1000];
+  private static final Node ZERO = Number.of(0);
 
   private final List<Node> input;
 
   public Day18(List<String> input) {
-    this.input = input.stream().map(Day18::parse).collect(Collectors.toList());
+    this.input = input.stream()
+            .map(s -> new Parser(s).parse())
+            .collect(Collectors.toList());
   }
 
   public static Day18 fromResource(String name) {
-    return new Day18(Util.readResource(name).stream().filter(s -> !s.isEmpty())
+    return new Day18(Util.readResource(name)
+            .stream()
+            .filter(s -> !s.isEmpty())
             .collect(Collectors.toList()));
   }
 
@@ -28,29 +33,24 @@ public class Day18 implements Day {
   }
 
   public long solvePart2() {
-    int best = 0;
-    for (Node left : input) {
-      for (Node right : input) {
-        if (left != right) {
-          best = Math.max(best, add(left, right).magnitude());
-        }
-      }
-    }
-    return best;
+    return input.stream()
+            .map(left -> input.stream()
+                    .filter(right -> right != left)
+                    .mapToLong(right -> add(left, right).magnitude()))
+            .flatMapToLong(Function.identity())
+            .max().getAsLong();
   }
 
   private static Node add(Node a, Node b) {
     return reduce(new Pair(a, b));
   }
 
-  private static Node reduce(Node current) {
-    while (true) {
-      Node next = current.explode(0).node.split();
-      if (next == current) {
-        return next;
-      }
-      current = next;
+  private static Node reduce(Node node) {
+    Node next = node.explode(4).node.split();
+    if (next == node) {
+      return next;
     }
+    return reduce(next);
   }
 
   static class ExplodeResult {
@@ -58,15 +58,11 @@ public class Day18 implements Day {
     final int addLeft;
     final int addRight;
 
-    public ExplodeResult(Node node, int addLeft, int addRight) {
+    ExplodeResult(Node node, int addLeft, int addRight) {
       this.node = node;
       this.addLeft = addLeft;
       this.addRight = addRight;
     }
-  }
-
-  static Node parse(String s) {
-    return new Parser(s).parse();
   }
 
   interface Node {
@@ -80,10 +76,16 @@ public class Day18 implements Day {
   static class Number implements Node {
     final int value;
     final ExplodeResult explodeResult = new ExplodeResult(this, 0, 0);
-    Node split;
+    final Node split;
 
     Number(int value) {
       this.value = value;
+      if (value >= 10) {
+        final int newLeft = value / 2;
+        split = new Pair(Number.of(newLeft), Number.of(value - newLeft));
+      } else {
+        split = this;
+      }
     }
 
     public static Node of(int value) {
@@ -102,9 +104,6 @@ public class Day18 implements Day {
 
     @Override
     public Node split() {
-      if (split == null) {
-        split = calcSplit();
-      }
       return split;
     }
 
@@ -123,15 +122,6 @@ public class Day18 implements Day {
       return Number.of(this.value + value);
     }
 
-    private Node calcSplit() {
-      if (value >= 10) {
-        int newLeft = value / 2;
-        int newRight = value - newLeft;
-        return new Pair(Number.of(newLeft), Number.of(newRight));
-      }
-      return this;
-    }
-
     @Override
     public String toString() {
       return String.valueOf(value);
@@ -142,7 +132,7 @@ public class Day18 implements Day {
     final Node left;
     final Node right;
 
-    public Pair(Node left, Node right) {
+    Pair(Node left, Node right) {
       this.left = left;
       this.right = right;
     }
@@ -159,18 +149,12 @@ public class Day18 implements Day {
 
     @Override
     public Node addLeft(int value) {
-      if (value == 0) {
-        return this;
-      }
       return setLeft(left.addLeft(value));
     }
 
     @Override
     public Node addRight(int value) {
-      if (value == 0) {
-        return this;
-      }
-      return setRight(right.addRight(value));
+      return new Pair(left, right.addRight(value));
     }
 
     Pair setLeft(Node newLeft) {
@@ -189,30 +173,31 @@ public class Day18 implements Day {
 
     @Override
     public ExplodeResult explode(int depth) {
-      if (depth >= 4) {
-        if (left instanceof Number && right instanceof Number) {
-          return new ExplodeResult(ZERO, ((Number) left).value, ((Number) right).value);
-        }
+      if (depth <= 0 && left instanceof Number && right instanceof Number) {
+        return new ExplodeResult(ZERO, ((Number) left).value, ((Number) right).value);
       }
-      Node newRight = right;
-      Node newLeft = left;
 
-      ExplodeResult leftExp = newLeft.explode(depth + 1);
-      newRight = newRight.addLeft(leftExp.addRight);
-      newLeft = leftExp.node;
+      final ExplodeResult leftExp = left.explode(depth - 1);
+      Node right = this.right;
+      if (leftExp.addRight != 0) {
+        right = right.addLeft(leftExp.addRight);
+      }
+      Node left = leftExp.node;
 
-      ExplodeResult rightExp = newRight.explode(depth + 1);
-      newLeft = newLeft.addRight(rightExp.addLeft);
-      newRight = rightExp.node;
+      final ExplodeResult rightExp = right.explode(depth - 1);
+      if (rightExp.addLeft != 0) {
+        left = left.addRight(rightExp.addLeft);
+      }
+      right = rightExp.node;
 
-      return new ExplodeResult(setLeft(newLeft).setRight(newRight), leftExp.addLeft, rightExp.addRight);
+      return new ExplodeResult(setLeft(left).setRight(right), leftExp.addLeft, rightExp.addRight);
     }
 
     @Override
     public Node split() {
       Node newLeft = left.split();
       if (newLeft != left) {
-        return setLeft(newLeft);
+        return new Pair(newLeft, right);
       }
       return setRight(right.split());
     }
