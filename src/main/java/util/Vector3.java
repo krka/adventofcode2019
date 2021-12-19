@@ -70,6 +70,10 @@ public class Vector3 {
     return new Vector3(x - other.x, y - other.y, z - other.z);
   }
 
+  public Vector3 negate() {
+    return new Vector3(- x, -y, -z);
+  }
+
   @Override
   public String toString() {
     return "(" +
