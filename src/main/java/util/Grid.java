@@ -44,6 +44,10 @@ public class Grid<T> implements Rotatable<Grid<T>> {
     return grid;
   }
 
+  public T getDefaultValue() {
+    return defaultValue;
+  }
+
   public void setGrid(int row, int col, Grid<T> source, int offsetRow, int offsetCol, int rows, int cols) {
     for (int sourceRow = 0; sourceRow < rows; sourceRow++) {
       for (int sourceCol = 0; sourceCol < cols; sourceCol++) {
