@@ -134,6 +134,9 @@ public class IntCode implements Runnable {
   @Override
   public void run() {
     step(Integer.MAX_VALUE);
+    while (state == State.PAUSED) {
+      step(Integer.MAX_VALUE);
+    }
   }
 
   public void step(int steps) {
