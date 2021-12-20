@@ -49,8 +49,7 @@ public class Day20 implements Day {
           index = index * 2 + (grid.get(row + r, col + c) == '#' ? 1 : 0);
         }
       }
-      Character newValue = algo.charAt(index);
-      newGrid.set(row, col, newValue);
+      newGrid.set(row, col, algo.charAt(index));
     });
     return newGrid;
   }

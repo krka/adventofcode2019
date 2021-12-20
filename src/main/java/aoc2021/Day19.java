@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -54,18 +55,21 @@ public class Day19 implements Day {
   }
 
   private Map<Vector3, Set<Vector3>> reduce(List<Set<Vector3>> in) {
-    Map<Integer, List<Match>> matches = new HashMap<>();
+    List<List<Match>> matches = new ArrayList<>();
+    for (int i = 0; i < in.size(); i++) {
+      matches.add(new ArrayList<>());
+    }
+
     for (int i = 0; i < in.size() - 1; i++) {
       Set<Vector3> left = in.get(i);
       for (Matrix3 rotation : Matrix3.ROTATIONS) {
         Matrix3 invert = Matrix3.INVERT_ROTATIONS.get(rotation);
         Set<Vector3> leftRot = left.stream().map(rotation::mul).collect(Collectors.toSet());
         for (int j = i + 1; j < in.size(); j++) {
-          Set<Vector3> right = in.get(j);
-          Vector3 offset = checkMatch(leftRot, right);
+          Vector3 offset = checkMatch(leftRot, in.get(j));
           if (offset != null) {
-            matches.computeIfAbsent(j, k -> new ArrayList<>()).add(new Match(i, j, rotation, offset));
-            matches.computeIfAbsent(i, k -> new ArrayList<>()).add(new Match(j, i, invert, invert.mul(offset.negate())));
+            matches.get(j).add(new Match(i, j, rotation, offset));
+            matches.get(i).add(new Match(j, i, invert, invert.mul(offset.negate())));
           }
         }
       }
@@ -81,24 +85,27 @@ public class Day19 implements Day {
     return result;
   }
 
-  private void dfs(List<Set<Vector3>> input, Map<Integer, List<Match>> matches, Map<Vector3, Set<Vector3>> result, int index, Function<Vector3, Vector3> transform) {
+  private void dfs(List<Set<Vector3>> input, List<List<Match>> matches, Map<Vector3, Set<Vector3>> result, int index, Function<Vector3, Vector3> transform) {
     Vector3 scanner = transform.apply(Vector3.zero());
     if (!result.containsKey(scanner)) {
       result.put(scanner, input.get(index).stream().map(transform).collect(Collectors.toSet()));
-      matches.getOrDefault(index, List.of())
+      matches.get(index)
               .forEach(match -> dfs(input, matches, result, match.destIndex, v -> transform.apply(match.rotation.mul(v).add(match.offset))));
     }
 
   }
 
   private Vector3 checkMatch(Set<Vector3> dest, Set<Vector3> source) {
-    Set<Vector3> candidates =
-            dest.stream().flatMap(d -> source.stream().map(s -> s.sub(d))).collect(Collectors.toSet());
-    for (Vector3 diff : candidates) {
-        if (dest.stream().map(v -> v.add(diff)).filter(source::contains).limit(12).count() >= 12) {
+    Map<Vector3, AtomicInteger> diffs = new HashMap<>();
+    for (Vector3 d : dest) {
+      for (Vector3 s : source) {
+        Vector3 diff = s.sub(d);
+        AtomicInteger counter = diffs.computeIfAbsent(diff, k -> new AtomicInteger());
+        if (counter.incrementAndGet() >= 12) {
           return diff;
         }
       }
+    }
     return null;
   }
 
