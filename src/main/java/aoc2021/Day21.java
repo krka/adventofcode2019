@@ -5,18 +5,20 @@ public class Day21 implements Day {
   // Range: [3..9]. Index = value - 3. value = index + 3
   private static final int[] DIE_COUNTS = new int[7];
   static {
-    for (int d1 = 1; d1 <= 3; d1++) {
-      for (int d2 = 1; d2 <= 3; d2++) {
-        for (int d3 = 1; d3 <= 3; d3++) {
-          int sum = d1 + d2 + d3;
-          DIE_COUNTS[sum - 3]++;
+    for (int d1 = 0; d1 < 3; d1++) {
+      for (int d2 = 0; d2 < 3; d2++) {
+        for (int d3 = 0; d3 < 3; d3++) {
+          DIE_COUNTS[d1 + d2 + d3]++;
         }
       }
     }
   }
 
   private static final int KEY_SPACE = 2 * 10 * 10 * 22 * 22;
-  private final long[] cache = new long[KEY_SPACE];
+  private final long[] cache = new long[KEY_SPACE + 2];
+  {
+    cache[KEY_SPACE + 1] = 1;
+  }
 
   private final int p1;
   private final int p2;
@@ -60,19 +62,19 @@ public class Day21 implements Day {
   }
 
   public long solvePart2() {
-    int index = solve(p1, p2, 0, 0);
+    int index = solve(p1 - 1, p2 - 1, 0, 0);
     return Math.max(cache[index], cache[index + 1]);
   }
 
   private int solve(int p1, int p2, int s1, int s2) {
     if (s2 >= 21) {
-      return -1;
+      return KEY_SPACE;
     }
 
-    int key = p1 - 1;
+    int key = p1;
 
     key *= 10;
-    key += p2 - 1;
+    key += p2;
 
     key *= 22;
     key += s1;
@@ -82,9 +84,7 @@ public class Day21 implements Day {
 
     key *= 2;
 
-    long a = cache[key];
-    long b = cache[key + 1];
-    if (a != 0 || b != 0) {
+    if (cache[key] + cache[key + 1] > 0) {
       return key;
     }
     long sumA = 0;
@@ -92,21 +92,13 @@ public class Day21 implements Day {
     for (int i = 6; i >= 0; i--) {
       int counts = DIE_COUNTS[i];
       int newP1 = p1 + i + 3;
-      if (newP1 > 10) {
+      if (newP1 >= 10) {
         newP1 -= 10;
       }
-      int newS1 = s1 + newP1;
+      int newS1 = s1 + newP1 + 1;
       final int index = solve(p2, newP1, s2, newS1);
-      long recA = 0;
-      long recB;
-      if (index == -1) {
-        recB = 1;
-      } else {
-        recA = cache[index];
-        recB = cache[index + 1];
-      }
-      sumA += counts * recA;
-      sumB += counts * recB;
+      sumA += counts * cache[index];
+      sumB += counts * cache[index + 1];
     }
     cache[key] = sumB;
     cache[key + 1] = sumA;
