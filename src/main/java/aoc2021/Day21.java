@@ -15,8 +15,8 @@ public class Day21 implements Day {
     }
   }
 
-  private static final int KEY_SPACE = 10 * 10 * 22 * 22;
-  private final LongPair[] cache = new LongPair[KEY_SPACE];
+  private static final int KEY_SPACE = 2 * 10 * 10 * 22 * 22;
+  private final long[] cache = new long[KEY_SPACE];
 
   private final int p1;
   private final int p2;
@@ -60,13 +60,13 @@ public class Day21 implements Day {
   }
 
   public long solvePart2() {
-    LongPair ans = solve(p1, p2, 0, 0);
-    return Math.max(ans.a, ans.b);
+    int index = solve(p1, p2, 0, 0);
+    return Math.max(cache[index], cache[index + 1]);
   }
 
-  private LongPair solve(int p1, int p2, int s1, int s2) {
+  private int solve(int p1, int p2, int s1, int s2) {
     if (s2 >= 21) {
-      return LongPair.RIGHT_ONE;
+      return -1;
     }
 
     int key = p1 - 1;
@@ -80,9 +80,12 @@ public class Day21 implements Day {
     key *= 22;
     key += s2;
 
-    LongPair ans = cache[key];
-    if (ans != null) {
-      return ans;
+    key *= 2;
+
+    long a = cache[key];
+    long b = cache[key + 1];
+    if (a != 0 || b != 0) {
+      return key;
     }
     long sumA = 0;
     long sumB = 0;
@@ -93,24 +96,20 @@ public class Day21 implements Day {
         newP1 -= 10;
       }
       int newS1 = s1 + newP1;
-      final LongPair rec = solve(p2, newP1, s2, newS1);
-      sumA += counts * rec.a;
-      sumB += counts * rec.b;
+      final int index = solve(p2, newP1, s2, newS1);
+      long recA = 0;
+      long recB;
+      if (index == -1) {
+        recB = 1;
+      } else {
+        recA = cache[index];
+        recB = cache[index + 1];
+      }
+      sumA += counts * recA;
+      sumB += counts * recB;
     }
-    ans = new LongPair(sumB, sumA);
-    cache[key] = ans;
-    return ans;
-  }
-
-  private static class LongPair {
-    private static final LongPair RIGHT_ONE = new LongPair(0, 1);
-
-    final long a;
-    final long b;
-
-    public LongPair(long a, long b) {
-      this.a = a;
-      this.b = b;
-    }
+    cache[key] = sumB;
+    cache[key + 1] = sumA;
+    return key;
   }
 }
