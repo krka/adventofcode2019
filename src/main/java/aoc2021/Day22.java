@@ -1,5 +1,6 @@
 package aoc2021;
 
+import util.BitSet;
 import util.Util;
 
 import java.util.HashMap;
@@ -80,7 +81,10 @@ public class Day22 implements Day {
     int ysize = yrev.length;
     int zsize = zrev.length;
 
+    //BitSet m = new BitSet(xsize * ysize * zsize);
     boolean[][][] m = new boolean[xsize][ysize][zsize];
+
+    int xfactor = zsize * ysize;
 
     for (Line line : input) {
       boolean on = line.on;
@@ -91,8 +95,11 @@ public class Day22 implements Day {
       int z1 = zmap.get(line.z1);
       int z2 = zmap.get(line.z2 + 1);
       for (int x = x1; x < x2; x++) {
+        //int xpart = x * xfactor;
         for (int y = y1; y < y2; y++) {
+          //int ypart = xpart + y * zsize;
           for (int z = z1; z < z2; z++) {
+            //m.set(ypart + z, on);
             m[x][y][z] = on;
           }
         }
@@ -101,9 +108,12 @@ public class Day22 implements Day {
 
     long count = 0;
     for (int x = 0; x < xsize; x++) {
+      //int xpart = x * xfactor;
       for (int y = 0; y < ysize; y++) {
+        //int ypart = xpart + y * zsize;
         for (int z = 0; z < zsize; z++) {
           if (m[x][y][z]) {
+          //if (m.get(ypart + z)) {
             long x1 = xrev[x];
             long x2 = xrev[x + 1];
             long y1 = yrev[y];
