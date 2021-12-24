@@ -29,45 +29,25 @@ public class Day22 implements Day {
   }
 
   public long solvePart1() {
-    boolean[][][] m = new boolean[101][101][101];
-    for (Line line : input) {
-      int maxX = Math.min(50, line.x2);
-      int maxY = Math.min(50, line.y2);
-      int maxZ = Math.min(50, line.z2);
-      int minX = Math.max(-50, line.x1);
-      int minY = Math.max(-50, line.y1);
-      int minZ = Math.max(-50, line.z1);
-      for (int x = minX; x <= maxX; x++) {
-        for (int y = minY; y <= maxY; y++) {
-          for (int z = minZ; z <= maxZ; z++) {
-            m[x + 50][y + 50][z + 50] = line.on;
-          }
-        }
-      }
-    }
-    int count = 0;
-    for (int x = -50; x <= 50; x++) {
-      for (int y = -50; y <= 50; y++) {
-        for (int z = -50; z <= 50; z++) {
-          count += m[x + 50][y + 50][z + 50] ? 1 : 0;
-        }
-      }
-    }
-    return count;
+    return solve(input.stream().map(Line::bounded).filter(Objects::nonNull).collect(Collectors.toList()));
   }
 
   public long solvePart2() {
+    return solve(input);
+  }
+
+  private long solve(List<Line> input) {
     TreeSet<Integer> xset = new TreeSet<>();
     TreeSet<Integer> yset = new TreeSet<>();
     TreeSet<Integer> zset = new TreeSet<>();
 
     for (Line line : input) {
       xset.add(line.x1);
-      xset.add(line.x2 + 1);
+      xset.add(line.x2);
       yset.add(line.y1);
-      yset.add(line.y2 + 1);
+      yset.add(line.y2);
       zset.add(line.z1);
-      zset.add(line.z2 + 1);
+      zset.add(line.z2);
     }
 
     int[] xrev = map(xset);
@@ -89,11 +69,11 @@ public class Day22 implements Day {
     for (Line line : input) {
       boolean on = line.on;
       int x1 = xmap.get(line.x1);
-      int x2 = xmap.get(line.x2 + 1);
+      int x2 = xmap.get(line.x2);
       int y1 = ymap.get(line.y1);
-      int y2 = ymap.get(line.y2 + 1);
+      int y2 = ymap.get(line.y2);
       int z1 = zmap.get(line.z1);
-      int z2 = zmap.get(line.z2 + 1);
+      int z2 = zmap.get(line.z2);
       for (int x = x1; x < x2; x++) {
         //int xpart = x * xfactor;
         for (int y = y1; y < y2; y++) {
@@ -154,14 +134,37 @@ public class Day22 implements Day {
     final int z1;
     final int z2;
 
+    public Line(boolean on, int x1, int x2, int y1, int y2, int z1, int z2) {
+      this.on = on;
+      this.x1 = x1;
+      this.x2 = x2;
+      this.y1 = y1;
+      this.y2 = y2;
+      this.z1 = z1;
+      this.z2 = z2;
+    }
+
     Line(String[] parts) {
       on = parts[0].equals("on");
       x1 = Integer.parseInt(parts[2]);
-      x2 = Integer.parseInt(parts[3]);
+      x2 = Integer.parseInt(parts[3]) + 1;
       y1 = Integer.parseInt(parts[5]);
-      y2 = Integer.parseInt(parts[6]);
+      y2 = Integer.parseInt(parts[6]) + 1;
       z1 = Integer.parseInt(parts[8]);
-      z2 = Integer.parseInt(parts[9]);
+      z2 = Integer.parseInt(parts[9]) + 1;
+    }
+
+    public Line bounded() {
+      int x1 = Math.max(-50, this.x1);
+      int x2 = Math.min(51, this.x2);
+      int y1 = Math.max(-50, this.y1);
+      int y2 = Math.min(51, this.y2);
+      int z1 = Math.max(-50, this.z1);
+      int z2 = Math.min(51, this.z2);
+      if (x1 >= x2 || y1 >= y2 || z1 >= z2) {
+        return null;
+      }
+      return new Line(on, x1, x2, y1, y2, z1, z2);
     }
 
     @Override
