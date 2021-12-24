@@ -1,26 +1,27 @@
 package aoc2021;
 
-import util.BitSet;
 import util.Util;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.function.ToIntFunction;
+import java.util.function.ToLongFunction;
 import java.util.stream.Collectors;
 
 public class Day22 implements Day {
 
 
-  private final List<Line> input;
+  private final List<Box> input;
 
   public Day22(List<String> input) {
     this.input = input.stream()
             .filter(s -> !s.isEmpty())
             .map(s -> s.split("[ =,.]+"))
-            .map(Line::new)
+            .map(Box::new)
             .collect(Collectors.toList());
   }
 
@@ -29,103 +30,63 @@ public class Day22 implements Day {
   }
 
   public long solvePart1() {
-    return solve(input.stream().map(Line::bounded).filter(Objects::nonNull).collect(Collectors.toList()));
+    return solve(input.stream()
+            .map(Box::bounded)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList()));
   }
 
   public long solvePart2() {
     return solve(input);
   }
 
-  private long solve(List<Line> input) {
-    TreeSet<Integer> xset = new TreeSet<>();
-    TreeSet<Integer> yset = new TreeSet<>();
-    TreeSet<Integer> zset = new TreeSet<>();
+  private long solve(List<Box> input) {
+    return phase(input, Box::getX1, Box::getX2, Box::splitX,
+            xboxes -> phase(xboxes, Box::getY1, Box::getY2, Box::splitY,
+                    yboxes -> phase(yboxes, Box::getZ1, Box::getZ2, Box::splitZ,
+                            this::sumVolumes)));
+  }
 
-    for (Line line : input) {
-      xset.add(line.x1);
-      xset.add(line.x2);
-      yset.add(line.y1);
-      yset.add(line.y2);
-      zset.add(line.z1);
-      zset.add(line.z2);
+  private long phase(List<Box> input,
+                     ToIntFunction<Box> first,
+                     ToIntFunction<Box> second,
+                     SplitFunction splitter,
+                     ToLongFunction<List<Box>> nextFun) {
+    TreeMap<Integer, List<Box>> map = new TreeMap<>();
+    for (Box box : input) {
+      map.computeIfAbsent(first.applyAsInt(box), k -> new ArrayList<>());
+      map.computeIfAbsent(second.applyAsInt(box), k -> new ArrayList<>());
     }
 
-    int[] xrev = map(xset);
-    int[] yrev = map(yset);
-    int[] zrev = map(zset);
-    Map<Integer, Integer> xmap = rev(xrev);
-    Map<Integer, Integer> ymap = rev(yrev);
-    Map<Integer, Integer> zmap = rev(zrev);
-
-    int xsize = xrev.length;
-    int ysize = yrev.length;
-    int zsize = zrev.length;
-
-    //BitSet m = new BitSet(xsize * ysize * zsize);
-    boolean[][][] m = new boolean[xsize][ysize][zsize];
-
-    int xfactor = zsize * ysize;
-
-    for (Line line : input) {
-      boolean on = line.on;
-      int x1 = xmap.get(line.x1);
-      int x2 = xmap.get(line.x2);
-      int y1 = ymap.get(line.y1);
-      int y2 = ymap.get(line.y2);
-      int z1 = zmap.get(line.z1);
-      int z2 = zmap.get(line.z2);
-      for (int x = x1; x < x2; x++) {
-        //int xpart = x * xfactor;
-        for (int y = y1; y < y2; y++) {
-          //int ypart = xpart + y * zsize;
-          for (int z = z1; z < z2; z++) {
-            //m.set(ypart + z, on);
-            m[x][y][z] = on;
-          }
+    for (Box box : input) {
+      final int min = first.applyAsInt(box);
+      final int max = second.applyAsInt(box) + 1;
+      final SortedMap<Integer, List<Box>> subMap = map.subMap(min, max);
+      int prev = first.applyAsInt(box);
+      for (Map.Entry<Integer, List<Box>> entry : subMap.entrySet()) {
+        int cur = entry.getKey();
+        if (cur != prev) {
+          entry.getValue().add(splitter.apply(box, prev, cur));
         }
+        prev = cur;
       }
     }
-
-    long count = 0;
-    for (int x = 0; x < xsize; x++) {
-      //int xpart = x * xfactor;
-      for (int y = 0; y < ysize; y++) {
-        //int ypart = xpart + y * zsize;
-        for (int z = 0; z < zsize; z++) {
-          if (m[x][y][z]) {
-          //if (m.get(ypart + z)) {
-            long x1 = xrev[x];
-            long x2 = xrev[x + 1];
-            long y1 = yrev[y];
-            long y2 = yrev[y + 1];
-            long z1 = zrev[z];
-            long z2 = zrev[z + 1];
-            count += (x2 - x1) * (y2 - y1) * (z2 - z1);
-          }
-        }
-      }
-    }
-    return count;
+    return map.values().stream().mapToLong(nextFun).sum();
   }
 
-  private Map<Integer, Integer> rev(int[] list) {
-    HashMap<Integer, Integer> res = new HashMap<>(list.length);
-    for (int i = 0; i < list.length; i++) {
-      res.put(list[i], i);
+  private long sumVolumes(List<Box> values) {
+    if (values.isEmpty()) {
+      return 0;
     }
-    return res;
+    final Box last = values.get(values.size() - 1);
+    if (last.isOn()) {
+      return last.volume();
+    } else {
+      return 0;
+    }
   }
 
-  private int[] map(Set<Integer> set) {
-    int[] res = new int[set.size()];
-    int index = 0;
-    for (Integer integer : set) {
-      res[index++] = integer;
-    }
-    return res;
-  }
-
-  static class Line {
+  static class Box {
     final boolean on;
     final int x1;
     final int x2;
@@ -134,7 +95,7 @@ public class Day22 implements Day {
     final int z1;
     final int z2;
 
-    public Line(boolean on, int x1, int x2, int y1, int y2, int z1, int z2) {
+    public Box(boolean on, int x1, int x2, int y1, int y2, int z1, int z2) {
       this.on = on;
       this.x1 = x1;
       this.x2 = x2;
@@ -144,7 +105,7 @@ public class Day22 implements Day {
       this.z2 = z2;
     }
 
-    Line(String[] parts) {
+    Box(String[] parts) {
       on = parts[0].equals("on");
       x1 = Integer.parseInt(parts[2]);
       x2 = Integer.parseInt(parts[3]) + 1;
@@ -154,7 +115,7 @@ public class Day22 implements Day {
       z2 = Integer.parseInt(parts[9]) + 1;
     }
 
-    public Line bounded() {
+    public Box bounded() {
       int x1 = Math.max(-50, this.x1);
       int x2 = Math.min(51, this.x2);
       int y1 = Math.max(-50, this.y1);
@@ -164,39 +125,58 @@ public class Day22 implements Day {
       if (x1 >= x2 || y1 >= y2 || z1 >= z2) {
         return null;
       }
-      return new Line(on, x1, x2, y1, y2, z1, z2);
+      return new Box(on, x1, x2, y1, y2, z1, z2);
     }
 
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) return true;
-      if (o == null || getClass() != o.getClass()) return false;
-      Line line = (Line) o;
-      return on == line.on &&
-              x1 == line.x1 &&
-              x2 == line.x2 &&
-              y1 == line.y1 &&
-              y2 == line.y2 &&
-              z1 == line.z1 &&
-              z2 == line.z2;
+    public boolean isOn() {
+      return on;
     }
 
-    @Override
-    public int hashCode() {
-      return Objects.hash(on, x1, x2, y1, y2, z1, z2);
+    public int getX1() {
+      return x1;
     }
 
-    @Override
-    public String toString() {
-      return "Line{" +
-              "on=" + on +
-              ", x1=" + x1 +
-              ", x2=" + x2 +
-              ", y1=" + y1 +
-              ", y2=" + y2 +
-              ", z1=" + z1 +
-              ", z2=" + z2 +
-              '}';
+    public int getX2() {
+      return x2;
     }
+
+    public int getY1() {
+      return y1;
+    }
+
+    public int getY2() {
+      return y2;
+    }
+
+    public int getZ1() {
+      return z1;
+    }
+
+    public int getZ2() {
+      return z2;
+    }
+
+    public Box splitX(int x1, int x2) {
+      return new Box(on, x1, x2, y1, y2, z1, z2);
+    }
+
+    public Box splitY(int y1, int y2) {
+      return new Box(on, x1, x2, y1, y2, z1, z2);
+    }
+
+    public Box splitZ(int z1, int z2) {
+      return new Box(on, x1, x2, y1, y2, z1, z2);
+    }
+
+    public long volume() {
+      final long x = x2 - x1;
+      final long y = y2 - y1;
+      final long z = z2 - z1;
+      return x * y * z;
+    }
+  }
+
+  private interface SplitFunction {
+    Box apply(Box box, int min, int max);
   }
 }
