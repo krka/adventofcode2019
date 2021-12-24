@@ -1,0 +1,27 @@
+if digit == z % 26 + $2:
+  z = z / $1
+else:
+  z = 26 * (z / $1) + digit + $3
+
+x = w != z % 26 + $2
+z = z / $1
+z = z + x * (z * 25 + (w + $3))
+
+inp w
+mul x 0
+add x z
+mod x 26
+div z (.*)
+add x (.*)
+eql x w
+eql x 0
+mul y 0
+add y 25
+mul y x
+add y 1
+mul z y
+mul y 0
+add y w
+add y (.*)
+mul y x
+add z y
