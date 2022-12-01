@@ -1,15 +1,14 @@
 package aoc2021;
 
+import util.Day;
 import util.Grid;
 import util.Util;
 import util.Vec2;
 
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Day15 implements Day {

@@ -1,7 +1,7 @@
 package aoc2021;
 
 import org.junit.Test;
-import util.Matrix3;
+import util.Day;
 
 import static org.junit.Assert.assertEquals;
 

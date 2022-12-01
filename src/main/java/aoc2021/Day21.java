@@ -1,5 +1,7 @@
 package aoc2021;
 
+import util.Day;
+
 public class Day21 implements Day {
 
   // Range: [3..9]. Index = value - 3. value = index + 3

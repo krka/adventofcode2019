@@ -1,16 +1,12 @@
 package aoc2021;
 
+import util.Day;
 import util.Grid;
 import util.Util;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class Day25 implements Day {
 

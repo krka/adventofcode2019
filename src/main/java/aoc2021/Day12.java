@@ -1,5 +1,6 @@
 package aoc2021;
 
+import util.Day;
 import util.Util;
 
 import java.util.HashMap;

@@ -1,4 +1,4 @@
-package aoc2021;
+package util;
 
 public interface Day {
   long solvePart1();

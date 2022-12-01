@@ -1,5 +1,6 @@
 package aoc2021;
 
+import util.Day;
 import util.Matrix3;
 import util.Util;
 import util.Vector3;

@@ -4,6 +4,7 @@ import intcode.IntCode;
 import intcode.assembler.AnnotatedIntCode;
 import intcode.assembler.Assembler;
 import org.junit.Test;
+import util.Day;
 import util.Util;
 
 import java.math.BigInteger;
