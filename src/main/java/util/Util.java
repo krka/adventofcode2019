@@ -66,6 +66,25 @@ public class Util {
     return intCode.stream().map(Object::toString).collect(Collectors.joining(","));
   }
 
+  public static <T> List<List<T>> partition(List<T> list, int size) {
+    if (size < 1) {
+      throw new IllegalArgumentException();
+    }
+    final List<List<T>> result = new ArrayList<>();
+    int i = 0;
+    while (true) {
+      int nextI = i + size;
+      if (nextI >= list.size()) {
+        result.add(list.subList(i, list.size()));
+        break;
+      } else {
+        result.add(list.subList(i, nextI));
+      }
+      i = nextI;
+    }
+    return result;
+  }
+
   public static <T> Collector<T, ?, List<List<T>>> toPartitions(BiFunction<T, T, Boolean> predicate) {
     return new Partitions<>(predicate);
   }
