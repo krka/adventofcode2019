@@ -1,14 +1,11 @@
 package aoc2022;
 
-import util.Day;
 import util.DayS;
 import util.Util;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 public class Day5 implements DayS {
 
