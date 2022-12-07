@@ -90,7 +90,11 @@ public class Util {
   }
 
   public static <T> Collector<T, ?, List<List<T>>> splitBy(Predicate<T> predicate) {
-    return new SplitStream<>(predicate);
+    return new SplitStream<>(predicate, false);
+  }
+
+  public static <T> Collector<T, ?, List<List<T>>> splitBefore(Predicate<T> predicate) {
+    return new SplitStream<>(predicate, true);
   }
 
   public static <T> WindowsCollector<T> windows(final int window) {

@@ -12,14 +12,16 @@ import java.util.stream.Collector;
 
 class SplitStream<T> implements Collector<T, SplitStream.Accumulator, List<List<T>>> {
   private final Predicate<T> predicate;
+  private final boolean keep;
 
-  public SplitStream(Predicate<T> predicate) {
+  public SplitStream(Predicate<T> predicate, boolean keep) {
     this.predicate = predicate;
+    this.keep = keep;
   }
 
   @Override
   public Supplier<Accumulator> supplier() {
-    return Accumulator::new;
+    return () -> new Accumulator<>(keep);
   }
 
   @Override
@@ -45,7 +47,12 @@ class SplitStream<T> implements Collector<T, SplitStream.Accumulator, List<List<
   static class Accumulator<T> {
 
     private final List<List<T>> closed = new ArrayList<>();
+    private final boolean keep;
     private List<T> current = new ArrayList<>();
+
+    public Accumulator(boolean keep) {
+      this.keep = keep;
+    }
 
     Accumulator combiner(Accumulator other) {
       throw new RuntimeException("Combiner is unsupported");
@@ -63,6 +70,9 @@ class SplitStream<T> implements Collector<T, SplitStream.Accumulator, List<List<
         if (!current.isEmpty()) {
           closed.add(current);
           current = new ArrayList<>();
+        }
+        if (keep) {
+          current.add(value);
         }
       } else {
         current.add(value);
