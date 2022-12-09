@@ -69,6 +69,12 @@ public class Vec2 {
     return Math.abs(x) + Math.abs(y);
   }
 
+  /* See https://en.wikipedia.org/wiki/Chebyshev_distance
+   */
+  public long chessDistance() {
+    return Math.max(Math.abs(x), Math.abs(y));
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;

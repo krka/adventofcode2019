@@ -5,9 +5,6 @@ import util.Grid;
 import util.Util;
 import util.Vec2;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import java.util.function.Function;
 
 public class Day8 implements Day {
