@@ -1,6 +1,5 @@
 package util;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Spliterator;
@@ -155,7 +154,7 @@ public class Grid<T> implements Rotatable<Grid<T>> {
           col = 0;
           row++;
         }
-        action.accept(new Entry<T>(r, c, get(r, c), Grid.this));
+        action.accept(new Entry<>(r, c, get(r, c), Grid.this));
         return true;
       }
 
@@ -270,6 +269,10 @@ public class Grid<T> implements Rotatable<Grid<T>> {
 
     public int getCol() {
       return col;
+    }
+
+    public Vec2 getPos() {
+      return new Vec2(getCol(), getRow());
     }
 
     public T getValue() {
