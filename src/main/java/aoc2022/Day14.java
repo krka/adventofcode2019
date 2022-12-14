@@ -40,63 +40,51 @@ public class Day14 implements Day {
 
   @Override
   public long solvePart1() {
-    final Vec2 start = Vec2.of(500, 0);
-    while (true) {
-      Vec2 pos = fill(start);
-      if (pos == null) {
-        return grid.size() - startSize;
-      } else {
-        grid.add(pos);
-      }
-    }
+    fill(Vec2.of(500, 0));
+    return grid.size() - startSize;
   }
 
   @Override
   public long solvePart2() {
-    final Vec2 start = Vec2.of(500, 0);
-    while (true) {
-      Vec2 pos = fill2(start);
-      grid.add(pos);
-      if (pos.equals(start)) {
-        return grid.size() - startSize;
-      }
+    fill2(Vec2.of(500, 0));
+    return grid.size() - startSize;
+  }
+
+  private boolean fill(Vec2 sv) {
+    if (sv.getY() > maxY) {
+      return false;
+    }
+
+    final Vec2 nextDown = sv.add(Vec2.SOUTH);
+    final Vec2 nextDownLeft = nextDown.add(Vec2.WEST);
+    final Vec2 nextDownRight = nextDown.add(Vec2.EAST);
+
+    boolean downFilled = grid.contains(nextDown) || fill(nextDown);
+    boolean leftFilled = downFilled && (grid.contains(nextDownLeft) || fill(nextDownLeft));
+    boolean rightFilled = leftFilled && (grid.contains(nextDownRight) || fill(nextDownRight));
+
+    if (rightFilled) {
+      grid.add(sv);
+      return true;
+    } else {
+      return false;
     }
   }
 
-  private Vec2 fill(Vec2 sv) {
-    while (true) {
-      if (sv.getY() > maxY) {
-        return null;
-      }
-      final Vec2 nextDown = sv.add(Vec2.SOUTH);
-      final Vec2 nextDownLeft = nextDown.add(Vec2.WEST);
-      final Vec2 nextDownRight = nextDown.add(Vec2.EAST);
-      if (!grid.contains(nextDown)) {
-        sv = nextDown;
-      } else if (!grid.contains(nextDownLeft)) {
-        sv = nextDownLeft;
-      } else if (!grid.contains(nextDownRight)) {
-        sv = nextDownRight;
-      } else {
-        return sv;
-      }
-    }
-  }
+  private boolean fill2(Vec2 sv) {
+    final Vec2 nextDown = sv.add(Vec2.SOUTH);
+    final Vec2 nextDownLeft = nextDown.add(Vec2.WEST);
+    final Vec2 nextDownRight = nextDown.add(Vec2.EAST);
 
-  private Vec2 fill2(Vec2 sv) {
-    while (true) {
-      final Vec2 nextDown = sv.add(Vec2.SOUTH);
-      final Vec2 nextDownLeft = nextDown.add(Vec2.WEST);
-      final Vec2 nextDownRight = nextDown.add(Vec2.EAST);
-      if (!contains2(nextDown)) {
-        sv = nextDown;
-      } else if (!contains2(nextDownLeft)) {
-        sv = nextDownLeft;
-      } else if (!contains2(nextDownRight)) {
-        sv = nextDownRight;
-      } else {
-        return sv;
-      }
+    boolean downFilled = contains2(nextDown) || fill2(nextDown);
+    boolean leftFilled = downFilled && (contains2(nextDownLeft) || fill2(nextDownLeft));
+    boolean rightFilled = leftFilled && (contains2(nextDownRight) || fill2(nextDownRight));
+
+    if (rightFilled) {
+      grid.add(sv);
+      return true;
+    } else {
+      return false;
     }
   }
 
