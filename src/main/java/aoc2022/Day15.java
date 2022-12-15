@@ -87,11 +87,7 @@ public class Day15 implements Day {
 
     for (Long a : diagsA) {
       for (Long b : diagsB) {
-        long y = b - a;
-        if (0 != (y % 2)) {
-          continue;
-        }
-        y /= 2;
+        long y = (b - a) / 2;
         long x = b - y;
         if (safe(Vec2.of(x, y), sensors)) {
           return x * 4000000 + y;
