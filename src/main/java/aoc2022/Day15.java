@@ -8,7 +8,6 @@ import util.Vec2;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -17,12 +16,10 @@ public class Day15 implements Day {
   private final List<Pair<Vec2, Vec2>> input2;
 
   private final int targetY;
-  private final int maxCoord;
 
-  public Day15(String name, int targetY, int maxCoord) {
+  public Day15(String name, int targetY) {
     input = Util.readResource(name);
     this.targetY = targetY;
-    this.maxCoord = maxCoord;
 
     input2 = input.stream().filter(s -> !s.isEmpty())
             .map(s -> {
@@ -64,44 +61,46 @@ public class Day15 implements Day {
   @Override
   public long solvePart2() {
     final ArrayList<Sensor> sensors = new ArrayList<>();
+    Set<Long> diagB = new HashSet<>();
+    Set<Long> diagA = new HashSet<>();
     for (Pair<Vec2, Vec2> pair : input2) {
       final Vec2 sensor = pair.a();
       final Vec2 beacon = pair.b();
       final int manhattan = (int) sensor.sub(beacon).manhattan();
       sensors.add(new Sensor(sensor, manhattan));
+
+      final long a = sensor.getX() - sensor.getY();
+      diagA.add(a - manhattan);
+      diagA.add(a + manhattan);
+
+      final long b = sensor.getX() + sensor.getY();
+      diagB.add(b - manhattan);
+      diagB.add(b + manhattan);
+
     }
 
-    Set<Vec2> candidates = new HashSet<>();
-    for (int y = 0; y <= maxCoord; y++) {
-      int y2 = y;
-      final List<Interval> intervals = sensors.stream()
-              .map(s -> s.toInterval(y2))
-              .filter(Objects::nonNull)
-              .collect(Collectors.toList());
-      for (Interval interval : intervals) {
-        test2(interval.minX - 1, y, intervals, candidates);
-        test2(interval.maxX + 1, y, intervals, candidates);
+    final Set<Long> diagsA = diagA.stream().filter(d -> diagA.contains(d + 2)).map(d -> d + 1).collect(Collectors.toSet());
+    final Set<Long> diagsB = diagB.stream().filter(d -> diagB.contains(d + 2)).map(d -> d + 1).collect(Collectors.toSet());
+
+    for (Long a : diagsA) {
+      for (Long b : diagsB) {
+        long y = b - a;
+        if (0 != (y % 2)) {
+          continue;
+        }
+        y /= 2;
+        long x = b - y;
+        if (safe(Vec2.of(x, y), sensors)) {
+          return x * 4000000 + y;
+        }
       }
     }
-    if (candidates.size() != 1) {
-      throw new RuntimeException();
-    }
-    final Vec2 ans = candidates.iterator().next();
-    return ans.getX() * 4000000 + ans.getY();
+    throw new RuntimeException();
   }
 
-  private void test2(int x, int y, List<Interval> intervals, Set<Vec2> candidates) {
-    if (test(x, intervals)) {
-      candidates.add(Vec2.of(x, y));
-    }
-  }
-
-  private boolean test(int x, List<Interval> intervals) {
-    if (x < 0 || x > maxCoord) {
-      return false;
-    }
-    for (Interval interval : intervals) {
-      if (interval.getMinX() <= x && x <= interval.getMaxX()) {
+  private boolean safe(Vec2 pos, ArrayList<Sensor> sensors) {
+    for (Sensor sensor : sensors) {
+      if (sensor.pos.sub(pos).manhattan() <= sensor.manhattan) {
         return false;
       }
     }
@@ -115,35 +114,6 @@ public class Day15 implements Day {
     public Sensor(Vec2 pos, int manhattan) {
       this.pos = pos;
       this.manhattan = manhattan;
-    }
-
-    Interval toInterval(int y) {
-      final int offset = (int) Math.abs(pos.getY() - y);
-      int m2 = manhattan - offset;
-      final int minX = (int) (pos.getX() - m2);
-      final int maxX = (int) (pos.getX() + m2);
-      if (maxX >= minX) {
-        return new Interval(minX, maxX);
-      }
-      return null;
-    }
-  }
-
-  private static class Interval {
-    private final int minX;
-    private final int maxX;
-
-    public Interval(int minX, int maxX) {
-      this.minX = minX;
-      this.maxX = maxX;
-    }
-
-    public int getMinX() {
-      return minX;
-    }
-
-    public int getMaxX() {
-      return maxX;
     }
   }
 }
