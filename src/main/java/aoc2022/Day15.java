@@ -1,6 +1,8 @@
 package aoc2022;
 
 import util.Day;
+import util.Interval;
+import util.IntervalSet;
 import util.Pair;
 import util.Util;
 import util.Vec2;
@@ -38,7 +40,7 @@ public class Day15 implements Day {
 
   @Override
   public long solvePart1() {
-    Set<Integer> notBeacon = new HashSet<>();
+    List<Interval> intervals = new ArrayList<>();
     for (Pair<Vec2, Vec2> pair : input2) {
       final Vec2 sensor = pair.a();
       final Vec2 beacon = pair.b();
@@ -47,15 +49,16 @@ public class Day15 implements Day {
       final long offset = Math.abs(sensor.getY() - targetY);
       final long m2 = manhattan - offset;
       final int minX = (int) (sensor.getX() - m2);
-      final int maxX = (int) (sensor.getX() + m2);
-      for (int i = minX; i <= maxX; i++) {
-        if (i != beacon.getX() || beacon.getY() != targetY) {
-          notBeacon.add(i);
-        }
+      final int maxX = (int) (sensor.getX() + m2) + 1;
+      final Interval interval = Interval.of(minX, maxX);
+      if (interval.contains(beacon.getX()) && beacon.getY() == targetY) {
+        intervals.add(Interval.of(minX, beacon.getX()));
+        intervals.add(Interval.of(beacon.getX() + 1, maxX));
+      } else {
+        intervals.add(interval);
       }
     }
-
-    return notBeacon.size();
+    return IntervalSet.merge(intervals).length();
   }
 
   @Override
