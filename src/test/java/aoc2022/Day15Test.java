@@ -7,26 +7,26 @@ import static org.junit.Assert.assertEquals;
 
 public class Day15Test {
 
-  private Day day = new Day15("2022/day15.in");
-  private Day sample = new Day15("2022/day15-sample.in");
+  private Day day = new Day15("2022/day15.in", 2000000, 4000000);
+  private Day sample = new Day15("2022/day15-sample.in", 10, 20);
 
   @Test
   public void testPart1() {
-    assertEquals(0, day.solvePart1());
+    assertEquals(6124805, day.solvePart1());
   }
 
   @Test
   public void testPart1Sample() {
-    assertEquals(0, sample.solvePart1());
+    assertEquals(26, sample.solvePart1());
   }
 
   @Test
   public void testPart2() {
-    assertEquals(0, day.solvePart2());
+    assertEquals(12555527364986L, day.solvePart2());
   }
 
   @Test
   public void testPart2Sample() {
-    assertEquals(0, sample.solvePart2());
+    assertEquals(56000011, sample.solvePart2());
   }
 }
