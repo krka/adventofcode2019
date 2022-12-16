@@ -26,6 +26,7 @@ public class Day16 implements Day {
 
   public Day16(String name) {
     input = Util.readResource(name);
+    System.out.println(name + " - t1: " + System.currentTimeMillis());
     for (String s : input) {
       if (s.isEmpty()) {
         continue;
@@ -53,7 +54,6 @@ public class Day16 implements Day {
     }
     final Map<String, Integer> toAdd = new HashMap<>();
     while (true) {
-      System.out.println(movement.values().stream().mapToLong(Map::size).sum());
       boolean doBreak = true;
       for (String s1 : flow.keySet()) {
         final Map<String, Integer> move1 = movement.get(s1);
@@ -100,6 +100,7 @@ public class Day16 implements Day {
     max = 1 << length;
     //cache = new int[length + 1][max][31][2];
     cache2 = new int[(length + 1) * max * 31 * 2];
+    System.out.println(name + " - t2: " + System.currentTimeMillis());
   }
 
 

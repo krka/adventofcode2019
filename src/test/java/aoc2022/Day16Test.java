@@ -7,8 +7,8 @@ import static org.junit.Assert.assertEquals;
 
 public class Day16Test {
 
-  private Day day = new Day16("2022/day16.in");
-  private Day sample = new Day16("2022/day16-sample.in");
+  private static final Day day = new Day16("2022/day16.in");
+  private static final Day sample = new Day16("2022/day16-sample.in");
 
   @Test
   public void testPart1() {
