@@ -4,6 +4,7 @@ import util.Day;
 import util.Util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -102,18 +103,18 @@ public class Day16 implements Day {
     final int length = flowPrimitive.length;
     final int nodes = (1 << length) - 1;
     final int bitmaskLength = 1 << length;
-    Long[][][] cache = new Long[length + 1][bitmaskLength][31];
+    int[][][] cache = new int[length + 1][bitmaskLength][31];
     return solve(-1, 0, 30, nodes, length, cache);
   }
 
-  private long solve(int from, int visited, int left, int nodes, int length, Long[][][] cache) {
+  private int solve(int from, int visited, int left, int nodes, int length, int[][][] cache) {
     int remaining = nodes ^ visited;
-    final Long cached = cache[from + 1][remaining][left];
-    if (cached != null) {
-      return cached;
+    final int cached = cache[from + 1][remaining][left];
+    if (cached != 0) {
+      return cached - 1;
     }
     final int[] ints = from < 0 ? startMovement : movementPrimitive[from];
-    long best = 0;
+    int best = 0;
     for (int to = 0; to < length; to++) {
       final int shift = 1 << to;
       if (0 == (nodes & shift)) {
@@ -132,7 +133,7 @@ public class Day16 implements Day {
         visited ^= shift;
       }
     }
-    cache[from + 1][remaining][left] = best;
+    cache[from + 1][remaining][left] = best + 1;
     return best;
   }
 
@@ -141,13 +142,13 @@ public class Day16 implements Day {
     final int length = flowPrimitive.length;
     int max = 1 << length;
     int maxBitmask = max - 1;
-    long best = 0;
-    Long[][][] cache = new Long[length + 1][max][27];
+    int best = 0;
+    int[][][] cache = new int[length + 1][max][27];
     for (int left = 0; left < max; left++) {
       int right = ~left & maxBitmask;
 
-      final long leftBest = solve(-1, 0, 26, left, length, cache);
-      final long rightBest = solve(-1, 0, 26, right, length, cache);
+      final int leftBest = solve(-1, 0, 26, left, length, cache);
+      final int rightBest = solve(-1, 0, 26, right, length, cache);
       best = Math.max(best, leftBest + rightBest);
     }
     return best;
