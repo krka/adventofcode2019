@@ -5,10 +5,9 @@ import util.Util;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.stream.Collectors;
 
 public class Day16 implements Day {
   private final List<String> input;
@@ -18,6 +17,9 @@ public class Day16 implements Day {
 
   private final List<String> nonZero = new ArrayList<>();
   private final Map<String, Map<String, Integer>> movement;
+  private final int[] startMovement;
+  private final int[][] movementPrimitive;
+  private final int[] flowPrimitive;
 
   public Day16(String name) {
     input = Util.readResource(name);
@@ -75,27 +77,51 @@ public class Day16 implements Day {
         break;
       }
     }
+    flowPrimitive = new int[nonZero.size()];
+    movementPrimitive = new int[nonZero.size()][nonZero.size()];
+    startMovement = new int[nonZero.size()];
+    final Map<String, Integer> startMovementCosts = movement.entrySet().stream().filter(e -> e.getKey().equals("AA"))
+            .map(Map.Entry::getValue)
+            .flatMap(stringIntegerMap -> stringIntegerMap.entrySet().stream())
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+    for (int i = 0; i < flowPrimitive.length; i++) {
+      final String s1 = nonZero.get(i);
+      startMovement[i] = startMovementCosts.get(s1);
+      flowPrimitive[i] = flow.get(s1);
+      for (int j = 0; j < flowPrimitive.length; j++) {
+        final String s2 = nonZero.get(j);
+        movementPrimitive[i][j] = movement.get(s1).get(s2);
+      }
+    }
   }
 
 
   @Override
   public long solvePart1() {
-    Set<String> visited = new HashSet<>();
-    return solve("AA", visited, 30, nonZero);
+    final int nodes = (1 << flowPrimitive.length) - 1;
+    return solve(-1, 0, 30, nodes, flowPrimitive.length);
   }
 
-  private long solve(String s1, Set<String> visited, int left, List<String> nodes) {
+  private long solve(int from, int visited, int left, int nodes, int length) {
+    final int[] ints = from < 0 ? startMovement : movementPrimitive[from];
     long best = 0;
-    for (String s2 : nodes) {
-      if (!visited.contains(s2)) {
-        visited.add(s2);
-        int moveThere = left - movement.get(s1).get(s2) - 1;
+    for (int to = 0; to < length; to++) {
+      final int shift = 1 << to;
+      if (0 == (nodes & shift)) {
+        continue;
+      }
+      if (0 == (visited & shift)) {
+        visited ^= shift;
+
+        int moveThere = left - ints[to] - 1;
         if (moveThere >= 0) {
-          final int flow = this.flow.get(s2);
+          final int flow = this.flowPrimitive[to];
           int addedFlow = moveThere * flow;
-          best = Math.max(best, addedFlow + solve(s2, visited, moveThere, nodes));
+          best = Math.max(best, addedFlow + solve(to, visited, moveThere, nodes, length));
         }
-        visited.remove(s2);
+
+        visited ^= shift;
       }
     }
     return best;
@@ -103,23 +129,15 @@ public class Day16 implements Day {
 
   @Override
   public long solvePart2() {
-    Set<String> visited = new HashSet<>();
-    int max = 1 << nonZero.size();
+    final int length = flowPrimitive.length;
+    int max = 1 << length;
+    int maxBitmask = max - 1;
     long best = 0;
-    final ArrayList<String> left = new ArrayList<>();
-    final ArrayList<String> right = new ArrayList<>();
-    for (int i = 0; i < max; i++) {
-      left.clear();
-      right.clear();
-      for (int j = 0; j < nonZero.size(); j++) {
-        if (0 == ((i >> j) & 1)) {
-          left.add(nonZero.get(j));
-        } else {
-          right.add(nonZero.get(j));
-        }
-      }
-      final long leftBest = solve("AA", visited, 26, left);
-      final long rightBest = solve("AA", visited, 26, right);
+    for (int left = 0; left < max; left++) {
+      int right = ~left & maxBitmask;
+
+      final long leftBest = solve(-1, 0, 26, left, length);
+      final long rightBest = solve(-1, 0, 26, right, length);
       best = Math.max(best, leftBest + rightBest);
     }
     return best;
