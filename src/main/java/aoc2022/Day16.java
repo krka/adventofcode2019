@@ -99,11 +99,19 @@ public class Day16 implements Day {
 
   @Override
   public long solvePart1() {
-    final int nodes = (1 << flowPrimitive.length) - 1;
-    return solve(-1, 0, 30, nodes, flowPrimitive.length);
+    final int length = flowPrimitive.length;
+    final int nodes = (1 << length) - 1;
+    final int bitmaskLength = 1 << length;
+    Long[][][] cache = new Long[length + 1][bitmaskLength][31];
+    return solve(-1, 0, 30, nodes, length, cache);
   }
 
-  private long solve(int from, int visited, int left, int nodes, int length) {
+  private long solve(int from, int visited, int left, int nodes, int length, Long[][][] cache) {
+    int remaining = nodes ^ visited;
+    final Long cached = cache[from + 1][remaining][left];
+    if (cached != null) {
+      return cached;
+    }
     final int[] ints = from < 0 ? startMovement : movementPrimitive[from];
     long best = 0;
     for (int to = 0; to < length; to++) {
@@ -118,12 +126,13 @@ public class Day16 implements Day {
         if (moveThere >= 0) {
           final int flow = this.flowPrimitive[to];
           int addedFlow = moveThere * flow;
-          best = Math.max(best, addedFlow + solve(to, visited, moveThere, nodes, length));
+          best = Math.max(best, addedFlow + solve(to, visited, moveThere, nodes, length, cache));
         }
 
         visited ^= shift;
       }
     }
+    cache[from + 1][remaining][left] = best;
     return best;
   }
 
@@ -133,11 +142,12 @@ public class Day16 implements Day {
     int max = 1 << length;
     int maxBitmask = max - 1;
     long best = 0;
+    Long[][][] cache = new Long[length + 1][max][27];
     for (int left = 0; left < max; left++) {
       int right = ~left & maxBitmask;
 
-      final long leftBest = solve(-1, 0, 26, left, length);
-      final long rightBest = solve(-1, 0, 26, right, length);
+      final long leftBest = solve(-1, 0, 26, left, length, cache);
+      final long rightBest = solve(-1, 0, 26, right, length, cache);
       best = Math.max(best, leftBest + rightBest);
     }
     return best;
