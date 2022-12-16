@@ -21,7 +21,6 @@ public class Day16 implements Day {
 
   public Day16(String name) {
     input = Util.readResource(name);
-    // Valve FI has flow rate=3; tunnels lead to valves DA, AY, ZO, MP, XP
     for (String s : input) {
       if (s.isEmpty()) {
         continue;
@@ -82,19 +81,19 @@ public class Day16 implements Day {
   @Override
   public long solvePart1() {
     Set<String> visited = new HashSet<>();
-    return solve("AA", visited, 30);
+    return solve("AA", visited, 30, nonZero);
   }
 
-  private long solve(String s1, Set<String> visited, int left) {
+  private long solve(String s1, Set<String> visited, int left, List<String> nodes) {
     long best = 0;
-    for (String s2 : nonZero) {
+    for (String s2 : nodes) {
       if (!visited.contains(s2)) {
         visited.add(s2);
         int moveThere = left - movement.get(s1).get(s2) - 1;
         if (moveThere >= 0) {
           final int flow = this.flow.get(s2);
           int addedFlow = moveThere * flow;
-          best = Math.max(best, addedFlow + solve(s2, visited, moveThere));
+          best = Math.max(best, addedFlow + solve(s2, visited, moveThere, nodes));
         }
         visited.remove(s2);
       }
@@ -105,38 +104,23 @@ public class Day16 implements Day {
   @Override
   public long solvePart2() {
     Set<String> visited = new HashSet<>();
-    return solve2("AA", "AA", visited, 26, 26);
-  }
-
-  private long solve2(String s1, String e1, Set<String> visited, int left, int eleft) {
+    int max = 1 << nonZero.size();
     long best = 0;
-    for (String s2 : nonZero) {
-      if (!visited.contains(s2)) {
-        visited.add(s2);
-
-        // Move regular
-        int moveThere = left - movement.get(s1).get(s2) - 1;
-
-        // move elephant
-        int moveThereE = eleft - movement.get(e1).get(s2) - 1;
-
-        final int flow = this.flow.get(s2);
-
-        if (moveThere > moveThereE) {
-          if (moveThere >= 0) {
-            int addedFlow = moveThere * flow;
-            best = Math.max(best, addedFlow + solve2(s2, e1, visited, moveThere, eleft));
-          }
+    final ArrayList<String> left = new ArrayList<>();
+    final ArrayList<String> right = new ArrayList<>();
+    for (int i = 0; i < max; i++) {
+      left.clear();
+      right.clear();
+      for (int j = 0; j < nonZero.size(); j++) {
+        if (0 == ((i >> j) & 1)) {
+          left.add(nonZero.get(j));
         } else {
-          if (moveThereE >= 0) {
-            int addedFlow = moveThereE * flow;
-            best = Math.max(best, addedFlow + solve2(s1, s2, visited, left, moveThereE));
-          }
+          right.add(nonZero.get(j));
         }
-
-
-        visited.remove(s2);
       }
+      final long leftBest = solve("AA", visited, 26, left);
+      final long rightBest = solve("AA", visited, 26, right);
+      best = Math.max(best, leftBest + rightBest);
     }
     return best;
   }
