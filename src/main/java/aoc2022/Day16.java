@@ -21,6 +21,7 @@ public class Day16 implements Day {
   private final int[] flowPrimitive;
   private final int length;
   private final int[][] costs;
+  private final int[][][][] cache;
 
   public Day16(String name) {
     input = Util.readResource(name);
@@ -95,52 +96,44 @@ public class Day16 implements Day {
         costs[i][j] = movement.get(s1).get(s2);
       }
     }
+    int max = 1 << length;
+    cache = new int[length + 1][max][31][2];
   }
 
 
   @Override
   public long solvePart1() {
-    final int bitmaskLength = 1 << length;
-    int[][][] cache = new int[length + 1][bitmaskLength][31];
-    return solve(length, 0, 30, cache);
+    return solve(length, 0, 30, 0);
   }
 
   @Override
   public long solvePart2() {
-    int max = 1 << length;
-    int maxBitmask = max - 1;
-    int best = 0;
-    int[][][] cache = new int[length + 1][max][27];
-    for (int left = 0; left < max; left++) {
-      int right = ~left & maxBitmask;
-
-      final int leftBest = solve(length, left, 26, cache);
-      final int rightBest = solve(length, right, 26, cache);
-      best = Math.max(best, leftBest + rightBest);
-    }
-    return best;
+    return solve(length, 0, 26, 1);
   }
 
-  private int solve(int from, int visited, int timeLeft, int[][][] cache) {
-    final int cached = cache[from][visited][timeLeft];
+  private int solve(int from, int visited, int timeLeft, int playersLeft) {
+    final int cached = cache[from][visited][timeLeft][playersLeft];
     if (cached != 0) {
       return cached - 1;
     }
     final int[] cost = costs[from];
     int best = 0;
+    if (playersLeft > 0) {
+      best = Math.max(best, solve(length, visited, 26, playersLeft - 1));
+    }
     for (int to = 0; to < length; to++) {
-      final int shift = 1 << to;
-      if (0 == (visited & shift)) {
+      final int bit = 1 << to;
+      if (0 == (visited & bit)) {
         int timeLeftAfter = timeLeft - cost[to] - 1;
         if (timeLeftAfter >= 0) {
           final int flow = flowPrimitive[to];
           int addedFlow = timeLeftAfter * flow;
-          final int newVisited = visited ^ shift;
-          best = Math.max(best, addedFlow + solve(to, newVisited, timeLeftAfter, cache));
+          final int newVisited = visited | bit;
+          best = Math.max(best, addedFlow + solve(to, newVisited, timeLeftAfter, playersLeft));
         }
       }
     }
-    cache[from][visited][timeLeft] = best + 1;
+    cache[from][visited][timeLeft][playersLeft] = best + 1;
     return best;
   }
 
