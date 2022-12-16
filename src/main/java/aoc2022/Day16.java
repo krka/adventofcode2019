@@ -4,7 +4,6 @@ import util.Day;
 import util.Util;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,10 +17,12 @@ public class Day16 implements Day {
 
   private final List<String> nonZero = new ArrayList<>();
   private final Map<String, Map<String, Integer>> movement;
-  private final int[] flowPrimitive;
+  private final int[] flows;
   private final int length;
   private final int[][] costs;
-  private final int[][][][] cache;
+  //private final int[][][][] cache;
+  private final int[] cache2;
+  private final int max;
 
   public Day16(String name) {
     input = Util.readResource(name);
@@ -80,7 +81,7 @@ public class Day16 implements Day {
       }
     }
     length = nonZero.size();
-    flowPrimitive = new int[length];
+    flows = new int[length];
     costs = new int[length + 1][length];
     final Map<String, Integer> startMovementCosts = movement.entrySet().stream().filter(e -> e.getKey().equals("AA"))
             .map(Map.Entry::getValue)
@@ -90,14 +91,15 @@ public class Day16 implements Day {
     for (int i = 0; i < length; i++) {
       final String s1 = nonZero.get(i);
       costs[length][i] = startMovementCosts.get(s1);
-      flowPrimitive[i] = flow.get(s1);
+      flows[i] = flow.get(s1);
       for (int j = 0; j < length; j++) {
         final String s2 = nonZero.get(j);
         costs[i][j] = movement.get(s1).get(s2);
       }
     }
-    int max = 1 << length;
-    cache = new int[length + 1][max][31][2];
+    max = 1 << length;
+    //cache = new int[length + 1][max][31][2];
+    cache2 = new int[(length + 1) * max * 31 * 2];
   }
 
 
@@ -111,8 +113,13 @@ public class Day16 implements Day {
     return solve(length, 0, 26, 1);
   }
 
+  private int key(int from, int visited, int timeLeft, int playersLeft) {
+    return 31 * 2 * max * from + 31 * 2 * visited + 2 * timeLeft + playersLeft;
+  }
+
   private int solve(int from, int visited, int timeLeft, int playersLeft) {
-    final int cached = cache[from][visited][timeLeft][playersLeft];
+    final int key = key(from, visited, timeLeft, playersLeft);
+    final int cached = cache2[key];
     if (cached != 0) {
       return cached - 1;
     }
@@ -121,19 +128,18 @@ public class Day16 implements Day {
     if (playersLeft > 0) {
       best = Math.max(best, solve(length, visited, 26, playersLeft - 1));
     }
-    for (int to = 0; to < length; to++) {
+    for (int to = length - 1; to >= 0; to--) {
       final int bit = 1 << to;
       if (0 == (visited & bit)) {
         int timeLeftAfter = timeLeft - cost[to] - 1;
         if (timeLeftAfter >= 0) {
-          final int flow = flowPrimitive[to];
-          int addedFlow = timeLeftAfter * flow;
+          int addedFlow = timeLeftAfter * flows[to];
           final int newVisited = visited | bit;
           best = Math.max(best, addedFlow + solve(to, newVisited, timeLeftAfter, playersLeft));
         }
       }
     }
-    cache[from][visited][timeLeft][playersLeft] = best + 1;
+    cache2[key] = best + 1;
     return best;
   }
 
