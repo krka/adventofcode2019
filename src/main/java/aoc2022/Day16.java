@@ -18,9 +18,9 @@ public class Day16 implements Day {
 
   private final List<String> nonZero = new ArrayList<>();
   private final Map<String, Map<String, Integer>> movement;
-  private final int[] startMovement;
-  private final int[][] movementPrimitive;
   private final int[] flowPrimitive;
+  private final int length;
+  private final int[][] costs;
 
   public Day16(String name) {
     input = Util.readResource(name);
@@ -78,21 +78,21 @@ public class Day16 implements Day {
         break;
       }
     }
-    flowPrimitive = new int[nonZero.size()];
-    movementPrimitive = new int[nonZero.size()][nonZero.size()];
-    startMovement = new int[nonZero.size()];
+    length = nonZero.size();
+    flowPrimitive = new int[length];
+    costs = new int[length + 1][length];
     final Map<String, Integer> startMovementCosts = movement.entrySet().stream().filter(e -> e.getKey().equals("AA"))
             .map(Map.Entry::getValue)
             .flatMap(stringIntegerMap -> stringIntegerMap.entrySet().stream())
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-    for (int i = 0; i < flowPrimitive.length; i++) {
+    for (int i = 0; i < length; i++) {
       final String s1 = nonZero.get(i);
-      startMovement[i] = startMovementCosts.get(s1);
+      costs[length][i] = startMovementCosts.get(s1);
       flowPrimitive[i] = flow.get(s1);
-      for (int j = 0; j < flowPrimitive.length; j++) {
+      for (int j = 0; j < length; j++) {
         final String s2 = nonZero.get(j);
-        movementPrimitive[i][j] = movement.get(s1).get(s2);
+        costs[i][j] = movement.get(s1).get(s2);
       }
     }
   }
@@ -100,46 +100,13 @@ public class Day16 implements Day {
 
   @Override
   public long solvePart1() {
-    final int length = flowPrimitive.length;
-    final int nodes = (1 << length) - 1;
     final int bitmaskLength = 1 << length;
     int[][][] cache = new int[length + 1][bitmaskLength][31];
-    return solve(-1, 0, 30, nodes, length, cache);
-  }
-
-  private int solve(int from, int visited, int left, int nodes, int length, int[][][] cache) {
-    int remaining = nodes ^ visited;
-    final int cached = cache[from + 1][remaining][left];
-    if (cached != 0) {
-      return cached - 1;
-    }
-    final int[] ints = from < 0 ? startMovement : movementPrimitive[from];
-    int best = 0;
-    for (int to = 0; to < length; to++) {
-      final int shift = 1 << to;
-      if (0 == (nodes & shift)) {
-        continue;
-      }
-      if (0 == (visited & shift)) {
-        visited ^= shift;
-
-        int moveThere = left - ints[to] - 1;
-        if (moveThere >= 0) {
-          final int flow = this.flowPrimitive[to];
-          int addedFlow = moveThere * flow;
-          best = Math.max(best, addedFlow + solve(to, visited, moveThere, nodes, length, cache));
-        }
-
-        visited ^= shift;
-      }
-    }
-    cache[from + 1][remaining][left] = best + 1;
-    return best;
+    return solve(length, 0, 30, cache);
   }
 
   @Override
   public long solvePart2() {
-    final int length = flowPrimitive.length;
     int max = 1 << length;
     int maxBitmask = max - 1;
     int best = 0;
@@ -147,10 +114,33 @@ public class Day16 implements Day {
     for (int left = 0; left < max; left++) {
       int right = ~left & maxBitmask;
 
-      final int leftBest = solve(-1, 0, 26, left, length, cache);
-      final int rightBest = solve(-1, 0, 26, right, length, cache);
+      final int leftBest = solve(length, left, 26, cache);
+      final int rightBest = solve(length, right, 26, cache);
       best = Math.max(best, leftBest + rightBest);
     }
+    return best;
+  }
+
+  private int solve(int from, int visited, int timeLeft, int[][][] cache) {
+    final int cached = cache[from][visited][timeLeft];
+    if (cached != 0) {
+      return cached - 1;
+    }
+    final int[] cost = costs[from];
+    int best = 0;
+    for (int to = 0; to < length; to++) {
+      final int shift = 1 << to;
+      if (0 == (visited & shift)) {
+        int timeLeftAfter = timeLeft - cost[to] - 1;
+        if (timeLeftAfter >= 0) {
+          final int flow = flowPrimitive[to];
+          int addedFlow = timeLeftAfter * flow;
+          final int newVisited = visited ^ shift;
+          best = Math.max(best, addedFlow + solve(to, newVisited, timeLeftAfter, cache));
+        }
+      }
+    }
+    cache[from][visited][timeLeft] = best + 1;
     return best;
   }
 
