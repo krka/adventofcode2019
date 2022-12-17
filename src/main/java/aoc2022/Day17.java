@@ -53,7 +53,6 @@ public class Day17 implements Day {
     long[][] prevMax = new long[pattern.length()][5];
     long[][] prevRocks = new long[pattern.length()][5];
 
-    boolean allowSkip = true;
     int skipFirstCycles = 5;
     long addedRocks = 0;
 
@@ -61,20 +60,16 @@ public class Day17 implements Day {
       int typeId = (int) (addedRocks % 5);
 
       long prevMax2 = prevMax[patternIndex][typeId];
-      if (prevMax2 != 0 && allowSkip) {
-        final long diffMax = maxY - prevMax2;
-        final long diffRocks = addedRocks - prevRocks[patternIndex][typeId];
-
-        //System.out.println("diff max " + diffMax + ", diff rocks " + diffRocks);
-        //System.out.println("pattern index " + patternIndex);
+      if (prevMax2 != 0) {
         if (skipFirstCycles > 0) {
           skipFirstCycles--;
         } else {
+          final long diffMax = maxY - prevMax2;
+          final long diffRocks = addedRocks - prevRocks[patternIndex][typeId];
           final long remainingRocks = numRocks - addedRocks;
           long numSkips = remainingRocks / diffRocks;
           addedRocks += numSkips * diffRocks;
           extraHeight += numSkips * diffMax;
-          allowSkip = false;
         }
       }
       prevMax[patternIndex][typeId] = maxY;
