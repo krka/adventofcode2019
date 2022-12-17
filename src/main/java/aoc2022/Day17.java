@@ -57,8 +57,7 @@ public class Day17 implements Day {
     int skipFirstCycles = 5;
     long addedRocks = 0;
 
-    while (true) {
-      if (!(addedRocks < numRocks)) break;
+    while (addedRocks < numRocks) {
       int typeId = (int) (addedRocks % 5);
 
       long prevMax2 = prevMax[patternIndex][typeId];
