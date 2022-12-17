@@ -2,8 +2,10 @@ package aoc2022;
 
 import org.junit.Test;
 import util.Day;
+import util.Util;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class Day17Test {
 
@@ -12,21 +14,24 @@ public class Day17Test {
 
   @Test
   public void testPart1() {
-    assertEquals(0, day.solvePart1());
+    assertEquals(3235, day.solvePart1());
   }
 
   @Test
   public void testPart1Sample() {
-    assertEquals(0, sample.solvePart1());
+    assertEquals(3068, sample.solvePart1());
   }
 
   @Test
   public void testPart2() {
-    assertEquals(0, day.solvePart2());
+    final long actual = day.solvePart2();
+    Util.assertTooHigh(actual, 1595362316453L);
+    Util.assertTooLow(actual, 1590697674416L);
+    assertEquals(1591860465110L, actual);
   }
 
   @Test
   public void testPart2Sample() {
-    assertEquals(0, sample.solvePart2());
+    assertEquals(1514285714288L, sample.solvePart2());
   }
 }

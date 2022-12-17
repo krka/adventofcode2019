@@ -21,6 +21,8 @@ import java.util.function.Predicate;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
+import static org.junit.Assert.fail;
+
 public class Util {
   private static final ClassLoader CLASS_LOADER = Util.class.getClassLoader();
 
@@ -158,5 +160,17 @@ public class Util {
       res.add(Pair.of(a.get(i), b.get(i)));
     }
     return res;
+  }
+
+  public static void assertTooHigh(long actual, long tooHigh) {
+    if (actual >= tooHigh) {
+      fail(actual + " is too high, known too-high is " + tooHigh);
+    }
+  }
+
+  public static void assertTooLow(long actual, long tooLow) {
+    if (actual <= tooLow) {
+      fail(actual + " is too low, known too-low is " + tooLow);
+    }
   }
 }
