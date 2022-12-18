@@ -2,7 +2,7 @@ package aoc2019;
 
 import intcode.IntCode;
 import org.junit.Test;
-import util.Vector3;
+import util.Vec3;
 
 import java.math.BigInteger;
 import java.util.HashMap;
@@ -17,14 +17,14 @@ public class Day13Test {
   public void testPart1() {
     IntCode intCode = IntCode.fromResource("2019/day13.in");
     intCode.run();
-    Map<Vector3, Integer> map = new HashMap<>();
+    Map<Vec3, Integer> map = new HashMap<>();
     List<BigInteger> output = intCode.drainStdout();
     Iterator<BigInteger> iterator = output.iterator();
     while (iterator.hasNext()) {
       int x = iterator.next().intValueExact();
       int y = iterator.next().intValueExact();
       int tile = iterator.next().intValueExact();
-      map.put(new Vector3(x, y, 0), tile);
+      map.put(new Vec3(x, y, 0), tile);
     }
     assertEquals(412, map.values().stream().filter(tile -> tile == 2).count());
   }

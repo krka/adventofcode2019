@@ -2,7 +2,7 @@ package aoc2022;
 
 import util.Day;
 import util.Util;
-import util.Vector3;
+import util.Vec3;
 
 import java.util.HashSet;
 import java.util.Queue;
@@ -11,7 +11,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.stream.Collectors;
 
 public class Day18 implements Day {
-  private final Set<Vector3> set;
+  private final Set<Vec3> set;
   private final int minX;
   private final int maxX;
   private final int minY;
@@ -22,14 +22,14 @@ public class Day18 implements Day {
   public Day18(String name) {
     set = Util.readResource(name).stream()
             .filter(s -> !s.isEmpty())
-            .map(Vector3::parse)
+            .map(Vec3::parse)
             .collect(Collectors.toSet());
-    minX = (int) set.stream().mapToLong(Vector3::getX).min().getAsLong();
-    maxX = (int) set.stream().mapToLong(Vector3::getX).max().getAsLong();
-    minY = (int) set.stream().mapToLong(Vector3::getY).min().getAsLong();
-    maxY = (int) set.stream().mapToLong(Vector3::getY).max().getAsLong();
-    minZ = (int) set.stream().mapToLong(Vector3::getZ).min().getAsLong();
-    maxZ = (int) set.stream().mapToLong(Vector3::getZ).max().getAsLong();
+    minX = (int) set.stream().mapToLong(Vec3::getX).min().getAsLong();
+    maxX = (int) set.stream().mapToLong(Vec3::getX).max().getAsLong();
+    minY = (int) set.stream().mapToLong(Vec3::getY).min().getAsLong();
+    maxY = (int) set.stream().mapToLong(Vec3::getY).max().getAsLong();
+    minZ = (int) set.stream().mapToLong(Vec3::getZ).min().getAsLong();
+    maxZ = (int) set.stream().mapToLong(Vec3::getZ).max().getAsLong();
 
   }
 
@@ -37,8 +37,8 @@ public class Day18 implements Day {
   @Override
   public long solvePart1() {
     int size = set.size() * 6;
-    for (Vector3 v : set) {
-      for (Vector3 dir : Vector3.DIR_6) {
+    for (Vec3 v : set) {
+      for (Vec3 dir : Vec3.DIR_6) {
         if (set.contains(v.add(dir))) {
           size--;
         }
@@ -49,19 +49,19 @@ public class Day18 implements Day {
 
   @Override
   public long solvePart2() {
-    Set<Vector3> visited = new HashSet<>();
-    Queue<Vector3> q = new LinkedBlockingQueue<>();
+    Set<Vec3> visited = new HashSet<>();
+    Queue<Vec3> q = new LinkedBlockingQueue<>();
 
-    final Vector3 start = new Vector3(minX - 1, minY - 1, minZ - 1);
+    final Vec3 start = new Vec3(minX - 1, minY - 1, minZ - 1);
     visited.add(start);
     q.add(start);
 
     int count = 0;
     while (!q.isEmpty()) {
-      final Vector3 pos = q.poll();
+      final Vec3 pos = q.poll();
       if (inbound((int) pos.getX(), (int) pos.getY(), (int) pos.getZ())) {
-        for (Vector3 dir : Vector3.DIR_6) {
-          final Vector3 nextPos = pos.add(dir);
+        for (Vec3 dir : Vec3.DIR_6) {
+          final Vec3 nextPos = pos.add(dir);
           if (set.contains(nextPos)) {
             count++;
           } else {

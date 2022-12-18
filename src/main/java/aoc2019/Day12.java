@@ -1,7 +1,7 @@
 package aoc2019;
 
 import util.Util;
-import util.Vector3;
+import util.Vec3;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,13 +10,13 @@ import java.util.Objects;
 import java.util.function.Function;
 
 public class Day12 {
-  private final List<Vector3> positions = new ArrayList<>();
-  private final List<Vector3> velocities = new ArrayList<>();
+  private final List<Vec3> positions = new ArrayList<>();
+  private final List<Vec3> velocities = new ArrayList<>();
 
   public Day12(String name) {
     for (String line : Util.readResource(name)) {
-      positions.add(Vector3.parse(line));
-      velocities.add(Vector3.zero());
+      positions.add(Vec3.parse(line));
+      velocities.add(Vec3.zero());
     }
   }
 
@@ -37,11 +37,11 @@ public class Day12 {
   private void step() {
     int n = positions.size();
     for (int j = 0; j < n; j++) {
-      Vector3 pair1 = positions.get(j);
+      Vec3 pair1 = positions.get(j);
       long x = 0, y = 0, z = 0;
       for (int k = 0; k < n; k++) {
-        Vector3 pair2 = positions.get(k);
-        Vector3 diff = pair2.sub(pair1);
+        Vec3 pair2 = positions.get(k);
+        Vec3 diff = pair2.sub(pair1);
         x += Math.signum(diff.getX());
         y += Math.signum(diff.getY());
         z += Math.signum(diff.getZ());
@@ -54,15 +54,15 @@ public class Day12 {
   }
 
   public long part2() {
-    long c1 = findCycle(init(Vector3::getX));
-    long c2 = findCycle(init(Vector3::getY));
-    long c3 = findCycle(init(Vector3::getZ));
+    long c1 = findCycle(init(Vec3::getX));
+    long c2 = findCycle(init(Vec3::getY));
+    long c3 = findCycle(init(Vec3::getZ));
 
     System.out.println(c1 + ", " + c2 + ", " + c3);
     return lcm(lcm(c1, c2), c3);
   }
 
-  private Moon[] init(Function<Vector3, Long> getter) {
+  private Moon[] init(Function<Vec3, Long> getter) {
     Moon[] moons = new Moon[4];
     for (int i = 0; i < 4; i++) {
       moons[i] = new Moon(getter.apply(positions.get(i)), 0);

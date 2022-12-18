@@ -87,7 +87,7 @@ public class Matrix3 {
     return new Matrix3(m2);
   }
 
-  public Vector3 mul(Vector3 v) {
+  public Vec3 mul(Vec3 v) {
     long x = v.getX();
     long y = v.getY();
     long z = v.getZ();
@@ -95,7 +95,7 @@ public class Matrix3 {
     long x2 = x * m[0] + y * m[1] + z * m[2];
     long y2 = x * m[3] + y * m[4] + z * m[5];
     long z2 = x * m[6] + y * m[7] + z * m[8];
-    return new Vector3(x2, y2, z2);
+    return new Vec3(x2, y2, z2);
   }
 
   public Matrix3 transpose() {

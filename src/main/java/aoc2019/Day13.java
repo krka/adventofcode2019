@@ -1,7 +1,7 @@
 package aoc2019;
 
 import intcode.IntCode;
-import util.Vector3;
+import util.Vec3;
 
 import java.math.BigInteger;
 import java.util.HashMap;
@@ -13,12 +13,12 @@ public class Day13 {
 
   private final IntCode intCode;
   private BigInteger score;
-  private Map<Vector3, Integer> map = new HashMap<>();
+  private Map<Vec3, Integer> map = new HashMap<>();
   private int rows = 0;
   private int cols = 0;
-  private Vector3 ball = Vector3.zero();
-  private Vector3 ballDir = Vector3.zero();
-  private Vector3 paddle = Vector3.zero();
+  private Vec3 ball = Vec3.zero();
+  private Vec3 ballDir = Vec3.zero();
+  private Vec3 paddle = Vec3.zero();
 
   public Day13() {
     intCode = IntCode.fromResource("2019/day13.in");
@@ -70,10 +70,10 @@ public class Day13 {
         score = last;
       } else {
         int tile = last.intValueExact();
-        Vector3 current = new Vector3(x, y, 0);
+        Vec3 current = new Vec3(x, y, 0);
         map.put(current, tile);
         if (tile == 4) {
-          Vector3 oldBall = ball;
+          Vec3 oldBall = ball;
           ball = current;
           ballDir = current.sub(oldBall);
         }
@@ -86,10 +86,10 @@ public class Day13 {
     }
   }
 
-  private void printGame(Map<Vector3, Integer> map, int rows, int cols) {
+  private void printGame(Map<Vec3, Integer> map, int rows, int cols) {
     for (int y = 0; y <= rows; y++) {
       for (int x = 0; x <= cols; x++) {
-        int tile = map.getOrDefault(new Vector3(x, y, 0), 0);
+        int tile = map.getOrDefault(new Vec3(x, y, 0), 0);
         System.out.print(getTile(tile));
       }
       System.out.println();
