@@ -1,6 +1,5 @@
 package aoc2019;
 
-import aoc2019.Day13;
 import intcode.IntCode;
 import org.junit.Test;
 import util.Vector3;

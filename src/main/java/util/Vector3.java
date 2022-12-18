@@ -1,8 +1,19 @@
 package util;
 
+import java.util.List;
 import java.util.Objects;
 
 public class Vector3 {
+
+  public static final List<Vector3> DIR_6 = List.of(
+          parse("1,0,0"),
+          parse("-1,0,0"),
+          parse("0,1,0"),
+          parse("0,-1,0"),
+          parse("0,0,1"),
+          parse("0,0,-1")
+  );
+
   final long x;
   final long y;
   final long z;
