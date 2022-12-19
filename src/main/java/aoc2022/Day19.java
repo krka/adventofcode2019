@@ -42,7 +42,7 @@ public class Day19 implements Day {
     long sum = 0;
     for (Blueprint blueprint : blueprints) {
       var cache = new HashMap<Key, Long>();
-      long maxGeodes = blueprint.solve(24, 1, 0, 0, 0, 0, 0, 0, 0, cache);
+      long maxGeodes = blueprint.solve(24, 1, 0, 0, 0, 0, 0, 0, cache);
       System.out.println("id " + blueprint.id + ", " + maxGeodes);
       sum += maxGeodes * blueprint.id;
     }
@@ -53,7 +53,7 @@ public class Day19 implements Day {
   public long solvePart2() {
     return blueprints.stream().limit(3).mapToLong(blueprint -> {
       var cache = new HashMap<Key, Long>();
-      long maxGeodes = blueprint.solve(32, 1, 0, 0, 0, 0, 0, 0, 0, cache);
+      long maxGeodes = blueprint.solve(32, 1, 0, 0, 0, 0, 0, 0, cache);
       System.out.println("id " + blueprint.id + ", " + maxGeodes);
       return maxGeodes;
     }).reduce((a,b) -> a * b).getAsLong();
@@ -71,6 +71,8 @@ public class Day19 implements Day {
     private final int geodeRobotOreCost;
     private final int geodeRobotObsidianCost;
     private final int maxOreUsage;
+    private final int maxClayUsage;
+    private final int maxObsidianUsage;
 
     public Blueprint(int id, int oreRobotOreCost, int clayRobotOreCost, int obsidianRobotOreCost, int obsidianRobotClayCost, int geodeRobotOreCost, int geodeRobotObsidianCost) {
       this.id = id;
@@ -81,69 +83,87 @@ public class Day19 implements Day {
       this.geodeRobotOreCost = geodeRobotOreCost;
       this.geodeRobotObsidianCost = geodeRobotObsidianCost;
       maxOreUsage = Math.max(geodeRobotOreCost, Math.max(obsidianRobotOreCost, Math.max(oreRobotOreCost, clayRobotOreCost)));
+      maxClayUsage = obsidianRobotClayCost;
+      maxObsidianUsage = geodeRobotObsidianCost;
     }
 
     public long solve(int timeLeft,
                       int oreRobots, int ore,
                       int clayRobots, int clay,
                       int obsidianRobots, int obsidian,
-                      int geodeRobots, int geode, Map<Key, Long> cache) {
-      final Key key = new Key(timeLeft, oreRobots, ore, clayRobots, clay, obsidianRobots, obsidian, geodeRobots, geode);
+                      int geodeRobots,
+                      Map<Key, Long> cache) {
+      final Key key = new Key(timeLeft, oreRobots, ore, clayRobots, clay, obsidianRobots, obsidian, geodeRobots);
       final Long cached = cache.get(key);
       if (cached != null) {
         return cached;
       }
       if (timeLeft == 0) {
-        return geode;
+        return 0;
       }
+
+      boolean needMoreOre = oreRobots < maxOreUsage;
+      boolean needMoreObsidian = obsidianRobots < geodeRobotObsidianCost;
+      boolean needMoreClay = needMoreObsidian && clayRobots < obsidianRobotClayCost;
 
       long best = 0;
       // Alt 4: build a geode robot
       if (ore >= geodeRobotOreCost && obsidian >= geodeRobotObsidianCost) {
-        long alt = solve(timeLeft - 1,
-                oreRobots, ore - geodeRobotOreCost + oreRobots,
-                clayRobots, clayRobots + clay,
-                obsidianRobots, obsidianRobots + obsidian - geodeRobotObsidianCost,
-                geodeRobots + 1, geodeRobots + geode, cache);
+        long alt = geodeRobots + solve(timeLeft - 1,
+                oreRobots, needMoreOre ? ore - geodeRobotOreCost + oreRobots : maxOreUsage,
+                clayRobots, needMoreClay ? clayRobots + clay : clayRobots,
+                obsidianRobots, needMoreObsidian ? obsidianRobots + obsidian - geodeRobotObsidianCost : obsidianRobots,
+                geodeRobots + 1, cache);
         best = Math.max(best, alt);
 
         cache.put(key, best);
         return best;
       }
 
-
-      // Alt 1: build nothing
-      if (true) {
-        final long alt = solve(timeLeft - 1, oreRobots, ore + oreRobots, clayRobots, clayRobots + clay, obsidianRobots, obsidianRobots + obsidian, geodeRobots, geodeRobots + geode, cache);
-        best = Math.max(best, alt);
-
-      }
-
       // Alt 2: build an ore robot
       if (ore >= oreRobotOreCost) {
-        if (oreRobots < maxOreUsage) {
-          long alt = solve(timeLeft - 1, oreRobots + 1, ore - oreRobotOreCost + oreRobots, clayRobots, clayRobots + clay, obsidianRobots, obsidianRobots + obsidian, geodeRobots, geodeRobots + geode, cache);
+        if (needMoreOre) {
+          long alt = geodeRobots + solve(timeLeft - 1,
+                  oreRobots + 1, needMoreOre ? ore - oreRobotOreCost + oreRobots : maxOreUsage,
+                  clayRobots, needMoreClay ? clayRobots + clay : clayRobots,
+                  obsidianRobots, needMoreObsidian ? obsidianRobots + obsidian : obsidianRobots,
+                  geodeRobots, cache);
           best = Math.max(best, alt);
         }
       }
 
       // Alt 2: build a clay robot
       if (ore >= clayRobotOreCost) {
-        if (clayRobots < obsidianRobotClayCost && clayRobots <= 4 * oreRobots) {
-          long alt = solve(timeLeft - 1, oreRobots, ore - clayRobotOreCost + oreRobots, clayRobots + 1, clayRobots + clay, obsidianRobots, obsidianRobots + obsidian, geodeRobots, geodeRobots + geode, cache);
+        if (needMoreClay && clayRobots <= 4 * oreRobots) {
+          long alt = geodeRobots + solve(timeLeft - 1,
+                  oreRobots, needMoreOre ? ore - clayRobotOreCost + oreRobots : maxOreUsage,
+                  clayRobots + 1, needMoreClay ? clayRobots + clay : clayRobots,
+                  obsidianRobots, needMoreObsidian ? obsidianRobots + obsidian : obsidianRobots,
+                  geodeRobots, cache);
           best = Math.max(best, alt);
         }
       }
 
       // Alt 3: build an obsidian robot
       if (ore >= obsidianRobotOreCost && clay >= obsidianRobotClayCost) {
-        if (obsidianRobots < geodeRobotObsidianCost) {
-          long alt = solve(timeLeft - 1,
-                  oreRobots, ore - obsidianRobotOreCost + oreRobots,
-                  clayRobots, clayRobots + clay - obsidianRobotClayCost,
-                  obsidianRobots + 1, obsidianRobots + obsidian, geodeRobots, geodeRobots + geode, cache);
+        if (needMoreObsidian) {
+          long alt = geodeRobots + solve(timeLeft - 1,
+                  oreRobots, needMoreOre ? ore - obsidianRobotOreCost + oreRobots : maxOreUsage,
+                  clayRobots, needMoreClay ? clayRobots + clay - obsidianRobotClayCost : clayRobots,
+                  obsidianRobots + 1, needMoreObsidian ? obsidianRobots + obsidian : obsidianRobots,
+                  geodeRobots, cache);
           best = Math.max(best, alt);
         }
+      }
+
+      // Alt 1: build nothing
+      if (true) {
+        final long alt = geodeRobots + solve(timeLeft - 1,
+                oreRobots, needMoreOre ? ore + oreRobots : oreRobots,
+                clayRobots, needMoreClay ? clayRobots + clay : clayRobots,
+                obsidianRobots, needMoreObsidian ? obsidianRobots + obsidian : obsidianRobots,
+                geodeRobots, cache);
+        best = Math.max(best, alt);
       }
 
       cache.put(key, best);
@@ -160,9 +180,8 @@ public class Day19 implements Day {
     final int obsidianRobots;
     final int obsidian;
     final int geodeRobots;
-    final int geode;
 
-    public Key(int timeLeft, int oreRobots, int ore, int clayRobots, int clay, int obsidianRobots, int obsidian, int geodeRobots, int geode) {
+    public Key(int timeLeft, int oreRobots, int ore, int clayRobots, int clay, int obsidianRobots, int obsidian, int geodeRobots) {
       this.timeLeft = timeLeft;
       this.oreRobots = oreRobots;
       this.ore = ore;
@@ -171,7 +190,6 @@ public class Day19 implements Day {
       this.obsidianRobots = obsidianRobots;
       this.obsidian = obsidian;
       this.geodeRobots = geodeRobots;
-      this.geode = geode;
     }
 
     @Override
@@ -179,12 +197,12 @@ public class Day19 implements Day {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
       Key key = (Key) o;
-      return timeLeft == key.timeLeft && oreRobots == key.oreRobots && ore == key.ore && clayRobots == key.clayRobots && clay == key.clay && obsidianRobots == key.obsidianRobots && obsidian == key.obsidian && geodeRobots == key.geodeRobots && geode == key.geode;
+      return timeLeft == key.timeLeft && oreRobots == key.oreRobots && ore == key.ore && clayRobots == key.clayRobots && clay == key.clay && obsidianRobots == key.obsidianRobots && obsidian == key.obsidian && geodeRobots == key.geodeRobots;
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(timeLeft, oreRobots, ore, clayRobots, clay, obsidianRobots, obsidian, geodeRobots, geode);
+      return Objects.hash(timeLeft, oreRobots, ore, clayRobots, clay, obsidianRobots, obsidian, geodeRobots);
     }
   }
 }
