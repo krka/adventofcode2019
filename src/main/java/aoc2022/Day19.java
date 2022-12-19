@@ -39,19 +39,17 @@ public class Day19 implements Day {
 
   @Override
   public long solvePart1() {
-    long sum = 0;
-    for (Blueprint blueprint : blueprints) {
+    return blueprints.parallelStream().mapToLong(blueprint -> {
       var cache = new HashMap<Key, Long>();
       long maxGeodes = blueprint.solve(24, 1, 0, 0, 0, 0, 0, 0, cache);
       System.out.println("id " + blueprint.id + ", " + maxGeodes);
-      sum += maxGeodes * blueprint.id;
-    }
-    return sum;
+      return maxGeodes * blueprint.id;
+    }).sum();
   }
 
   @Override
   public long solvePart2() {
-    return blueprints.stream().limit(3).mapToLong(blueprint -> {
+    return blueprints.parallelStream().limit(3).mapToLong(blueprint -> {
       var cache = new HashMap<Key, Long>();
       long maxGeodes = blueprint.solve(32, 1, 0, 0, 0, 0, 0, 0, cache);
       System.out.println("id " + blueprint.id + ", " + maxGeodes);
@@ -120,11 +118,23 @@ public class Day19 implements Day {
         return best;
       }
 
+      // Alt 3: build an obsidian robot
+      if (ore >= obsidianRobotOreCost && clay >= obsidianRobotClayCost) {
+        if (needMoreObsidian) {
+          long alt = geodeRobots + solve(timeLeft - 1,
+                  oreRobots, needMoreOre ? ore - obsidianRobotOreCost + oreRobots : maxOreUsage,
+                  clayRobots, needMoreClay ? clayRobots + clay - obsidianRobotClayCost : clayRobots,
+                  obsidianRobots + 1, obsidianRobots + obsidian,
+                  geodeRobots, cache);
+          best = Math.max(best, alt);
+        }
+      }
+
       // Alt 2: build an ore robot
       if (ore >= oreRobotOreCost) {
         if (needMoreOre) {
           long alt = geodeRobots + solve(timeLeft - 1,
-                  oreRobots + 1, needMoreOre ? ore - oreRobotOreCost + oreRobots : maxOreUsage,
+        oreRobots + 1, ore - oreRobotOreCost + oreRobots,
                   clayRobots, needMoreClay ? clayRobots + clay : clayRobots,
                   obsidianRobots, needMoreObsidian ? obsidianRobots + obsidian : obsidianRobots,
                   geodeRobots, cache);
@@ -137,34 +147,20 @@ public class Day19 implements Day {
         if (needMoreClay && clayRobots <= 4 * oreRobots) {
           long alt = geodeRobots + solve(timeLeft - 1,
                   oreRobots, needMoreOre ? ore - clayRobotOreCost + oreRobots : maxOreUsage,
-                  clayRobots + 1, needMoreClay ? clayRobots + clay : clayRobots,
+                  clayRobots + 1, clayRobots + clay,
                   obsidianRobots, needMoreObsidian ? obsidianRobots + obsidian : obsidianRobots,
                   geodeRobots, cache);
           best = Math.max(best, alt);
         }
       }
 
-      // Alt 3: build an obsidian robot
-      if (ore >= obsidianRobotOreCost && clay >= obsidianRobotClayCost) {
-        if (needMoreObsidian) {
-          long alt = geodeRobots + solve(timeLeft - 1,
-                  oreRobots, needMoreOre ? ore - obsidianRobotOreCost + oreRobots : maxOreUsage,
-                  clayRobots, needMoreClay ? clayRobots + clay - obsidianRobotClayCost : clayRobots,
-                  obsidianRobots + 1, needMoreObsidian ? obsidianRobots + obsidian : obsidianRobots,
-                  geodeRobots, cache);
-          best = Math.max(best, alt);
-        }
-      }
-
       // Alt 1: build nothing
-      if (true) {
-        final long alt = geodeRobots + solve(timeLeft - 1,
-                oreRobots, needMoreOre ? ore + oreRobots : oreRobots,
-                clayRobots, needMoreClay ? clayRobots + clay : clayRobots,
-                obsidianRobots, needMoreObsidian ? obsidianRobots + obsidian : obsidianRobots,
-                geodeRobots, cache);
-        best = Math.max(best, alt);
-      }
+      final long alt = geodeRobots + solve(timeLeft - 1,
+              oreRobots, needMoreOre ? ore + oreRobots : oreRobots,
+              clayRobots, needMoreClay ? clayRobots + clay : clayRobots,
+              obsidianRobots, needMoreObsidian ? obsidianRobots + obsidian : obsidianRobots,
+              geodeRobots, cache);
+      best = Math.max(best, alt);
 
       cache.put(key, best);
       return best;
