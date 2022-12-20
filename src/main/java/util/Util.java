@@ -162,14 +162,6 @@ public class Util {
     return res;
   }
 
-  public static long posMod(long a, long b) {
-    long c = a % b;
-    if (c < 0) {
-      c += b;
-    }
-    return c;
-  }
-
   public static void assertTooHigh(long actual, long tooHigh) {
     if (actual >= tooHigh) {
       fail(actual + " is too high, known too-high is " + tooHigh);

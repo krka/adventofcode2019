@@ -4,10 +4,8 @@ import util.Day;
 import util.Util;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
@@ -40,7 +38,7 @@ public class Day20 implements Day {
 
     ArrayList<W> copy = new ArrayList<>(input2);
     for (int i = 0; i < rounds; i++) {
-      copy = mix(copy, input2);
+      mix(copy, input2);
     }
 
     int zeroIndex = copy.indexOf(theZero);
@@ -50,14 +48,14 @@ public class Day20 implements Day {
     return a + b + c;
   }
 
-  private ArrayList<W> mix(ArrayList<W> copy, List<W> order) {
+  private void mix(List<W> copy, List<W> order) {
+    final long size = copy.size() - 1;
     for (W w : order) {
       int position = copy.indexOf(w);
       copy.remove(position);
-      position = (int) Util.posMod(position + w.value, copy.size());
+      position = (int) Math.floorMod(position + w.value, size);
       copy.add(position, w);
     }
-    return copy;
   }
 
   private static class W {
