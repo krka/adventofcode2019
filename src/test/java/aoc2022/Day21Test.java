@@ -13,21 +13,21 @@ public class Day21Test {
   @Test
   public void testPart1() {
     final long actual = day.solvePart1();
-    assertEquals(1, actual);
+    assertEquals(70674280581468L, actual);
   }
 
   @Test
   public void testPart1Sample() {
-    assertEquals(1, sample.solvePart1());
+    assertEquals(152, sample.solvePart1());
   }
 
   @Test
   public void testPart2() {
-    assertEquals(1, day.solvePart2());
+    assertEquals(3243420789721L, day.solvePart2());
   }
 
   @Test
   public void testPart2Sample() {
-    assertEquals(1, sample.solvePart2());
+    assertEquals(301, sample.solvePart2());
   }
 }
