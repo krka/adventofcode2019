@@ -30,13 +30,19 @@ public class Grid<T> implements Rotatable<Grid<T>> {
   public static <T> Grid<T> from(List<String> lines, T defaultValue, Function<Character, T> mapper) {
     int rows = lines.size();
     String first = lines.get(0);
-    int cols = first.length();
+    int cols = lines.stream().mapToInt(String::length).max().getAsInt();
     Grid<T> grid = new Grid<T>(rows, cols, defaultValue);
 
     int row = 0;
     for (String line : lines) {
       for (int col = 0; col < cols; col++) {
-        grid.set(row, col, mapper.apply(line.charAt(col)));
+        final T c;
+        if (col >= line.length()) {
+          c = defaultValue;
+        } else {
+          c = mapper.apply(line.charAt(col));
+        }
+        grid.set(row, col, c);
       }
       row++;
     }

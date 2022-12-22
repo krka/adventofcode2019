@@ -46,7 +46,7 @@ public class Day21 implements Day {
       case "+": return left + right;
       case "-": return left - right;
       case "*": return left * right;
-      case "/": return left / right;
+      case "/": return div(left, right);
       default: throw new RuntimeException();
     }
   }
@@ -94,8 +94,8 @@ public class Day21 implements Day {
     switch (op) {
       case "+": return target - left;
       case "-": return left - target;
-      case "*": return target / left;
-      case "/": return left / target;
+      case "*": return div(target, left);
+      case "/": return div(left, target);
       default: throw new RuntimeException();
     }
   }
@@ -104,10 +104,17 @@ public class Day21 implements Day {
     switch (op) {
       case "+": return target - right;
       case "-": return target + right;
-      case "*": return target / right;
+      case "*": return div(target, right);
       case "/": return target * right;
       default: throw new RuntimeException();
     }
+  }
+
+  private long div(long a, long b) {
+    if (0 != (a % b)) {
+      throw new RuntimeException();
+    }
+    return a / b;
   }
 
   private Long eval(String node) {
@@ -125,7 +132,7 @@ public class Day21 implements Day {
         case "+": return v1 + v2;
         case "-": return v1 - v2;
         case "*": return v1 * v2;
-        case "/": return v1 / v2;
+        case "/": return div(v1, v2);
         default: throw new RuntimeException();
       }
     }
