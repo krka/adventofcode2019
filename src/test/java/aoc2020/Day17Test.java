@@ -61,7 +61,7 @@ public class Day17Test {
     int maxZ = 1 + 2 * cycles;
     Grid<State>[] grids = new Grid[maxZ];
     for (int i = 0; i < maxZ; i++) {
-      grids[i] = new Grid<>(maxRows, maxCols, State.INACTIVE);
+      grids[i] = Grid.create(maxRows, maxCols, State.INACTIVE);
     }
     Grid<State> middlegrid = grids[cycles];
     inGrid.forEach((row, col, value) -> {
@@ -140,7 +140,7 @@ public class Day17Test {
     Grid<State>[][] grids = new Grid[maxZ][maxW];
     for (int z = 0; z < maxZ; z++) {
       for (int w = 0; w < maxW; w++) {
-        grids[z][w] = new Grid<>(maxRows, maxCols, State.INACTIVE);
+        grids[z][w] = Grid.create(maxRows, maxCols, State.INACTIVE);
       }
     }
     Grid<State> middlegrid = grids[cycles][cycles];

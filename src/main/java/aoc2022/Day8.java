@@ -17,7 +17,7 @@ public class Day8 implements Day {
 
   @Override
   public long solvePart1() {
-    final Grid<Boolean> count = new Grid<>(grid.rows(), grid.cols(), false);
+    final Grid<Boolean> count = Grid.create(grid.rows(), grid.cols(), false);
     count2(count, 0, 0, 1, 0);
     count2(count, 0, 0, 0, 1);
     count2(count, grid.rows() - 1, grid.cols() - 1, -1, 0);

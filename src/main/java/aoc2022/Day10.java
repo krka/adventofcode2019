@@ -43,7 +43,7 @@ public class Day10 implements Day {
 
   @Override
   public long solvePart2() {
-    final Grid<Character> grid = new Grid(6, 40, ' ');
+    final Grid<Character> grid = Grid.create(6, 40, ' ');
     for (int i = 0; i < 240; i++) {
       int col = i % 40;
       int row = i / 40;

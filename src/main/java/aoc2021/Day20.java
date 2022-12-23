@@ -42,7 +42,7 @@ public class Day20 implements Day {
 
   private Grid<Character> enhance(Grid<Character> grid) {
     char defaultValue = grid.getDefaultValue() == '#' ? allLight : allDark;
-    Grid<Character> newGrid = new Grid<>(grid.rows() + 2, grid.cols() + 2, defaultValue);
+    Grid<Character> newGrid = Grid.create(grid.rows() + 2, grid.cols() + 2, defaultValue);
     newGrid.forEach((row, col, value) -> {
       int index = 0;
       for (int r = -2; r < 1; r++) {

@@ -23,15 +23,18 @@ public class Grid<T> implements Rotatable<Grid<T>> {
     this.defaultValue = defaultValue;
   }
 
-  public Grid(int rows, int cols, T defaultValue) {
+  private Grid(int rows, int cols, T defaultValue) {
     this(rows, cols, defaultValue, IntStream.rangeClosed(0, rows * cols).mapToObj(value -> defaultValue).toArray());
+  }
+
+  public static <T> Grid<T> create(int rows, int cols, T defaultValue) {
+    return new Grid<>(rows, cols, defaultValue);
   }
 
   public static <T> Grid<T> from(List<String> lines, T defaultValue, Function<Character, T> mapper) {
     int rows = lines.size();
-    String first = lines.get(0);
     int cols = lines.stream().mapToInt(String::length).max().getAsInt();
-    Grid<T> grid = new Grid<T>(rows, cols, defaultValue);
+    Grid<T> grid = Grid.create(rows, cols, defaultValue);
 
     int row = 0;
     for (String line : lines) {

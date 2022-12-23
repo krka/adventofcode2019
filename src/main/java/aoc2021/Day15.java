@@ -25,7 +25,7 @@ public class Day15 implements Day {
   }
 
   public long solvePart2() {
-    Grid<Integer> bigGrid = new Grid<>(grid.rows() * 5, grid.cols() * 5, 0);
+    Grid<Integer> bigGrid = Grid.create(grid.rows() * 5, grid.cols() * 5, 0);
     bigGrid.setGrid(0, 0, grid, 0, 0, grid.rows(), grid.cols());
     for (int i = grid.rows(); i < bigGrid.rows(); i++) {
       for (int j = 0; j < grid.cols(); j++) {
@@ -42,7 +42,7 @@ public class Day15 implements Day {
   }
 
   private long solveGrid(Grid<Integer> grid) {
-    Grid<Boolean> visited = new Grid<>(grid.rows(), grid.cols(), false);
+    Grid<Boolean> visited = Grid.create(grid.rows(), grid.cols(), false);
     Vec2 target = Vec2.of(grid.cols() - 1, grid.rows() - 1);
     Queue<Node> queue = new PriorityQueue<>(Comparator.comparingInt(Node::getEstimate));
     queue.add(new Node(Vec2.zero(), 0, target));

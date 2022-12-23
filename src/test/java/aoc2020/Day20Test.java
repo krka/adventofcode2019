@@ -82,7 +82,7 @@ public class Day20Test {
     assertEquals(4, cornerEdges.size());
 
     int dim = (int) Math.sqrt(tiles.size());
-    Grid<Tile> tileGrid = new Grid<>(dim, dim, null);
+    Grid<Tile> tileGrid = Grid.create(dim, dim, null);
 
     corner = Rotatable.rotateUntil(corner, tile -> tile.isTopLeft(cornerEdges));
     tileGrid.set(0, 0, corner);
@@ -119,7 +119,7 @@ public class Day20Test {
 
     int size = tiles.get(0).grid.cols() - 2;
 
-    Grid<Character> grid = new Grid<>(size * dim, size * dim, 'X');
+    Grid<Character> grid = Grid.create(size * dim, size * dim, 'X');
     for (int r = 0; r < dim; r++) {
       for (int c = 0; c < dim; c++) {
         grid.setGrid(r * size, c * size, tileGrid.get(r, c).grid, 1, 1, size, size);
@@ -141,7 +141,7 @@ public class Day20Test {
 
   private long countMonsters(Grid<Character> monster, Grid<Character> grid) {
     boolean hasMonster = false;
-    Grid<Integer> monsterCount = new Grid<>(grid.rows(), grid.cols(), 0);
+    Grid<Integer> monsterCount = Grid.create(grid.rows(), grid.cols(), 0);
     int maxRow = grid.rows() - monster.rows();
     int maxCol = grid.cols() - monster.cols();
     for (int row = 0; row < maxRow; row++) {
