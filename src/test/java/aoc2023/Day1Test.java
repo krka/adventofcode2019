@@ -40,8 +40,8 @@ public class Day1Test {
   @Test
   public void testIntCode() {
     AnnotatedIntCode compiled = Assembler.compileAnnotated("2023/day1.asm");
-    System.out.println(compiled.toString());
-    System.out.println(compiled.toProgram());
+    //System.out.println(compiled.toString());
+    //System.out.println(compiled.toProgram());
     IntCode intCode = IntCode.fromResource(compiled.getIntCode());
 
     Util.readResource("2023/day1.in").forEach(intCode::writeASCIILine);

@@ -29,12 +29,10 @@ int part1sum = 0
 int part2sum = 0
 
 func eq_num(pos, num, numlen)
-  int i = 0
-  while i < numlen do
+  for i = 0, i < numlen do
     if line[pos + i] != num[i] then
       return 0
     end
-    i = i + 1
   end
   return 1
 end
@@ -45,12 +43,10 @@ func find(pos, step, part2)
     if c >= '0' && c <= '9' then
       return c - '0'
     elseif part2 then
-      int num = 0
-      while num < 9 do
+      for num = 0, num < 9 do
         if eq_num(pos, numbers[num], numbers_len[num]) then
           return num + 1
         end
-        num = num + 1
       end
     end
 
@@ -59,16 +55,9 @@ func find(pos, step, part2)
   throw()
 end
 
-int n = 0
-while n < 9 do
+for n = 0, n < 9 do
   numbers_len[n] = strlen(numbers[n])
-  n = n + 1
 end
-
-# TODO: fix this bug
-#for n = 0, 9 do
-#  numbers_len[n] = strlen(numbers[n])
-##end
 
 while 1 do
   read_until(line, 10)
