@@ -81,6 +81,47 @@ public class Day24 implements Day {
     return run1.getSteps() + run2.getSteps() + run3.getSteps();
   }
 
+  public long solveForTarget(long target) {
+    int[] steps1 = new int[totalPeriod];
+    int[] steps2 = new int[totalPeriod];
+    long[] tripsPerPeriod = new long[totalPeriod];
+    long[] stepsPerPeriod = new long[totalPeriod];
+    long totalTrips = 0;
+    long totalSteps = 0;
+    int curPeriod = 0;
+    while (totalTrips < target) {
+      if (steps1[curPeriod] == 0) {
+        final BFS.Node<State> run = bfs(new State(-1, 0, curPeriod), state -> state.row == rows).run();
+        steps1[curPeriod] = run.getSteps();
+        final BFS.Node<State> run2 = bfs(run.getPos(), state -> state.row == -1).run();
+        steps2[curPeriod] = run2.getSteps();
+      }
+      final int addedSteps = steps1[curPeriod] + steps2[curPeriod];
+      totalSteps += addedSteps;
+      totalTrips++;
+      if (tripsPerPeriod[curPeriod] != 0) {
+        long diffSteps = totalSteps - stepsPerPeriod[curPeriod];
+        long diffTrips = totalTrips - tripsPerPeriod[curPeriod];
+
+        long remaining = target - totalTrips;
+        long fullCycles = remaining / diffTrips;
+        totalTrips += fullCycles * diffTrips;
+        totalSteps += fullCycles * diffSteps;
+      } else {
+        tripsPerPeriod[curPeriod] = totalTrips;
+        stepsPerPeriod[curPeriod] = totalSteps;
+      }
+      curPeriod = (curPeriod + addedSteps) % totalPeriod;
+    }
+
+    if (steps1[curPeriod] == 0) {
+      final BFS.Node<State> run = bfs(new State(-1, 0, curPeriod), state -> state.row == rows).run();
+      steps1[curPeriod] = run.getSteps();
+    }
+
+    return totalSteps + steps1[curPeriod];
+  }
+
   private BFS<State> bfs(State start, Predicate<State> target) {
     return BFS.newBFS(State.class)
               .withStarts(List.of(start))
