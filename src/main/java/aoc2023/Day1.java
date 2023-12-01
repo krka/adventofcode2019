@@ -6,7 +6,6 @@ import util.Util;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.IntStream;
 
 public class Day1 implements Day {
 
@@ -46,22 +45,22 @@ public class Day1 implements Day {
 
   private long sum(Map<String, Integer> map) {
     return parts.stream()
-            .mapToLong(strings -> strings.stream().mapToLong(x -> digits(x, map)).sum())
+            .mapToLong(strings -> strings.stream().mapToLong(line -> digits(line, map)).sum())
             .max().getAsLong();
   }
 
-  private long digits(String x, Map<String, Integer> map) {
-    int first = find23(x, map, 0, 1);
-    int last = find23(x, map, x.length() - 1, -1);
+  private long digits(String line, Map<String, Integer> map) {
+    int first = find(line, map, 0, 1);
+    int last = find(line, map, line.length() - 1, -1);
     return first * 10 + last;
   }
 
-  private int find23(String x, Map<String, Integer> map, int start, int step) {
-    while (start >= 0 && start < x.length()) {
+  private int find(String line, Map<String, Integer> map, int start, int step) {
+    while (start >= 0 && start < line.length()) {
       for (Map.Entry<String, Integer> entry : map.entrySet()) {
         final String key = entry.getKey();
-        if (start + key.length() <= x.length()) {
-          if (x.subSequence(start, start + key.length()).equals(key)) {
+        if (start + key.length() <= line.length()) {
+          if (line.subSequence(start, start + key.length()).equals(key)) {
             return entry.getValue();
           }
         }
