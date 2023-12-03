@@ -34,6 +34,10 @@ public class Vec2 {
     hash = Objects.hash(x, y);
   }
 
+  public static Vec2 grid(long row, long col) {
+    return new Vec2(col, row);
+  }
+
   public static Vec2 parse(String line) {
     String[] split = line.split("[, ]+");
     long x = Long.parseLong(split[0]);
@@ -54,6 +58,14 @@ public class Vec2 {
   }
 
   public long getY() {
+    return y;
+  }
+
+  public long col() {
+    return x;
+  }
+
+  public long row() {
     return y;
   }
 
