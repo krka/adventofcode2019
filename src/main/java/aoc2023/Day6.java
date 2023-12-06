@@ -1,13 +1,9 @@
 package aoc2023;
 
 import util.Day;
-import util.Interval;
 import util.Util;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Day6 implements Day {
 
@@ -31,28 +27,21 @@ public class Day6 implements Day {
   }
 
   private long solve(long time, long bestDistance) {
-    long count = 0;
-    for (long i = 1; i <= time; i++) {
-      long speed = i;
-      long remaining = time - i;
-      long distance = remaining * speed;
-      if (distance > bestDistance) {
-        count++;
-      }
-    }
-    return count;
+    final long target = bestDistance + 1;
+    final double sqrt = Math.sqrt(time * time - 4 * target);
+    long x1 = (long) Math.ceil((time - sqrt) / 2);
+    long x2 = (long) Math.floor((time + sqrt) / 2);
+    return x2 - x1 + 1;
   }
 
   @Override
   public long solvePart2() {
-    long ans = 1;
     final String[] parts1 = lines.get(0).get(0).replace(" ", "").split(":");
     final String[] parts2 = lines.get(0).get(1).replace(" ", "").split(":");
 
     final long time = Long.parseLong(parts1[1]);
     final long bestDistance = Long.parseLong(parts2[1]);
-    ans *= solve(time, bestDistance);
-    return ans;
+    return solve(time, bestDistance);
   }
 
 }
