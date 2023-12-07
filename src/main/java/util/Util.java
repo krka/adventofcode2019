@@ -8,13 +8,16 @@ import java.io.Reader;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
+import java.util.function.Function;
 import java.util.function.IntBinaryOperator;
 import java.util.function.LongBinaryOperator;
 import java.util.function.Predicate;
@@ -162,6 +165,23 @@ public class Util {
     return res;
   }
 
+  public static <A> List<Pair<A, Integer>> zipWithIndex(List<A> a) {
+    int size = a.size();
+    ArrayList<Pair<A, Integer>> res = new ArrayList<>(size);
+    for (int i = 0; i < size; i++) {
+      res.add(Pair.of(a.get(i), i));
+    }
+    return res;
+  }
+
+  public static List<Character> toList(String s) {
+    return s.chars().mapToObj(i -> (char) i).collect(Collectors.toList());
+  }
+
+  public static Set<Character> toSet(String s) {
+    return s.chars().mapToObj(i -> (char) i).collect(Collectors.toSet());
+  }
+
   public static void assertTooHigh(long actual, long tooHigh) {
     if (actual >= tooHigh) {
       fail(actual + " is too high, known too-high is " + tooHigh);
@@ -172,5 +192,35 @@ public class Util {
     if (actual <= tooLow) {
       fail(actual + " is too low, known too-low is " + tooLow);
     }
+  }
+
+  public static <T> Comparator<T> comparingEnum(ToEnumFunction<? super T> keyExtractor) {
+    Objects.requireNonNull(keyExtractor);
+    return Comparator.comparingInt(c -> keyExtractor.applyAsEnum(c).ordinal());
+  }
+
+  public static <T extends Enum<?>> Comparator<T> comparingEnum() {
+    return Comparator.comparingInt(c -> c.ordinal());
+  }
+
+  public static <T, U extends Comparable<U>> Comparator<T> comparingList(Function<T, List<U>> keyExtractor) {
+    return (o1, o2) -> {
+      final List<U> list1 = keyExtractor.apply(o1);
+      final List<U> list2 = keyExtractor.apply(o2);
+      int n = Math.min(list1.size(), list2.size());
+      for (int i = 0; i < n; i++) {
+        final U v1 = list1.get(i);
+        final U v2 = list2.get(i);
+        final int comp = v1.compareTo(v2);
+        if (comp != 0) {
+          return comp;
+        }
+      }
+      return list2.size() - list1.size();
+    };
+  }
+
+  public interface ToEnumFunction<T> {
+    Enum<?> applyAsEnum(T obj);
   }
 }
