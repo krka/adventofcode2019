@@ -8,6 +8,7 @@ import java.io.Reader;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -23,6 +24,7 @@ import java.util.function.LongBinaryOperator;
 import java.util.function.Predicate;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.junit.Assert.fail;
 
@@ -232,18 +234,28 @@ public class Util {
   }
 
   public static List<Long> factors(long value) {
+    if (value < 0) {
+      return Stream.of(List.of(-1L), factors(-value))
+              .flatMap(Collection::stream)
+              .collect(Collectors.toList());
+    }
+    if (value <= 3) {
+      return List.of(value);
+    }
     final ArrayList<Long> res = new ArrayList<>();
     while (0 == (value & 1)) {
       res.add(2L);
       value >>= 1;
     }
-    for (long candidate = 3; candidate < value; candidate += 2) {
+    for (long candidate = 3; candidate*candidate <= value; candidate += 2) {
       if (0 == (value % candidate)) {
         value /= candidate;
         res.add(candidate);
       }
     }
-    res.add(value);
+    if (value > 1) {
+      res.add(value);
+    }
     return res;
   }
 

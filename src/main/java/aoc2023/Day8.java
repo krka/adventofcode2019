@@ -3,7 +3,6 @@ package aoc2023;
 import util.Day;
 import util.Util;
 
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -58,24 +57,20 @@ public class Day8 implements Day {
 
   @Override
   public long solvePart1() {
-    return solve("AAA", "ZZZ");
+    return solve("AAA");
   }
 
   @Override
   public long solvePart2() {
     return nodes.stream().map(s -> s.name)
             .filter(s -> s.endsWith("A"))
-            .mapToLong(s -> solve(s, "Z"))
-            .map(l -> {
-              System.out.println(Util.factors(l));
-              return l;
-            })
+            .mapToLong(this::solve)
             .reduce(1L, Util::lcm);
   }
 
-  private int solve(String current, String end) {
+  private int solve(String current) {
     int steps = 0;
-    while (!current.endsWith(end)) {
+    while (!current.endsWith("Z")) {
       final Node node = nodeMap.get(current);
       final int action = steps % sequence.length();
       if (sequence.charAt(action) == 'R') {
