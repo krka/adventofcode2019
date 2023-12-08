@@ -220,6 +220,33 @@ public class Util {
     };
   }
 
+  public static long gcd(long n1, long n2) {
+    if (n2 == 0) {
+      return n1;
+    }
+    return gcd(n2, n1 % n2);
+  }
+
+  public static long lcm(long a, long b) {
+    return a * b / gcd(a, b);
+  }
+
+  public static List<Long> factors(long value) {
+    final ArrayList<Long> res = new ArrayList<>();
+    while (0 == (value & 1)) {
+      res.add(2L);
+      value >>= 1;
+    }
+    for (long candidate = 3; candidate < value; candidate += 2) {
+      if (0 == (value % candidate)) {
+        value /= candidate;
+        res.add(candidate);
+      }
+    }
+    res.add(value);
+    return res;
+  }
+
   public interface ToEnumFunction<T> {
     Enum<?> applyAsEnum(T obj);
   }
