@@ -27,9 +27,10 @@ public class Day8 implements Day {
     for (Node node : this.nodes) {
       nodeMap.put(node.name, node);
     }
-    try (FileOutputStream stream = new FileOutputStream("day8.dot")) {
+    try (FileOutputStream stream = new FileOutputStream(name.replace("/", "_") + ".dot")) {
       final String s = toGraphViz(nodeMap);
       stream.write(s.getBytes(StandardCharsets.UTF_8));
+      // neato -Tpng -x -o day8.png 2023_day8.in.dot
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -39,6 +40,12 @@ public class Day8 implements Day {
     StringBuilder sb = new StringBuilder();
     sb.append("digraph {\n");
     nodeMap.forEach((s, node) -> {
+      if (s.endsWith("Z")) {
+        sb.append(s + " [style=filled,color=\".5 .5 1.0\"]\n");
+      }
+      if (s.endsWith("A")) {
+        sb.append(s + " [style=filled,color=\".5 1.0 .5\"]\n");
+      }
       sb.append(s + " -> " + node.left + ", " + node.right + ";\n");
     });
     sb.append("}\n");

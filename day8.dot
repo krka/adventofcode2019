@@ -1,9 +1,9 @@
 digraph {
-AAA -> BBB, CCC;
-CCC -> ZZZ, GGG;
-BBB -> DDD, EEE;
-EEE -> EEE, EEE;
-DDD -> DDD, DDD;
-GGG -> GGG, GGG;
-ZZZ -> ZZZ, ZZZ;
+AAA -> BBB, CCC [style=filled,color=".5 1.0 .5"];
+CCC -> ZZZ, GGG ;
+BBB -> DDD, EEE ;
+EEE -> EEE, EEE ;
+DDD -> DDD, DDD ;
+GGG -> GGG, GGG ;
+ZZZ -> ZZZ, ZZZ [style=filled,color=".5 .5 1.0"];
 }
