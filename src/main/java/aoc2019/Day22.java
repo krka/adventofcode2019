@@ -98,23 +98,12 @@ public class Day22 {
     }
 
     public Operation invert() {
-      long[] gcds = gcd(factor, n);
-      long inverseFactor = gcds[1];
+      Util.GcdResult gcds = Util.gcdExtended(factor, n);
+      long inverseFactor = gcds.a;
 
       long inverseOffset = multiply(offset, inverseFactor, n);
       return new Operation(n, inverseFactor, n - inverseOffset);
     }
   }
 
-  //  return array [d, a, b] such that d = gcd(p, q), ap + bq = d
-  static long[] gcd(long p, long q) {
-    if (q == 0)
-      return new long[] { p, 1, 0 };
-
-    long[] vals = gcd(q, p % q);
-    long d = vals[0];
-    long a = vals[2];
-    long b = vals[1] - (p / q) * vals[2];
-    return new long[] { d, a, b };
-  }
 }

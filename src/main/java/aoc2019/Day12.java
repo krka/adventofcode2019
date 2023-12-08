@@ -59,7 +59,7 @@ public class Day12 {
     long c3 = findCycle(init(Vec3::getZ));
 
     System.out.println(c1 + ", " + c2 + ", " + c3);
-    return lcm(lcm(c1, c2), c3);
+    return Util.lcm(Util.lcm(c1, c2), c3);
   }
 
   private Moon[] init(Function<Vec3, Long> getter) {
@@ -92,17 +92,6 @@ public class Day12 {
         moons[j] = self.add(self.vel, 0);
       }
     }
-  }
-
-  static long gcd(long n1, long n2) {
-    if (n2 == 0) {
-      return n1;
-    }
-    return gcd(n2, n1 % n2);
-  }
-
-  static long lcm(long a, long b) {
-    return a * b / gcd(a, b);
   }
 
   static class Moon {

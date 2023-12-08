@@ -233,6 +233,40 @@ public class Util {
     return a * b / gcd(a, b);
   }
 
+  //  return [d, a, b] such that d = gcd(p, q), ap + bq = d
+  public static GcdResult gcdExtended(long p, long q) {
+    if (q == 0) {
+      return new GcdResult(p, 1, 0);
+    }
+
+    GcdResult vals = gcdExtended(q, p % q);
+    long d = vals.d;
+    long a = vals.b;
+    long b = vals.a - (p / q) * vals.b;
+    return new GcdResult(d, a, b);
+  }
+
+  public static class GcdResult {
+    public final long d;
+    public final long a;
+    public final long b;
+
+    public GcdResult(long d, long a, long b) {
+      this.d = d;
+      this.a = a;
+      this.b = b;
+    }
+
+    @Override
+    public String toString() {
+      return "GcdResult{" +
+              "d=" + d +
+              ", a=" + a +
+              ", b=" + b +
+              '}';
+    }
+  }
+
   public static List<Long> factors(long value) {
     if (value < 0) {
       return Stream.of(List.of(-1L), factors(-value))
