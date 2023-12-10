@@ -3,6 +3,7 @@ package util;
 import java.util.List;
 import java.util.Objects;
 import java.util.Spliterator;
+import java.util.Stack;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -50,6 +51,24 @@ public class Grid<T> implements Rotatable<Grid<T>> {
       row++;
     }
     return grid;
+  }
+
+  public void floodFill(Vec2 pos, Predicate<T> predicate, T newValue) {
+    if (!predicate.test(get(pos))) {
+      return;
+    }
+    Stack<Vec2> x = new Stack<>();
+    x.push(pos);
+    while (!x.isEmpty()) {
+      final Vec2 pos2 = x.pop();
+      Vec2.DIRS.stream().forEach(vec2 -> {
+        final Vec2 nextPos = vec2.add(pos2);
+        if (inbound(nextPos) && predicate.test(get(nextPos))) {
+          set(nextPos, newValue);
+          x.push(nextPos);
+        }
+      });
+    }
   }
 
   public T getDefaultValue() {
@@ -220,6 +239,10 @@ public class Grid<T> implements Rotatable<Grid<T>> {
       newGrid.set(rows - row - 1, col, value);
     });
     return newGrid;
+  }
+
+  public Stream<Entry<T>> edgeStream() {
+    return stream().filter(e -> 0 == e.getCol() || 0 == e.getRow());
   }
 
   public interface GridConsumer<T> {

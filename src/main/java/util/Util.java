@@ -246,6 +246,10 @@ public class Util {
     return new GcdResult(d, a, b);
   }
 
+  public static boolean even(int x) {
+    return 0 == (x & 1);
+  }
+
   public static class GcdResult {
     public final long d;
     public final long a;
