@@ -280,6 +280,21 @@ public class Util {
     return res;
   }
 
+  /**
+   *
+   * @param list
+   * @return Sum of difference of all distinct pairs (i < j in list), list must be ordered
+   */
+  public static long sumOfDiffOfPairs(List<Long> list) {
+    long sum = 0;
+    final int size = list.size();
+    for (int i = 0; i < size; i++) {
+      long factor = 2L*i + 1L - size;
+      sum += factor * list.get(i);
+    }
+    return sum;
+  }
+
   public static class GcdResult {
     public final long d;
     public final long a;

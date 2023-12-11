@@ -6,7 +6,6 @@ import util.Util;
 import util.Vec2;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -48,8 +47,9 @@ public class Day11 implements Day {
             .map(g -> Vec2.grid(rowCoords[g.irow()], colCoords[g.icol()]))
             .collect(Collectors.toList());
 
-    return Util.distinctPairs(translated).stream()
-            .mapToLong(p -> p.a().sub(p.b()).manhattan())
-            .sum();
+    final List<Long> rows = translated.stream().map(Vec2::row).sorted().collect(Collectors.toList());
+    final List<Long> cols = translated.stream().map(Vec2::col).sorted().collect(Collectors.toList());
+    return Util.sumOfDiffOfPairs(cols) + Util.sumOfDiffOfPairs(rows);
   }
+
 }
