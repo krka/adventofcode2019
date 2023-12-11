@@ -8,6 +8,7 @@ import java.io.Reader;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -269,6 +270,26 @@ public class Util {
               ", b=" + b +
               '}';
     }
+  }
+
+  public static long[] accumulate(long[] arr) {
+    final long[] res = new long[arr.length];
+    long running = 0;
+    for (int i = 0; i < arr.length; i++) {
+      running += arr[i];
+      res[i] = running;
+    }
+    return res;
+  }
+
+  List<Long> accumulativeSum(List<Long> list) {
+    long running = 0;
+    final ArrayList<Long> res = new ArrayList<>();
+    for (Long val : list) {
+      running += val;
+      res.add(running);
+    }
+    return res;
   }
 
   public static List<Long> factors(long value) {

@@ -6,6 +6,7 @@ import util.Util;
 import util.Vec2;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,32 +31,23 @@ public class Day11 implements Day {
   }
 
   private long solve(int weight) {
-    int[] rowcounts = new int[grid.rows()];
-    int[] colcounts = new int[grid.cols()];
+    long[] rowWeights = new long[grid.rows()];
+    long[] colWeights = new long[grid.cols()];
+    Arrays.fill(rowWeights, weight);
+    Arrays.fill(colWeights, weight);
     List<Vec2> galaxies = new ArrayList<>();
     grid.forEach((row, col, value) -> {
       if (value == '#') {
-        rowcounts[row]++;
-        colcounts[col]++;
+        rowWeights[row] = colWeights[col] = 1;
         galaxies.add(Vec2.grid(row, col));
       }
     });
 
-    int[] rowsums = new int[grid.rows()];
-    int[] colsums = new int[grid.cols()];
-    for (int i = 0; i < grid.rows(); i++) {
-      final int prev = i > 0 ? rowsums[i - 1] : 0;
-      final int cur = rowcounts[i] == 0 ? weight : 1;
-      rowsums[i] = prev + cur;
-    }
-    for (int i = 0; i < grid.cols(); i++) {
-      final int prev = i > 0 ? colsums[i - 1] : 0;
-      final int cur = colcounts[i] == 0 ? weight : 1;
-      colsums[i] = prev + cur;
-    }
+    long[] rowCoords = Util.accumulate(rowWeights);
+    long[] colCoords = Util.accumulate(colWeights);
 
     List<Vec2> galaxies2 = galaxies.stream()
-            .map(galaxy -> Vec2.grid(colsums[(int) galaxy.col()], rowsums[(int) galaxy.row()]))
+            .map(galaxy -> Vec2.grid(rowCoords[galaxy.irow()], colCoords[galaxy.icol()]))
             .collect(Collectors.toList());
 
     return galaxies2.stream().mapToLong(g1 ->

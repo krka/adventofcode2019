@@ -65,8 +65,16 @@ public class Vec2 {
     return x;
   }
 
+  public int icol() {
+    return Math.toIntExact(x);
+  }
+
   public long row() {
     return y;
+  }
+
+  public int irow() {
+    return Math.toIntExact(y);
   }
 
   public Vec2 add(long x, long y) {
