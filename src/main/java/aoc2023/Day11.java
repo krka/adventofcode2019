@@ -31,10 +31,8 @@ public class Day11 implements Day {
   }
 
   private long solve(int weight) {
-    long[] rowWeights = new long[grid.rows()];
-    long[] colWeights = new long[grid.cols()];
-    Arrays.fill(rowWeights, weight);
-    Arrays.fill(colWeights, weight);
+    long[] rowWeights = Util.newLongArray(grid.rows(), weight);
+    long[] colWeights = Util.newLongArray(grid.cols(), weight);
     List<Vec2> galaxies = new ArrayList<>();
     grid.forEach((row, col, value) -> {
       if (value == '#') {
@@ -46,12 +44,12 @@ public class Day11 implements Day {
     long[] rowCoords = Util.accumulate(rowWeights);
     long[] colCoords = Util.accumulate(colWeights);
 
-    List<Vec2> galaxies2 = galaxies.stream()
-            .map(galaxy -> Vec2.grid(rowCoords[galaxy.irow()], colCoords[galaxy.icol()]))
+    List<Vec2> translated = galaxies.stream()
+            .map(g -> Vec2.grid(rowCoords[g.irow()], colCoords[g.icol()]))
             .collect(Collectors.toList());
 
-    return galaxies2.stream().mapToLong(g1 ->
-            galaxies2.stream().mapToLong(g2 -> g1.sub(g2).manhattan()).sum())
-            .sum() / 2;
+    return Util.distinctPairs(translated).stream()
+            .mapToLong(p -> p.a().sub(p.b()).manhattan())
+            .sum();
   }
 }

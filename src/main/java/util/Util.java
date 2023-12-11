@@ -251,6 +251,35 @@ public class Util {
     return 0 == (x & 1);
   }
 
+  public static <A, B> List<Pair<A, B>> cross(List<A> list1, List<B> list2) {
+    final ArrayList<Pair<A, B>> res = new ArrayList<>();
+    for (A a : list1) {
+      for (B b : list2) {
+        res.add(Pair.of(a, b));
+      }
+    }
+    return res;
+  }
+
+  public static <A> List<Pair<A, A>> distinctPairs(List<A> list1) {
+    final ArrayList<Pair<A, A>> res = new ArrayList<>();
+    final int len = list1.size();
+    for (int i = 0; i < len; i++) {
+      final A a = list1.get(i);
+      for (int j = i+1; j < len; j++) {
+        final A b = list1.get(j);
+        res.add(Pair.of(a, b));
+      }
+    }
+    return res;
+  }
+
+  public static long[] newLongArray(int size, long value) {
+    final long[] res = new long[size];
+    Arrays.fill(res, value);
+    return res;
+  }
+
   public static class GcdResult {
     public final long d;
     public final long a;
