@@ -6,8 +6,10 @@ import util.Util;
 import util.Vec2;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Stream;
 
 public class Day10 implements Day {
@@ -28,18 +30,23 @@ public class Day10 implements Day {
   @Override
   public long solvePart2() {
     final List<Vec2> path = findPath();
+    final Set<Vec2> pathSet = new HashSet<>(path);
 
-    final Grid<Character> grid2x = Grid.create(grid.rows() * 2, grid.cols() * 2, ' ');
-    Vec2 prev = path.get(0);
-    for (Vec2 point : path) {
-      grid2x.set(point.multiply(2), '#');
-      grid2x.set(point.add(prev), '#');
-      prev = point;
+    int count = 0;
+    for (int r = 0; r < grid.rows(); r++) {
+      int inside = 0;
+      for (int c = 0; c < grid.cols(); c++) {
+        if (pathSet.contains(Vec2.grid(r, c))) {
+          final char ch = grid.get(r, c);
+          if (ch == '|' || ch == 'F' || ch == '7' || ch == 'S') {
+            inside = 1 - inside;
+          }
+        } else {
+          count += inside;
+        }
+      }
     }
-    grid2x.edgeStream().forEach(e -> grid2x.floodFill(e.getPos(), c -> c == ' ', '.'));
-    return grid2x.stream()
-            .filter(e -> Util.even(e.getRow()) && Util.even(e.getCol()) && e.getValue() == ' ')
-            .count();
+    return count;
   }
 
   private List<Vec2> findPath() {
