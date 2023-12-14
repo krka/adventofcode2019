@@ -32,7 +32,11 @@ public class Grid<T> implements Rotatable<Grid<T>> {
     return new Grid<>(rows, cols, defaultValue);
   }
 
-  public static <T> Grid<T> from(List<String> lines, T defaultValue, Function<Character, T> mapper) {
+  public static Grid<Character> from(List<String> lines, char defaultValue) {
+    return from(lines, defaultValue, x -> x);
+  }
+
+    public static <T> Grid<T> from(List<String> lines, T defaultValue, Function<Character, T> mapper) {
     int rows = lines.size();
     int cols = lines.stream().mapToInt(String::length).max().getAsInt();
     Grid<T> grid = Grid.create(rows, cols, defaultValue);
@@ -243,6 +247,13 @@ public class Grid<T> implements Rotatable<Grid<T>> {
 
   public Stream<Entry<T>> edgeStream() {
     return stream().filter(e -> 0 == e.getCol() || 0 == e.getRow());
+  }
+
+  public void swap(Vec2 a, Vec2 b) {
+    final T val1 = get(a);
+    final T val2 = get(b);
+    set(a, val2);
+    set(b, val1);
   }
 
   public interface GridConsumer<T> {
