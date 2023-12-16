@@ -49,17 +49,26 @@ public class BFS<T> {
     }
   }
 
+  public Set<T> visited() {
+    return visited;
+  }
+
   public static class BFSBuilder<T> {
 
     private List<T> starts;
     private Function<T, Stream<T>> edgeFunction;
-    private Predicate<T> predicate;
+    private Predicate<T> predicate = value -> false;
 
     private BFSBuilder(Class<T> clazz) {
     }
 
     public BFSBuilder<T> withStarts(List<T> starts) {
       this.starts = starts;
+      return this;
+    }
+
+    public BFSBuilder<T> withStart(T start) {
+      this.starts = List.of(start);
       return this;
     }
 
