@@ -3,14 +3,26 @@ package aoc2023;
 import util.BFS;
 import util.Day;
 import util.Grid;
+import util.Pair;
 import util.Util;
 import util.Vec2;
 
+import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
+import java.util.Map;
 import java.util.stream.Stream;
 
 public class Day16 implements Day {
+  private static final Map<Pair<Character, Vec2>, List<Vec2>> MAPPING = new HashMap<>();
+  static {
+    Vec2.DIRS.forEach(dir -> {
+      Util.toList("-|\\/.").forEach(ch -> {
+        final Pair<Character, Vec2> key = Pair.of(ch, dir);
+        MAPPING.put(key, computeMapping(ch, dir));
+      });
+    });
+  }
+
   private final List<List<String>> lines;
   private final Grid<Character> grid;
 
@@ -38,69 +50,26 @@ public class Day16 implements Day {
     return best;
   }
 
-  private long bfs(Vec2 startPos, Vec2 startDir) {
-    final BFS<Node> bfs = BFS.newBFS(Node.class)
-            .withStart(new Node(startPos, startDir))
-            .withEdgeFunction(x -> {
-              final Vec2 pos = x.pos;
-              if (grid.inbound(x.pos)) {
-                final Vec2 dir = x.dir;
-                final boolean vertical = dir.equals(Vec2.SOUTH) || dir.equals(Vec2.NORTH);
-                int rotation = vertical ? 1 : -1;
-                switch (grid.get(pos)) {
-                  case '.': return Stream.of(nextPos(pos, dir));
-                  case '\\': return Stream.of(nextPos(pos, dir.rotateLeft(rotation)));
-                  case '/': return Stream.of(nextPos(pos, dir.rotateRight(rotation)));
-                  case '|': {
-                    if (vertical) {
-                      return Stream.of(nextPos(pos, dir));
-                    }
-                    return Stream.of(nextPos(pos, Vec2.SOUTH), nextPos(pos, Vec2.NORTH));
-                  }
-                  case '-': {
-                    if (vertical) {
-                      return Stream.of(nextPos(pos, Vec2.EAST), nextPos(pos, Vec2.WEST));
-                    }
-                    return Stream.of(nextPos(pos, dir));
-                  }
-                  default:
-                    throw new RuntimeException();
-                }
-              } else {
-                return Stream.of();
-              }
-            }).build();
+  private long bfs(Vec2 pos, Vec2 dir) {
+    final BFS<Pair<Vec2, Vec2>> bfs = BFS.newBFS(Pair.of(pos, dir)).withEdgeFunction(this::next).build();
     bfs.run();
-    return bfs.visited().stream().map(node -> node.pos)
-            .filter(grid::inbound)
-            .distinct()
-            .count();
+    return bfs.visited().stream().map(Pair::a).distinct().count();
   }
 
-  static Node nextPos(Vec2 pos, Vec2 dir) {
-    return new Node(pos.add(dir), dir);
+  private Stream<Pair<Vec2, Vec2>> next(Pair<Vec2, Vec2> node) {
+    return MAPPING.get(Pair.of(grid.get(node.a()), node.b()))
+            .stream().map(dir -> Pair.of(node.a().add(dir), dir))
+            .filter(x -> grid.inbound(x.a()));
   }
 
-  static class Node {
-    final Vec2 pos;
-    final Vec2 dir;
-
-    Node(Vec2 pos, Vec2 dir) {
-      this.pos = pos;
-      this.dir = dir;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) return true;
-      if (o == null || getClass() != o.getClass()) return false;
-      Node x = (Node) o;
-      return Objects.equals(pos, x.pos) && Objects.equals(dir, x.dir);
-    }
-
-    @Override
-    public int hashCode() {
-      return Objects.hash(pos, dir);
+  private static List<Vec2> computeMapping(char ch, Vec2 dir) {
+    switch (ch) {
+      case '.': return List.of(dir);
+      case '\\': return List.of(dir.rotateLeft(dir.vertical() ? 1 : -1));
+      case '/': return List.of(dir.rotateRight(dir.vertical() ? 1 : -1));
+      case '|': return dir.vertical() ? List.of(dir) : List.of(Vec2.SOUTH, Vec2.NORTH);
+      case '-': return dir.horizontal() ? List.of(dir) : List.of(Vec2.EAST, Vec2.WEST);
+      default: throw new RuntimeException();
     }
   }
 }

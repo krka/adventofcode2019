@@ -150,4 +150,12 @@ public class Vec2 {
   public Vec2 multiply(long n) {
     return new Vec2(x * n, y * n);
   }
+
+  public boolean vertical() {
+    return x == 0;
+  }
+
+  public boolean horizontal() {
+    return y == 0;
+  }
 }

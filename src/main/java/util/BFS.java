@@ -25,7 +25,15 @@ public class BFS<T> {
   }
 
   public static<T> BFSBuilder<T> newBFS(Class<T> clazz) {
-    return new BFSBuilder<>(clazz);
+    return new BFSBuilder<>();
+  }
+
+  public static<T> BFSBuilder<T> newBFS(List<T> starts) {
+    return new BFSBuilder<T>().withStarts(starts);
+  }
+
+  public static<T> BFSBuilder<T> newBFS(T start) {
+    return new BFSBuilder<T>().withStart(start);
   }
 
   public Node<T> run() {
@@ -59,7 +67,7 @@ public class BFS<T> {
     private Function<T, Stream<T>> edgeFunction;
     private Predicate<T> predicate = value -> false;
 
-    private BFSBuilder(Class<T> clazz) {
+    private BFSBuilder() {
     }
 
     public BFSBuilder<T> withStarts(List<T> starts) {
