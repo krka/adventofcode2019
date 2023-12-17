@@ -76,8 +76,8 @@ public class Day24 implements Day {
   public long solvePart2() {
     final State start = new State(-1, 0, 0);
     final BFS.Node<State> run1 = bfs(start, state -> state.row == rows).run();
-    final BFS.Node<State> run2 = bfs(run1.getPos(), s -> s.row == -1).run();
-    final BFS.Node<State> run3 = bfs(run2.getPos(), s -> s.row == rows).run();
+    final BFS.Node<State> run2 = bfs(run1.getNode(), s -> s.row == -1).run();
+    final BFS.Node<State> run3 = bfs(run2.getNode(), s -> s.row == rows).run();
     return run1.getSteps() + run2.getSteps() + run3.getSteps();
   }
 
@@ -93,7 +93,7 @@ public class Day24 implements Day {
       if (steps1[curPeriod] == 0) {
         final BFS.Node<State> run = bfs(new State(-1, 0, curPeriod), state -> state.row == rows).run();
         steps1[curPeriod] = run.getSteps();
-        final BFS.Node<State> run2 = bfs(run.getPos(), state -> state.row == -1).run();
+        final BFS.Node<State> run2 = bfs(run.getNode(), state -> state.row == -1).run();
         steps2[curPeriod] = run2.getSteps();
       }
       final int addedSteps = steps1[curPeriod] + steps2[curPeriod];
