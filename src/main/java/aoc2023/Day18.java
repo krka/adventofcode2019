@@ -18,7 +18,8 @@ public class Day18 implements Day {
   @Override
   public long solvePart1() {
     Vec2 pos = Vec2.zero();
-    List<Pair<Vec2, Vec2>> path = new ArrayList<>();
+    List<Vec2> path = new ArrayList<>();
+    long totalDistance = 0;
     for (String s : lines.get(0)) {
       final String[] parts = s.split(" ");
       String dir = parts[0];
@@ -32,18 +33,20 @@ public class Day18 implements Day {
       }
       int distance = Integer.parseInt(parts[1]);
 
+      totalDistance += distance;
       pos = pos.add(vdir.multiply(distance));
-      path.add(Pair.of(pos, vdir));
+      path.add(pos);
     }
 
-    return areaOfGridEdge(path);
+    return areaOfPoly(path) + 1 + totalDistance / 2;
 
   }
 
   @Override
   public long solvePart2() {
     Vec2 pos = Vec2.zero();
-    List<Pair<Vec2, Vec2>> path = new ArrayList<>();
+    List<Vec2> path = new ArrayList<>();
+    long totalDistance = 0;
     for (String s : lines.get(0)) {
       final String[] parts = s.split("[ #()]+");
       final String hex = parts[2];
@@ -58,36 +61,22 @@ public class Day18 implements Day {
         default: throw new RuntimeException();
       }
 
+      totalDistance += distance;
       pos = pos.add(vdir.multiply(distance));
-      path.add(Pair.of(pos, vdir));
+      path.add(pos);
     }
 
-    return areaOfGridEdge(path);
+    return areaOfPoly(path) + 1 + totalDistance / 2;
   }
 
-  private static long areaOfGridEdge(List<Pair<Vec2, Vec2>> path) {
-    final var path2 = new ArrayList<>(path);
-    path2.add(path2.remove(0));
-    final var zipped = Util.zip(path, path2);
-
+  private static long areaOfPoly(List<Vec2> path) {
     long sum = 0;
     long x1 = 0;
     long y1 = 0;
-    long modx = 0;
-    long mody = 0;
 
-    for (Pair<Pair<Vec2, Vec2>, Pair<Vec2, Vec2>> pair : zipped) {
-      final Vec2 pos = pair.a().a();
-      final Vec2 dir = pair.a().b();
-      final Vec2 nextDir = pair.b().b();
-
-      if (dir.vertical()) {
-        mody = (1 - nextDir.getX()) / 2;
-      } else {
-        modx = (1 + nextDir.getY()) / 2;
-      }
-      final long x2 = pos.getX() + modx;
-      final long y2 = pos.getY() + mody;
+    for (Vec2 pos: path) {
+      final long x2 = pos.getX();
+      final long y2 = pos.getY();
       sum += x1 * y2 - x2 * y1;
 
       x1 = x2;
