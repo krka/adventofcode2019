@@ -158,4 +158,8 @@ public class Vec2 {
   public boolean horizontal() {
     return y == 0;
   }
+
+  public long cross(Vec2 other) {
+    return x * other.y - y * other.x;
+  }
 }

@@ -12,21 +12,21 @@ public class Day18Test {
 
   @Test
   public void testPart1Sample() {
-    assertEquals(0, sample.solvePart1());
+    assertEquals(62, sample.solvePart1());
   }
 
   @Test
   public void testPart2Sample() {
-    assertEquals(0, sample.solvePart2());
+    assertEquals(952408144115L, sample.solvePart2());
   }
 
   @Test
   public void testPart1() {
-    assertEquals(0, day.solvePart1());
+    assertEquals(45159, day.solvePart1());
   }
 
   @Test
   public void testPart2() {
-    assertEquals(0, day.solvePart2());
+    assertEquals(134549294799713L, day.solvePart2());
   }
 }
