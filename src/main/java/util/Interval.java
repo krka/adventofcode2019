@@ -20,6 +20,18 @@ public class Interval implements Comparable<Interval> {
     return new Interval(min, max);
   }
 
+  public Pair<Interval, Interval> split(long point) {
+    Interval a = Interval.of(min, point);
+    if (a.isEmpty()) {
+      a = Interval.of(min, min);
+    }
+    Interval b = Interval.of(point, max);
+    if (b.isEmpty()) {
+      b = Interval.of(min, min);
+    }
+    return Pair.of(a, b);
+  }
+
   public static List<Interval> split(List<Interval> intervals, List<Long> points) {
     final ArrayList<Interval> res = new ArrayList<>();
     for (Interval interval : intervals) {

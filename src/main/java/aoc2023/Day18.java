@@ -1,7 +1,6 @@
 package aoc2023;
 
 import util.Day;
-import util.Pair;
 import util.Util;
 import util.Vec2;
 
@@ -38,7 +37,7 @@ public class Day18 implements Day {
       path.add(pos);
     }
 
-    return areaOfPoly(path) + 1 + totalDistance / 2;
+    return Util.areaOfPoly(path) + 1 + totalDistance / 2;
 
   }
 
@@ -66,24 +65,8 @@ public class Day18 implements Day {
       path.add(pos);
     }
 
-    return areaOfPoly(path) + 1 + totalDistance / 2;
+    return Util.areaOfPoly(path) + 1 + totalDistance / 2;
   }
 
-  private static long areaOfPoly(List<Vec2> path) {
-    long sum = 0;
-    long x1 = 0;
-    long y1 = 0;
-
-    for (Vec2 pos: path) {
-      final long x2 = pos.getX();
-      final long y2 = pos.getY();
-      sum += x1 * y2 - x2 * y1;
-
-      x1 = x2;
-      y1 = y2;
-    }
-
-    return sum / 2;
-  }
 }
 

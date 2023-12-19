@@ -74,6 +74,14 @@ public class Util {
     return intCode.stream().map(Object::toString).collect(Collectors.joining(","));
   }
 
+  public static List<String> split(String pattern, String s) {
+    return Splitter.of(pattern).split(s);
+  }
+
+  public static List<String> splitWithoutDelim(String pattern, String s) {
+    return Splitter.of(pattern).withoutDelim().split(s);
+  }
+
   public static <T> List<List<T>> partition(List<T> list, int size) {
     if (size < 1) {
       throw new IllegalArgumentException();
@@ -293,6 +301,29 @@ public class Util {
       sum += factor * list.get(i);
     }
     return sum;
+  }
+
+  public static long areaOfPoly(List<Vec2> path) {
+    long sum = 0;
+    long x1 = 0;
+    long y1 = 0;
+
+    for (Vec2 pos: path) {
+      final long x2 = pos.getX();
+      final long y2 = pos.getY();
+      sum += x1 * y2 - x2 * y1;
+
+      x1 = x2;
+      y1 = y2;
+    }
+
+    return sum / 2;
+  }
+
+  public static <K, V> Map<K, V> patch(Map<K, V> map, K key, V value) {
+    final HashMap<K, V> res = new HashMap<>(map);
+    res.put(key, value);
+    return res;
   }
 
   public static class GcdResult {

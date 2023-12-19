@@ -49,4 +49,8 @@ public class Pair<A, B> {
             ", " + b +
             ')';
   }
+
+  public Pair<B, A> swap() {
+    return of(b, a);
+  }
 }
