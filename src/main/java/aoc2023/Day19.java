@@ -107,12 +107,7 @@ public class Day19 implements Day {
         return sum + count(rule.target, intervals);
       }
       var split = rule.split(intervals.get(rule.varName));
-      if (split.a().nonEmpty()) {
-        sum += count(rule.target, patch(intervals, rule.varName, split.a()));
-      }
-      if (split.b().isEmpty()) {
-        return sum;
-      }
+      sum += count(rule.target, patch(intervals, rule.varName, split.a()));
       intervals = patch(intervals, rule.varName, split.b());
     }
     throw new RuntimeException();
