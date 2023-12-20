@@ -162,4 +162,8 @@ public class Vec2 {
   public long cross(Vec2 other) {
     return x * other.y - y * other.x;
   }
+
+  public Vec2 mod(Vec2 dimensions) {
+    return new Vec2(Util.posMod(x, dimensions.x), Util.posMod(y, dimensions.y));
+  }
 }

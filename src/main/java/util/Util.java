@@ -272,6 +272,18 @@ public class Util {
     return 0 == (x & 1);
   }
 
+  public static boolean even(long x) {
+    return 0 == (x & 1);
+  }
+
+  public static long posMod(long a, long b) {
+    final long x = a % b;
+    if (x >= 0) {
+      return x;
+    }
+    return x + b;
+  }
+
   public static <A, B> List<Pair<A, B>> cross(List<A> list1, List<B> list2) {
     final ArrayList<Pair<A, B>> res = new ArrayList<>();
     for (A a : list1) {
