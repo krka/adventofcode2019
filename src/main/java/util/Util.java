@@ -48,6 +48,20 @@ public class Util {
     return list.stream().map(BigInteger::valueOf).collect(Collectors.toList());
   }
 
+  public static String removePrefix(String prefix, String s) {
+    if (s.startsWith(prefix)) {
+      return s.substring(prefix.length());
+    }
+    throw new RuntimeException("Expected '" + s + "' to start with '" + prefix + "'");
+  }
+
+  public static String removeSuffix(String suffix, String s) {
+    if (s.endsWith(suffix)) {
+      return s.substring(0, s.length() - suffix.length());
+    }
+    throw new RuntimeException("Expected '" + s + "' to end with '" + suffix + "'");
+  }
+
   public static List<String> readResource(String name) {
     List<String> list = new ArrayList<>();
     try (BufferedReader reader = new BufferedReader(fromResource(name))) {
@@ -75,11 +89,7 @@ public class Util {
   }
 
   public static List<String> split(String pattern, String s) {
-    return Splitter.of(pattern).split(s);
-  }
-
-  public static List<String> splitWithoutDelim(String pattern, String s) {
-    return Splitter.of(pattern).withoutDelim().split(s);
+    return Splitter.withDelim(pattern).split(s);
   }
 
   public static <T> List<List<T>> partition(List<T> list, int size) {
@@ -239,6 +249,9 @@ public class Util {
   }
 
   public static long lcm(long a, long b) {
+    if (a == 0 || b == 0) {
+      return 0;
+    }
     return a * b / gcd(a, b);
   }
 
@@ -324,6 +337,13 @@ public class Util {
     final HashMap<K, V> res = new HashMap<>(map);
     res.put(key, value);
     return res;
+  }
+
+  public static <T> T exactlyOne(Collection<T> set) {
+    if (set.size() != 1) {
+      throw new RuntimeException("Expected exactly one item in the set: " + set);
+    }
+    return set.iterator().next();
   }
 
   public static class GcdResult {

@@ -14,16 +14,20 @@ public class Splitter {
     this.includeDelim = includeDelim;
   }
 
-  public static Splitter of(Pattern pattern) {
+  public static Splitter withDelim(Pattern pattern) {
     return new Splitter(pattern, true);
   }
 
-  public static Splitter of(String pattern) {
-    return of(Pattern.compile(pattern));
+  public static Splitter withDelim(String pattern) {
+    return withDelim(Pattern.compile(pattern));
   }
 
-  public Splitter withoutDelim() {
+  public static Splitter withoutDelim(Pattern pattern) {
     return new Splitter(pattern, false);
+  }
+
+  public static Splitter withoutDelim(String pattern) {
+    return withoutDelim(Pattern.compile(pattern));
   }
 
   public List<String> split(String s) {
@@ -49,4 +53,11 @@ public class Splitter {
     }
   }
 
+  @Override
+  public String toString() {
+    return "Splitter{" +
+            "pattern=" + pattern +
+            ", includeDelim=" + includeDelim +
+            '}';
+  }
 }

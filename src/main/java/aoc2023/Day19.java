@@ -15,10 +15,10 @@ import java.util.stream.Collectors;
 import static util.Util.patch;
 
 public class Day19 implements Day {
-  private static final Splitter SPLITTER_RULE = Splitter.of("[{}]");
-  private static final Splitter SPLITTER_COMMA = Splitter.of(",").withoutDelim();
-  private static final Splitter SPLITTER_MAP_PARTS = Splitter.of("[\\{,=\\}]").withoutDelim();
-  public static final Splitter SPLITTER_RULE_PART = Splitter.of("[<>:]");
+  private static final Splitter SPLITTER_RULE = Splitter.withDelim("[{}]");
+  private static final Splitter SPLITTER_COMMA = Splitter.withoutDelim(",");
+  private static final Splitter SPLITTER_MAP_PARTS = Splitter.withoutDelim("[\\{,=\\}]");
+  private static final Splitter SPLITTER_RULE_PART = Splitter.withDelim("[<>:]");
 
   private final List<List<String>> lines;
   private final Map<String, List<Rule>> rules;

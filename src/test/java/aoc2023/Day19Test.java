@@ -2,13 +2,14 @@ package aoc2023;
 
 import org.junit.Test;
 import util.Day;
+import util.TestBase;
 
 import static org.junit.Assert.assertEquals;
 
 public class Day19Test {
 
-  private static Day day = new Day19("2023/day19.in");
-  private static Day sample = new Day19("2023/day19-sample.in");
+  private static final Day day = TestBase.create("$YEAR/$DAY.in");
+  private static final Day sample = TestBase.create("$YEAR/$DAY-sample.in");
 
   @Test
   public void testPart1Sample() {
