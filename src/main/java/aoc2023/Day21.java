@@ -2,7 +2,7 @@ package aoc2023;
 
 import util.Day;
 import util.Grid;
-import util.Pair;
+import util.Polynomial;
 import util.Util;
 import util.Vec2;
 
@@ -45,10 +45,10 @@ public class Day21 implements Day {
     long total = 26501365L;
     long delta = total % 131;
 
-    List<Pair<Integer, Integer>> dataPoints = new ArrayList<>();
+    List<Vec2> dataPoints = new ArrayList<>();
     for (int steps = 0; true; steps++) {
       if (delta == steps % 131) {
-        dataPoints.add(Pair.of(steps, cur.size()));
+        dataPoints.add(Vec2.of(steps, cur.size()));
         if (dataPoints.size() == 3) {
           break;
         }
@@ -59,27 +59,8 @@ public class Day21 implements Day {
               .collect(Collectors.toSet());
     }
 
-    dataPoints.forEach(pair -> System.out.printf("f(%d) = %d%n", pair.a(), pair.b()));
-
-    return fun(total);
-  }
-
-  private long fun(long x) {
-    // Values from wolfram-alpha, solving for:
-    // f(65) = 3726
-    // f(196) = 33086
-    // f(327) = 91672
-    final BigInteger bigX = BigInteger.valueOf(x);
-    final BigInteger bigX2 = bigX.pow(2);
-    BigInteger ba = bigX2.multiply(BigInteger.valueOf(14613));
-    BigInteger bb = bigX.multiply(BigInteger.valueOf(32167));
-    BigInteger bc = BigInteger.valueOf(111106);
-    BigInteger bans = ba.add(bb).add(bc);
-    final BigInteger[] bigIntegers = bans.divideAndRemainder(BigInteger.valueOf(17161L));
-    if (bigIntegers[1].equals(BigInteger.ZERO)) {
-      return bigIntegers[0].longValueExact();
-    }
-    throw new RuntimeException();
+    final Polynomial poly = Polynomial.solve(dataPoints);
+    return poly.evaluate(total).toLongExact();
   }
 }
 
