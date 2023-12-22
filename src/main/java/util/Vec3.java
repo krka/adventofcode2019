@@ -38,6 +38,10 @@ public class Vec3 {
     return new Vec3(0, 0, 0);
   }
 
+  public static Vec3 of(long x, long y, long z) {
+    return new Vec3(x, y, z);
+  }
+
   public long getX() {
     return x;
   }

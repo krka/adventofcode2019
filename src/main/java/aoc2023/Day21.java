@@ -7,9 +7,14 @@ import util.Util;
 import util.Vec2;
 
 import java.math.BigInteger;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.PriorityQueue;
+import java.util.Queue;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -39,7 +44,11 @@ public class Day21 implements Day {
 
   @Override
   public long solvePart2() {
-    Set<Vec2> cur = new HashSet<>(List.of(start));
+    Map<Vec2, Integer> reached = new HashMap<>();
+    Queue<Vec2> queue = new ArrayDeque<>();
+    reached.put(start, 0);
+    queue.add(start);
+
     final Vec2 offset = Vec2.grid(grid.rows(), grid.cols());
 
     long total = 26501365L;
@@ -48,17 +57,28 @@ public class Day21 implements Day {
     List<Vec2> dataPoints = new ArrayList<>();
     for (int steps = 0; true; steps++) {
       if (delta == steps % 131) {
-        dataPoints.add(Vec2.of(steps, cur.size()));
+        final int parity = steps & 1;
+        final long size = reached.values().stream().filter(val -> (val & 1) == parity).count();
+        dataPoints.add(Vec2.of(steps, size));
         if (dataPoints.size() == 3) {
           break;
         }
       }
-      cur = cur.stream()
-              .flatMap(point -> Vec2.DIRS.stream().map(point::add))
-              .filter(point -> grid.get(point.mod(offset)) == '.')
-              .collect(Collectors.toSet());
+      final int nextSteps = steps + 1;
+      List<Vec2> newQueue = new ArrayList<>();
+      while (!queue.isEmpty()) {
+        final Vec2 poll = queue.poll();
+        for (Vec2 dir : Vec2.DIRS) {
+          final Vec2 newPoint = dir.add(poll);
+          if (grid.get(newPoint.mod(offset)) == '.') {
+            if (null == reached.put(newPoint, nextSteps)) {
+              newQueue.add(newPoint);
+            }
+          }
+        }
+      }
+      queue.addAll(newQueue);
     }
-
     final Polynomial poly = Polynomial.solve(dataPoints);
     return poly.evaluate(total).toLongExact();
   }
